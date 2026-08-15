@@ -193,6 +193,24 @@ def run_stage(run_id: str, stage: str, request: StageRequest | None = None) -> d
     run_obj = _run(run_id)
     req = request or StageRequest()
 
+    # Refuse a stage whose inputs are not ready. A disabled button in the UI is
+    # not a guard — the client can be stale, and `execute` in particular spends
+    # real money on an agent run.
+    status = run_obj.status()
+    missing = [s for s in STAGES[: STAGES.index(stage)] if status.get(s) != "complete"]
+    if missing:
+        raise HTTPException(
+            409,
+            detail={
+                "stage": stage,
+                "error": (
+                    f"cannot run '{stage}': {', '.join(missing)} "
+                    f"{'has' if len(missing) == 1 else 'have'} not completed"
+                ),
+                "missing": missing,
+            },
+        )
+
     try:
         if stage == "study":
             manifest = run_obj.manifest()

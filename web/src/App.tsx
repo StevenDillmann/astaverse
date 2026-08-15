@@ -44,6 +44,18 @@ export default function App() {
 
   async function execute() {
     if (!runId) return;
+    // `execute` launches a real agent in a container and bills for it. Every
+    // other stage is cheap and idempotent; this one is neither.
+    if (stage === "execute") {
+      const n = (detail?.artifacts.universes as any)?.universes?.length ?? "?";
+      if (
+        !window.confirm(
+          `Run the Harbor task for real?\n\nThis launches a coding agent in a ` +
+            `container to sweep ${n} universes. It takes many minutes and costs money.`,
+        )
+      )
+        return;
+    }
     setBusy(true);
     setError(null);
     try {

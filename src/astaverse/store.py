@@ -55,7 +55,10 @@ class Run:
     """Handle on one run directory."""
 
     def __init__(self, root: Path):
-        self.root = Path(root)
+        # Always absolute. Stages shell out to tools with their own working
+        # directory (harbor, docker), so a relative run path silently resolves
+        # against the wrong place.
+        self.root = Path(root).resolve()
 
     # -- lifecycle ---------------------------------------------------------
 

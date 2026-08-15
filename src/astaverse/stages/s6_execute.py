@@ -102,13 +102,26 @@ def run(
         jobs.append(record)
 
     artifact = ExecuteArtifact(jobs=jobs, dry_run=dry_run)
+    # Write the artifact first either way, so the exact commands stay
+    # inspectable after a failure.
     run_obj.write_artifact("execute", artifact)
-    if not dry_run:
-        run_obj.record_stage(
-            "execute",
-            agent=agent,
-            models=[m for m in models],
-            n_jobs=len(jobs),
-            failures=[j.job_name for j in jobs if j.returncode not in (0, None)],
+
+    if dry_run:
+        return artifact
+
+    failures = [j for j in jobs if j.returncode not in (0, None)]
+    if failures:
+        # A harbor run that crashed is not a completed stage. Recording it as
+        # one would let verdicts read a nonexistent sweep and report an empty
+        # multiverse as though it were a result.
+        raise RuntimeError(
+            "harbor run failed for "
+            + ", ".join(f"{j.job_name} (exit {j.returncode})" for j in failures)
+            + f"\nCommands are recorded in {run_obj.artifact_path('execute').name}; "
+            "re-run one by hand to see harbor's own output."
         )
+
+    run_obj.record_stage(
+        "execute", agent=agent, models=[m for m in models], n_jobs=len(jobs)
+    )
     return artifact
