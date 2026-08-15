@@ -247,7 +247,16 @@ def enumerate_universes(
     n_dropped_cap = 0
     if cap is not None and len(valid) > cap:
         n_dropped_cap = len(valid) - cap
-        valid = valid[:cap]
+        # Take an evenly spaced stride, never a prefix. `itertools.product`
+        # varies the last decision fastest, so the first N combinations differ
+        # only in the trailing axes and hold the leading ones fixed — a subset
+        # that would make the leading decisions look perfectly inert and let
+        # the trailing ones dominate the specification curve. A stride keeps
+        # every option of every decision represented.
+        rest = valid[1:]
+        step = len(rest) / (cap - 1) if cap > 1 else len(rest)
+        sampled = [rest[min(int(i * step), len(rest) - 1)] for i in range(cap - 1)]
+        valid = [valid[0]] + sampled
 
     universes = [
         Universe(id=f"universe_{i:03d}", decisions=sel, is_default=(sel == defaults))

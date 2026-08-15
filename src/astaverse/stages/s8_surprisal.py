@@ -173,7 +173,12 @@ def _elicit(
 def _describe_result(result) -> str:
     s = result.stats
     parts = []
-    if s.estimate is not None:
+    # Prefer the comparable estimand: describing a raw coefficient to the
+    # judge invites it to read magnitude differences that are only unit
+    # changes between universes.
+    if s.estimate_standardized is not None:
+        parts.append(f"standardized effect = {s.estimate_standardized:.4g}")
+    elif s.estimate is not None:
         parts.append(f"estimate = {s.estimate:.4g}")
     if s.std_error is not None:
         parts.append(f"std. error = {s.std_error:.4g}")

@@ -200,6 +200,11 @@ class UniverseStats(BaseModel):
     universe_id: str
     decisions: dict[str, str] = Field(default_factory=dict)
     estimate: float | None = None
+    # The comparable estimand. `estimate` is on the natural scale of whatever
+    # model the universe fitted, so it is NOT comparable across universes that
+    # transform the outcome or change model family — plotting those together
+    # yields a spread made of unit changes rather than analytic disagreement.
+    estimate_standardized: float | None = None
     std_error: float | None = None
     p_value: float | None = None
     n: int | None = None

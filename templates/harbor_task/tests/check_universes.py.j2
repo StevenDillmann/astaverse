@@ -29,7 +29,21 @@ from pathlib import Path
 APP = Path(os.environ.get("ASTAVERSE_APP_DIR", "/app"))
 
 EXPECTED = {{ expected_universes | tojson }}
-REQUIRED_FIELDS = ["estimate", "std_error", "p_value", "n", "direction", "converged"]
+REQUIRED_FIELDS = [
+    "estimate",
+    "estimate_standardized",
+    "std_error",
+    "p_value",
+    "n",
+    "direction",
+    "converged",
+]
+# Ratio of largest to smallest |estimate_standardized| above which the values
+# cannot plausibly be on one scale. Genuinely standardized effects across
+# specifications of the same hypothesis stay well inside an order of magnitude;
+# a real gpt-5.6-luna run that reported raw coefficients spanned 82x, so the
+# threshold has to sit comfortably below that to catch the case it exists for.
+MAX_STANDARDIZED_SPREAD = 20.0
 FORBIDDEN_FIELDS = ["verdict", "supported", "significant", "conclusion", "is_supported"]
 
 failures: list[str] = []
@@ -89,6 +103,26 @@ else:
         declared = row.get("decisions")
         if isinstance(declared, dict) and declared and declared != EXPECTED[uid]:
             fail(f"{uid}: reported decisions {declared} do not match the spec {EXPECTED[uid]}")
+
+    # The comparable estimand must actually be comparable. A huge spread means
+    # the natural-scale coefficient was copied in, and every downstream number
+    # (specification curve, sensitivity ranking) would then be measuring unit
+    # changes rather than analytic disagreement.
+    standardized = [
+        abs(r["estimate_standardized"])
+        for r in rows.values()
+        if isinstance(r.get("estimate_standardized"), (int, float))
+        and r["estimate_standardized"]
+    ]
+    if len(standardized) > 1:
+        spread = max(standardized) / min(standardized)
+        if spread > MAX_STANDARDIZED_SPREAD:
+            fail(
+                f"estimate_standardized spans {spread:.0f}x across universes "
+                f"({min(standardized):.4g} to {max(standardized):.4g}). It is meant to be "
+                "on one comparable scale — standardize the focal predictor (and divide "
+                "by the modelled outcome's SD) rather than reporting the raw coefficient."
+            )
 
 
 # -- 2. analysis.py structure -----------------------------------------------

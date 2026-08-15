@@ -113,6 +113,7 @@ def _parse_stats(path: Path) -> dict[str, UniverseStats]:
             universe_id=uid,
             decisions=row.get("decisions") or {},
             estimate=row.get("estimate"),
+            estimate_standardized=row.get("estimate_standardized"),
             std_error=row.get("std_error"),
             p_value=row.get("p_value"),
             n=row.get("n"),

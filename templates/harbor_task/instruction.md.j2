@@ -67,14 +67,30 @@ behaviour, that behaviour must be expressed through `selections`.
 ```json
 {"universe_id": "universe_000",
  "decisions": {"<decision_id>": "<option_id>", ...},
- "estimate": 0.243, "std_error": 0.101, "p_value": 0.019,
+ "estimate": 0.243, "estimate_standardized": 0.181,
+ "std_error": 0.101, "p_value": 0.019,
  "n": 92, "direction": "positive", "converged": true,
  "notes": "optional, brief"}
 ```
 
-- `estimate` — the effect estimate that bears on the hypothesis (a
-  coefficient, a correlation, a mean difference — but the *same* quantity in
-  every universe, so the universes are comparable).
+- `estimate` — the effect estimate that bears on the hypothesis, on the
+  natural scale of the model you fitted.
+- `estimate_standardized` — **the comparable estimand, and the one that
+  matters.** Standardize the focal predictor to mean 0 and SD 1 before
+  fitting, so that the coefficient is "effect per one standard deviation of
+  the predictor". Where the outcome scale also varies across universes (a
+  log transform in one, raw counts in another), divide by the standard
+  deviation of the outcome actually modelled, so the result is in
+  outcome-SD units.
+
+**Why this matters more than it looks.** A coefficient on log(deaths) and a
+coefficient on raw deaths are different quantities, and a specification curve
+that plots them on one axis is meaningless — the spread it shows would be an
+artifact of unit changes rather than an analytic disagreement. If two universes
+use different outcome scales or model families, their `estimate` values will
+differ by orders of magnitude for reasons that have nothing to do with the
+hypothesis. `estimate_standardized` is what makes them comparable, so compute
+it deliberately rather than copying `estimate` into it.
 - `direction` — `"positive"`, `"negative"`, or `"none"`, relative to the
   hypothesis as stated.
 - Use `null` for a statistic that genuinely does not exist for a universe, and

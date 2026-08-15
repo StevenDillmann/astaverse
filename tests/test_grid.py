@@ -158,3 +158,48 @@ def test_rewriting_universes_clears_stale_files(tmp_path):
     write_universe_files(enumerate_universes(_decisions()), tmp_path)
     write_universe_files(enumerate_universes(_decisions(), cap=2), tmp_path)
     assert len(list(tmp_path.glob("universe_*.yaml"))) == 2
+
+
+def _wide_decisions() -> dict[str, Decision]:
+    """Three independent 3-option decisions: 27 combinations, no constraints."""
+    return {
+        name: Decision(
+            label=name,
+            default="a",
+            options={o: Option(label=o) for o in ("a", "b", "c")},
+        )
+        for name in ("first", "second", "third")
+    }
+
+
+def test_cap_samples_across_the_grid_rather_than_taking_a_prefix():
+    """A prefix would hold the leading decisions fixed and make them look inert.
+
+    itertools.product varies the LAST decision fastest, so valid[:cap] pins
+    `first` to its earliest option. Every decision must stay represented.
+    """
+    result = enumerate_universes(_wide_decisions(), cap=9)
+    assert len(result.universes) == 9
+    assert result.n_dropped_cap == 18
+
+    for decision in ("first", "second", "third"):
+        seen = {u.decisions[decision] for u in result.universes}
+        assert seen == {"a", "b", "c"}, f"{decision} lost options under the cap: {seen}"
+
+
+def test_cap_keeps_the_default_universe_first():
+    result = enumerate_universes(_wide_decisions(), cap=5)
+    assert result.universes[0].is_default
+    assert result.universes[0].decisions == {"first": "a", "second": "a", "third": "a"}
+
+
+def test_cap_returns_distinct_universes():
+    result = enumerate_universes(_wide_decisions(), cap=9)
+    keys = [tuple(sorted(u.decisions.items())) for u in result.universes]
+    assert len(set(keys)) == len(keys)
+
+
+def test_cap_of_one_yields_just_the_default():
+    result = enumerate_universes(_wide_decisions(), cap=1)
+    assert len(result.universes) == 1
+    assert result.universes[0].is_default

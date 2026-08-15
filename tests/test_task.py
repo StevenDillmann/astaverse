@@ -176,6 +176,7 @@ def _valid_rows(prepared_run) -> list[dict]:
             "universe_id": u.id,
             "decisions": u.decisions,
             "estimate": 0.2,
+            "estimate_standardized": 0.18,
             "std_error": 0.1,
             "p_value": 0.02,
             "n": 94,
@@ -249,7 +250,37 @@ def test_check_accepts_nulls_for_a_failed_universe(prepared_run, tmp_path):
     s5_task.run(prepared_run)
     app = tmp_path / "app"
     rows = _valid_rows(prepared_run)
-    rows[0].update(estimate=None, std_error=None, p_value=None, converged=False)
+    rows[0].update(estimate=None, estimate_standardized=None, std_error=None,
+                   p_value=None, converged=False)
+    _write_submission(app, rows, GOOD_ANALYSIS)
+    result = _run_check(prepared_run.task_dir, app)
+    assert result.returncode == 0, result.stdout
+
+
+def test_check_fails_when_the_standardized_estimand_is_not_comparable(prepared_run, tmp_path):
+    """The defect a real agent actually produced: raw coefficients across scales.
+
+    Estimates spanning orders of magnitude mean the universes were measured in
+    different units, so a specification curve over them would show unit changes
+    rather than analytic disagreement.
+    """
+    s5_task.run(prepared_run)
+    app = tmp_path / "app"
+    rows = _valid_rows(prepared_run)
+    rows[0]["estimate_standardized"] = 0.56
+    rows[1]["estimate_standardized"] = 45.7
+    _write_submission(app, rows, GOOD_ANALYSIS)
+    result = _run_check(prepared_run.task_dir, app)
+    assert result.returncode == 1
+    assert "comparable scale" in result.stdout
+
+
+def test_check_accepts_a_genuinely_standardized_estimand(prepared_run, tmp_path):
+    s5_task.run(prepared_run)
+    app = tmp_path / "app"
+    rows = _valid_rows(prepared_run)
+    for i, r in enumerate(rows):
+        r["estimate_standardized"] = 0.15 + 0.02 * i
     _write_submission(app, rows, GOOD_ANALYSIS)
     result = _run_check(prepared_run.task_dir, app)
     assert result.returncode == 0, result.stdout
