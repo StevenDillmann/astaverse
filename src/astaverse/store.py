@@ -113,15 +113,49 @@ class Run:
         self.manifest_path.write_text(json.dumps(data, indent=2) + "\n")
 
     def record_stage(self, stage: str, **extra: Any) -> None:
-        """Mark a stage complete and invalidate everything after it."""
+        """Mark a stage complete and supersede everything after it.
+
+        Superseded artifacts are moved into `history/<timestamp>/` rather than
+        deleted or renamed in place. Re-running an early stage is how you
+        explore, so the results it invalidates are exactly the ones worth being
+        able to go back and compare against.
+        """
         m = self.manifest()
         m.setdefault("stages", {})[stage] = {"completed_at": utcnow(), **extra}
-        for downstream in STAGES[STAGES.index(stage) + 1 :]:
-            m["stages"].pop(downstream, None)
-            path = self.artifact_path(downstream)
-            if path.exists():
-                path.rename(path.with_suffix(path.suffix + ".stale"))
+
+        superseded = [
+            s
+            for s in STAGES[STAGES.index(stage) + 1 :]
+            if self.artifact_path(s).exists() or s in m["stages"]
+        ]
+        if superseded:
+            stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+            archive = self.root / "history" / f"{stamp}__superseded-by-{stage}"
+            archive.mkdir(parents=True, exist_ok=True)
+            snapshot: dict[str, Any] = {}
+            for downstream in superseded:
+                entry = m["stages"].pop(downstream, None)
+                if entry is not None:
+                    snapshot[downstream] = entry
+                path = self.artifact_path(downstream)
+                if path.exists():
+                    path.rename(archive / path.name)
+            (archive / "stages.json").write_text(
+                json.dumps({"superseded_by": stage, "at": utcnow(), "stages": snapshot}, indent=2)
+            )
+            m.setdefault("history", []).append(
+                {
+                    "archived_at": utcnow(),
+                    "directory": archive.name,
+                    "superseded_by": stage,
+                    "stages": sorted(superseded),
+                }
+            )
         self.write_manifest(m)
+
+    def history(self) -> list[dict[str, Any]]:
+        """Archived artifact sets, newest first."""
+        return list(reversed(self.manifest().get("history", [])))
 
     def status(self) -> dict[str, str]:
         done = self.manifest().get("stages", {})

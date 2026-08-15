@@ -492,3 +492,241 @@ pre {
     transition: none !important;
   }
 }
+
+/* -- new study, tabs, file browser ---------------------------------------- */
+
+.new-btn {
+  width: 100%;
+  background: none;
+  border: 1px dashed var(--rule-strong);
+  border-radius: 2px;
+  color: var(--ink-2);
+  padding: calc(var(--u) * 2);
+  margin-bottom: calc(var(--u) * 5);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.new-btn:hover,
+.new-btn[aria-current="true"] {
+  border-color: var(--dist);
+  border-style: solid;
+  color: var(--dist);
+}
+
+/* Stage pips: a run's shape at a glance, so an abandoned study is
+   distinguishable from a finished one without opening it. */
+.pips {
+  display: inline-flex;
+  gap: 2px;
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+.pips i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--rule-strong);
+}
+
+.pips i.on {
+  background: var(--ok);
+}
+
+.tabs {
+  display: flex;
+  gap: calc(var(--u) * 5);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: calc(var(--u) * 6);
+}
+
+.tabs button {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 0 0 calc(var(--u) * 2);
+  color: var(--ink-3);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tabs button[aria-current="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+}
+
+.newrun-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: calc(var(--u) * 4);
+  margin-bottom: calc(var(--u) * 7);
+}
+
+.ghost-btn {
+  background: none;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  padding: calc(var(--u) * 2) calc(var(--u) * 3);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+
+.ghost-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.newrun-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: calc(var(--u) * 9);
+  align-items: start;
+}
+
+.field {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  padding: calc(var(--u) * 2) calc(var(--u) * 3);
+  margin-bottom: calc(var(--u) * 3);
+  resize: vertical;
+}
+
+.field:focus {
+  border-color: var(--dist);
+  outline: none;
+}
+
+.ds-list {
+  max-height: 460px;
+  overflow-y: auto;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface);
+}
+
+.ds-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--paper);
+  border-left: 2px solid transparent;
+  padding: calc(var(--u) * 3) calc(var(--u) * 4);
+}
+
+.ds-item:hover {
+  background: var(--paper);
+}
+
+.ds-item[aria-current="true"] {
+  border-left-color: var(--dist);
+  background: var(--paper);
+}
+
+.ds-name {
+  display: block;
+  font-size: 13px;
+}
+
+.ds-meta {
+  display: block;
+  font-size: 10px;
+  color: var(--ink-3);
+  margin-top: 2px;
+}
+
+.ds-rq {
+  display: block;
+  font-family: var(--sans);
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-top: calc(var(--u) * 2);
+  line-height: 1.45;
+}
+
+.rq-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: calc(var(--u) * 2) calc(var(--u) * 3);
+  margin-bottom: var(--u);
+}
+
+.rq-btn:hover {
+  border-color: var(--dist);
+  color: var(--ink);
+}
+
+.files-grid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: calc(var(--u) * 6);
+  align-items: start;
+}
+
+.file-list {
+  max-height: 620px;
+  overflow-y: auto;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(var(--u) * 3);
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  padding: calc(var(--u) * 1) calc(var(--u) * 3);
+  font-size: 11px;
+  color: var(--ink-2);
+}
+
+.file-item:hover {
+  background: var(--paper);
+}
+
+.file-item[aria-current="true"] {
+  border-left-color: var(--dist);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+
+.file-view pre {
+  max-height: 620px;
+  overflow: auto;
+}
+
+@media (max-width: 1100px) {
+  .newrun-grid,
+  .files-grid {
+    grid-template-columns: 1fr;
+  }
+}

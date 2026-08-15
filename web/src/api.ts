@@ -58,3 +58,38 @@ export const createRun = (hypothesis: string, dataset: string) =>
     method: "POST",
     body: JSON.stringify({ hypothesis, dataset }),
   });
+
+export interface DatasetInfo {
+  name: string;
+  path: string;
+  csv_path: string;
+  kind: string;
+  n_columns: number;
+  n_rows: number | null;
+  description: string | null;
+  research_questions: string[];
+  columns: string[];
+}
+
+export interface RunFile {
+  path: string;
+  name: string;
+  category: string;
+  bytes: number;
+  modified: number;
+}
+
+export interface HistoryEntry {
+  archived_at: string;
+  directory: string;
+  superseded_by: string;
+  stages: string[];
+}
+
+export const listDatasets = () => request<DatasetInfo[]>("/api/datasets");
+export const listFiles = (id: string) => request<RunFile[]>(`/api/runs/${id}/files`);
+export const readFile = (id: string, path: string) =>
+  request<{ path: string; bytes: number; content: string }>(
+    `/api/runs/${id}/file?path=${encodeURIComponent(path)}`,
+  );
+export const getHistory = (id: string) => request<HistoryEntry[]>(`/api/runs/${id}/history`);

@@ -19,6 +19,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from . import datasets
 from .schemas import PlanSet, RobustSurprisal, StudySpec, UniverseSet
 from .stages import (
     s1_study,
@@ -136,6 +137,80 @@ def get_run(run_id: str) -> dict[str, Any]:
         "status": run_obj.status(),
         "artifacts": {stage: _artifact(run_obj, stage) for stage in STAGES},
     }
+
+
+@app.get("/api/datasets")
+def list_datasets() -> list[dict[str, Any]]:
+    """Datasets available to start a study from."""
+    return [d.to_dict() for d in datasets.discover()]
+
+
+# Files worth surfacing in the browser. Everything else in a run directory is
+# either an artifact already rendered by its stage, or container plumbing.
+BROWSABLE_SUFFIXES = {".json", ".yaml", ".yml", ".md", ".py", ".txt", ".jsonl", ".toml", ".log", ".sh"}
+MAX_FILE_BYTES = 2_000_000
+
+
+@app.get("/api/runs/{run_id}/files")
+def list_files(run_id: str) -> list[dict[str, Any]]:
+    """Every readable file in the run, including agent output and history.
+
+    This is the "go back and investigate" surface: superseded artifacts live
+    under history/, and what the agent actually wrote lives under jobs/.
+    """
+    run_obj = _run(run_id)
+    out: list[dict[str, Any]] = []
+    for path in sorted(run_obj.root.rglob("*")):
+        if not path.is_file() or path.suffix not in BROWSABLE_SUFFIXES:
+            continue
+        rel = path.relative_to(run_obj.root)
+        parts = rel.parts
+        if parts[0] == "history":
+            category = "history"
+        elif parts[0] == "jobs":
+            category = "agent output" if "artifacts" in parts else "job"
+        elif parts[0] == "harbor_task":
+            category = "task"
+        elif parts[0] == "universes":
+            category = "universes"
+        else:
+            category = "artifact"
+        stat = path.stat()
+        out.append(
+            {
+                "path": str(rel),
+                "name": path.name,
+                "category": category,
+                "bytes": stat.st_size,
+                "modified": stat.st_mtime,
+            }
+        )
+    return out
+
+
+@app.get("/api/runs/{run_id}/file")
+def read_file(run_id: str, path: str) -> dict[str, Any]:
+    run_obj = _run(run_id)
+    target = (run_obj.root / path).resolve()
+    # Refuse anything outside the run directory: `path` is client-supplied.
+    if not str(target).startswith(str(run_obj.root)) or not target.is_file():
+        raise HTTPException(404, f"no such file in run: {path}")
+    if target.suffix not in BROWSABLE_SUFFIXES:
+        raise HTTPException(415, f"not a readable text file: {path}")
+    size = target.stat().st_size
+    if size > MAX_FILE_BYTES:
+        raise HTTPException(413, f"file is {size} bytes, too large to display")
+    return {
+        "path": path,
+        "bytes": size,
+        "content": target.read_text(errors="replace"),
+    }
+
+
+@app.get("/api/runs/{run_id}/history")
+def get_history(run_id: str) -> list[dict[str, Any]]:
+    """Artifact sets superseded by re-running an earlier stage, newest first."""
+    return _run(run_id).history()
 
 
 @app.get("/api/runs/{run_id}/log")

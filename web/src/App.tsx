@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { STAGES, getRun, listRuns, runStage } from "./api";
 import type { RunDetail, RunSummary, Stage } from "./api";
+import { Files } from "./Files";
+import { NewRun } from "./NewRun";
 import { StagePanel } from "./StagePanel";
 import "./styles.css";
 
@@ -22,6 +24,7 @@ export default function App() {
   const [stage, setStage] = useState<Stage>("study");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [view, setView] = useState<"pipeline" | "files" | "new">("pipeline");
 
   useEffect(() => {
     listRuns()
@@ -81,33 +84,75 @@ export default function App() {
           <h1>Astaverse</h1>
           <span>multiverse</span>
         </div>
-        <p className="eyebrow">Runs</p>
-        {runs.length === 0 && (
-          <p className="empty">
-            No runs yet. Create one with <code>astaverse new</code>.
-          </p>
-        )}
+        <button
+          className="new-btn"
+          aria-current={view === "new"}
+          onClick={() => setView("new")}
+        >
+          + New study
+        </button>
+
+        <p className="eyebrow">Studies</p>
+        {runs.length === 0 && <p className="empty">None yet.</p>}
         {runs.map((r) => (
           <button
             key={r.run_id}
             className="run-item"
-            aria-current={r.run_id === runId}
-            onClick={() => setRunId(r.run_id)}
+            aria-current={r.run_id === runId && view !== "new"}
+            onClick={() => {
+              setRunId(r.run_id);
+              setView("pipeline");
+            }}
           >
             <span className="hyp">{r.hypothesis}</span>
             <span className="meta">
-              {r.n_complete}/{STAGES.length} stages · {r.run_id.slice(0, 13)}
+              <span className="pips" aria-hidden="true">
+                {STAGES.map((s) => (
+                  <i key={s} className={r.status[s] === "complete" ? "on" : ""} />
+                ))}
+              </span>
+              {r.n_complete}/{STAGES.length} · {r.run_id.slice(0, 13)}
             </span>
           </button>
         ))}
       </aside>
 
       <main className="main">
-        {detail ? (
+        {view === "new" ? (
+          <NewRun
+            onCancel={() => setView("pipeline")}
+            onCreated={async (id) => {
+              setRuns(await listRuns());
+              setRunId(id);
+              setStage("study");
+              setView("pipeline");
+            }}
+          />
+        ) : detail ? (
           <>
             <h2 className="hypothesis">{String(detail.manifest.hypothesis ?? "")}</h2>
             <p className="dataset-line">{String(detail.manifest.dataset ?? "")}</p>
 
+            <div className="tabs">
+              <button
+                aria-current={view === "pipeline"}
+                onClick={() => setView("pipeline")}
+              >
+                Pipeline
+              </button>
+              <button aria-current={view === "files"} onClick={() => setView("files")}>
+                Artifacts &amp; history
+              </button>
+            </div>
+
+            {view === "files" ? (
+              <section className="panel">
+                <div className="panel-body">
+                  <Files runId={detail.run_id} />
+                </div>
+              </section>
+            ) : (
+              <>
             <nav className="track" aria-label="Pipeline stages">
               {STAGES.map((s, i) => (
                 <button
@@ -145,9 +190,11 @@ export default function App() {
                 <StagePanel stage={stage} artifact={detail.artifacts[stage]} />
               </div>
             </section>
+              </>
+            )}
           </>
         ) : (
-          <p className="empty">{error ?? "Select a run."}</p>
+          <p className="empty">{error ?? "Select a study, or create one."}</p>
         )}
       </main>
     </div>

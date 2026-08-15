@@ -160,6 +160,49 @@ Ranked sensitivity for this estimand: covariates 0.106, model family 0.074,
 outcome transform 0.070, outlier handling 0.068, femininity measure 0.007,
 verdict rule 0.005, min-pressure direction 0.001.
 
+## 7. First real agent run — and direct evidence for §3
+
+`terminus-2` on `gpt-5.6-luna`, 24 universes, 2m12s, rubric 0.8.
+
+**Both structural bias controls held against a real agent.** The verifier
+reported "structural check passed: 24 universes, parametric analyze()
+present", and the rubric scored `parametric_structure` and
+`no_verdict_smuggling` at 1.0. The agent wrote one parameterised analysis and
+did not try to assign verdicts.
+
+Robust surprisal on the agent's own sweep: median +0.041, IQR 0.000,
+fragility **0.000**. Against the femininity claim's fragility of 0.195, this
+is the control case the diagnostic needed — it stays quiet when nothing is
+fragile. 67 of 72 results supported, with a prior already at 0.708: the model
+knew storm severity predicts deaths, so confirming it is unsurprising, which
+is what a surprisal metric should say.
+
+**The estimand defect.** The rubric scored `comparable_estimand` at 0.0, and
+inspection showed why: estimates spanning +0.56 to +45.7, an 82x range,
+because a coefficient on log-deaths and one on raw counts were reported side
+by side. A specification curve over those would plot unit changes as though
+they were analytic disagreement. Fixed by requiring `estimate_standardized`,
+preferring it downstream, and failing the run when its spread shows it was not
+actually standardized. Worth noting the first threshold chosen (100x) would
+have let the real 82x case through; it is now 20x.
+
+**The direct evidence for §3.** The agent's `/app/analysis.py` contains:
+
+```python
+# Pressure is reversed because lower pressure indicates greater severity.
+'pressure': _z(-pd.to_numeric(df['min'], errors='coerce')),
+```
+
+It reversed minimum pressure spontaneously, correctly, and **hardcoded** —
+not as a decision. This is the same resolution all three agents reached in the
+sibling repo, and the opposite of what AutoDiscovery's own code did. So the
+fork is real and live in this very run, an agent resolved it silently, and
+because extraction never surfaced it into the decision space, the multiverse
+did not test it. The choice that most needs a universe is precisely the one
+competent implementers agree on without discussing — which is why it never
+appears in plan text, and why extracting against data semantics rather than
+plan text is the fix.
+
 ## Not yet run
 
 - **Stage 6** (`harbor run`) — the task emits and passes its own structural
