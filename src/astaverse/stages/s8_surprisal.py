@@ -1,0 +1,357 @@
+"""s8 — robust surprisal: a verdict distribution -> surprisal as a distribution.
+
+Reimplements AutoDiscovery's belief update standalone (see `beliefs.py` and
+`run.py` in asta-autodiscovery), then reports the resulting surprisal across
+universes rather than at one arbitrary point in the decision space.
+
+The headline number is `fragility_index`: how far the single-universe
+(default-option) surprisal sits from the median across the multiverse. That is
+the quantity slide 1 cannot see and slide 2 exists to expose.
+"""
+
+from __future__ import annotations
+
+import math
+import statistics
+from collections import Counter, defaultdict
+
+from pydantic import BaseModel, Field
+
+from ..astra_io import read_astra_yaml
+from ..llm import DEFAULT_BELIEF_MODEL, structured_call
+from ..schemas import (
+    BeliefDistribution,
+    DecisionSensitivity,
+    DecisionSpec,
+    RobustSurprisal,
+    UniverseSurprisal,
+    Verdict,
+)
+from ..store import Run
+from .s7_verdicts import VerdictsArtifact
+
+# Categorical belief scale, matching AutoDiscovery's `boolean_cat` mode.
+CATEGORY_SCORES = {
+    "definitely_false": 0.0,
+    "maybe_false": 0.25,
+    "uncertain": 0.5,
+    "maybe_true": 0.75,
+    "definitely_true": 1.0,
+}
+CANNOT_COMMENT = "cannot_comment"
+
+JEFFREYS = (0.5, 0.5)
+DEFAULT_N_SAMPLES = 5
+DEFAULT_EVIDENCE_WEIGHT = 2.0
+SURPRISAL_WIDTH = 0.2
+
+
+class _BeliefResponse(BaseModel):
+    judgement: str = Field(
+        description=(
+            "One of: definitely_false, maybe_false, uncertain, maybe_true, "
+            "definitely_true, cannot_comment"
+        )
+    )
+    reasoning: str = Field(default="", description="One sentence of justification")
+
+
+# --------------------------------------------------------------------------
+# belief maths
+# --------------------------------------------------------------------------
+
+
+def theoretical_max_shift(
+    n_samples: int, weight: float = 1.0, prior_params: tuple[float, float] = JEFFREYS
+) -> float:
+    """Largest achievable prior->posterior mean shift, for normalisation.
+
+    Ported from asta-autodiscovery's `_theoretical_max_boolean_cat`, derived in
+    its `docs/autodiscovery/surprisal_normalization.md`. Verified in
+    `tests/test_surprisal.py` against the documented value 0.7729916774697783
+    for N=30, w=1, Jeffreys.
+    """
+    alpha, beta = prior_params
+    total = alpha + beta
+    d = min(alpha, beta)
+    t = weight * n_samples
+    if t <= 0:
+        return 1.0
+    u_star = d + math.sqrt(d * (d + t))
+    u_opt = min(max(u_star, total), total + n_samples)
+    return (t * (u_opt - d)) / (u_opt * (u_opt + t))
+
+
+def beta_from_counts(
+    counts: dict[str, int], weight: float = 1.0, prior_params: tuple[float, float] = JEFFREYS
+) -> BeliefDistribution:
+    """Categorical draws -> Beta parameters, as `boolean_cat` does."""
+    alpha_obs = sum(counts.get(cat, 0) * score for cat, score in CATEGORY_SCORES.items())
+    n_effective = sum(counts.get(cat, 0) for cat in CATEGORY_SCORES)
+    return BeliefDistribution(
+        alpha=weight * alpha_obs + prior_params[0],
+        beta=weight * (n_effective - alpha_obs) + prior_params[1],
+        counts=dict(counts),
+        n_samples=n_effective,
+    )
+
+
+def posterior_from_prior(
+    prior: BeliefDistribution,
+    counts: dict[str, int],
+    weight: float = DEFAULT_EVIDENCE_WEIGHT,
+) -> BeliefDistribution:
+    """Explicit Bayesian update of `prior` with new categorical evidence."""
+    alpha_obs = sum(counts.get(cat, 0) * score for cat, score in CATEGORY_SCORES.items())
+    n_effective = sum(counts.get(cat, 0) for cat in CATEGORY_SCORES)
+    return BeliefDistribution(
+        alpha=prior.alpha + weight * alpha_obs,
+        beta=prior.beta + weight * (n_effective - alpha_obs),
+        counts=dict(counts),
+        n_samples=n_effective,
+    )
+
+
+# --------------------------------------------------------------------------
+# LLM belief elicitation
+# --------------------------------------------------------------------------
+
+BELIEF_SYSTEM = (
+    "You are a careful scientific referee. You judge how likely a hypothesis is "
+    "to be true, given whatever evidence you are shown."
+)
+
+PRIOR_PROMPT = """\
+How likely is the following hypothesis to be true, based only on your general
+knowledge? No experimental evidence is provided.
+
+Hypothesis: {hypothesis}
+
+Answer with one of: definitely_false, maybe_false, uncertain, maybe_true,
+definitely_true, cannot_comment.
+"""
+
+POSTERIOR_PROMPT = """\
+Judge the following hypothesis in light of the evidence from one analysis.
+
+Hypothesis: {hypothesis}
+
+## Analytic choices made in this analysis
+{decisions}
+
+## Result
+{result}
+
+Answer with one of: definitely_false, maybe_false, uncertain, maybe_true,
+definitely_true, cannot_comment.
+"""
+
+
+def _elicit(
+    prompt: str, model: str, n_samples: int, run_obj: Run, tag: str
+) -> dict[str, int]:
+    responses = structured_call(
+        prompt,
+        _BeliefResponse,
+        model,
+        system=BELIEF_SYSTEM,
+        temperature=1.0,
+        n=n_samples,
+        log_dir=run_obj.root,
+        tag=tag,
+    )
+    counts: Counter[str] = Counter()
+    for r in responses:
+        judgement = r.judgement.strip().lower()
+        if judgement in CATEGORY_SCORES or judgement == CANNOT_COMMENT:
+            counts[judgement] += 1
+        else:
+            counts[CANNOT_COMMENT] += 1
+    return dict(counts)
+
+
+def _describe_result(result) -> str:
+    s = result.stats
+    parts = []
+    if s.estimate is not None:
+        parts.append(f"estimate = {s.estimate:.4g}")
+    if s.std_error is not None:
+        parts.append(f"std. error = {s.std_error:.4g}")
+    if s.p_value is not None:
+        parts.append(f"p = {s.p_value:.4g}")
+    if s.n is not None:
+        parts.append(f"n = {s.n}")
+    if s.direction:
+        parts.append(f"direction = {s.direction}")
+    if not s.converged:
+        parts.append("the model did not converge")
+    body = "; ".join(parts) if parts else "no statistics were reported"
+    verdict = {
+        Verdict.supported: "the hypothesis is supported",
+        Verdict.not_supported: "the hypothesis is not supported",
+        Verdict.mixed: "the result is mixed",
+        Verdict.failed: "the analysis failed",
+    }[result.verdict]
+    return f"{body}. Under the rule '{result.verdict_rule}', {verdict}."
+
+
+# --------------------------------------------------------------------------
+# the stage
+# --------------------------------------------------------------------------
+
+
+def run(
+    run_obj: Run,
+    model: str | None = None,
+    n_samples: int = DEFAULT_N_SAMPLES,
+    evidence_weight: float = DEFAULT_EVIDENCE_WEIGHT,
+) -> RobustSurprisal:
+    model = model or DEFAULT_BELIEF_MODEL
+    spec: DecisionSpec = read_astra_yaml(run_obj.artifact_path("decisions"))
+    verdicts: VerdictsArtifact = run_obj.read_artifact("verdicts", VerdictsArtifact)
+
+    if not verdicts.results:
+        raise ValueError("no universe results to analyse")
+    if not verdicts.complete:
+        run_obj.log(
+            "surprisal",
+            f"WARNING: incomplete grid ({len(verdicts.missing_universe_ids)} universes missing); "
+            "the distribution below is over what was actually reported",
+        )
+
+    # Prior once, from the hypothesis alone.
+    prior_counts = _elicit(
+        PRIOR_PROMPT.format(hypothesis=spec.hypothesis),
+        model,
+        n_samples,
+        run_obj,
+        "s8_prior",
+    )
+    prior = beta_from_counts(prior_counts, weight=1.0)
+    max_shift = theoretical_max_shift(n_samples, weight=evidence_weight)
+
+    per_universe: list[UniverseSurprisal] = []
+    for result in verdicts.results:
+        decisions_text = "\n".join(
+            f"- {did}: {oid}" for did, oid in sorted(result.decisions.items())
+        )
+        counts = _elicit(
+            POSTERIOR_PROMPT.format(
+                hypothesis=spec.hypothesis,
+                decisions=decisions_text,
+                result=_describe_result(result),
+            ),
+            model,
+            n_samples,
+            run_obj,
+            f"s8_posterior::{result.universe_id}::{result.verdict_rule}",
+        )
+        posterior = posterior_from_prior(prior, counts, weight=evidence_weight)
+        per_universe.append(
+            UniverseSurprisal(
+                universe_id=result.universe_id,
+                decisions=result.decisions,
+                verdict=result.verdict,
+                posterior_mean=posterior.mean,
+                surprisal=(posterior.mean - prior.mean) / max_shift,
+                is_default=result.is_default,
+                agent=result.agent,
+            )
+        )
+
+    values = [u.surprisal for u in per_universe]
+    median = statistics.median(values)
+    positive = sum(1 for v in values if v > 0)
+    modal = max(positive, len(values) - positive)
+
+    defaults = [u.surprisal for u in per_universe if u.is_default]
+    single = statistics.mean(defaults) if defaults else None
+
+    robust = RobustSurprisal(
+        prior_mean=prior.mean,
+        n_universes=len(per_universe),
+        per_universe=per_universe,
+        median=median,
+        mean=statistics.mean(values),
+        iqr=_iqr(values),
+        sign_consistency=modal / len(values),
+        frac_surprising=sum(1 for v in values if abs(v) >= SURPRISAL_WIDTH) / len(values),
+        verdict_distribution=dict(Counter(u.verdict.value for u in per_universe)),
+        single_universe_surprisal=single,
+        fragility_index=abs(single - median) if single is not None else None,
+        decision_sensitivity=_decision_sensitivity(per_universe, spec),
+        between_agent_spread=_between_agent_spread(per_universe),
+    )
+
+    run_obj.write_artifact("surprisal", robust)
+    run_obj.record_stage(
+        "surprisal",
+        model=model,
+        n_universes=len(per_universe),
+        median=robust.median,
+        fragility_index=robust.fragility_index,
+    )
+    run_obj.log(
+        "surprisal",
+        f"median={robust.median:.3f} iqr={robust.iqr:.3f} "
+        f"sign_consistency={robust.sign_consistency:.2f} "
+        f"single_universe={single if single is None else round(single, 3)} "
+        f"fragility={robust.fragility_index if robust.fragility_index is None else round(robust.fragility_index, 3)}",
+    )
+    return robust
+
+
+def _iqr(values: list[float]) -> float:
+    if len(values) < 2:
+        return 0.0
+    ordered = sorted(values)
+    q1, q3 = statistics.quantiles(ordered, n=4)[0], statistics.quantiles(ordered, n=4)[2]
+    return q3 - q1
+
+
+def _decision_sensitivity(
+    per_universe: list[UniverseSurprisal], spec: DecisionSpec
+) -> list[DecisionSensitivity]:
+    """Mean surprisal per option of each decision, marginalizing the rest.
+
+    This is the specification curve in tabular form: it shows which decisions
+    actually moved the result, as opposed to which ones were *predicted* to.
+    """
+    out: list[DecisionSensitivity] = []
+    for did, decision in spec.decisions.items():
+        by_option: dict[str, list[float]] = defaultdict(list)
+        for u in per_universe:
+            oid = u.decisions.get(did)
+            if oid is not None:
+                by_option[oid].append(u.surprisal)
+        if len(by_option) < 2:
+            continue
+        means = {oid: statistics.mean(vals) for oid, vals in by_option.items()}
+        out.append(
+            DecisionSensitivity(
+                decision_id=did,
+                label=decision.label,
+                kind=decision.kind,
+                option_means=means,
+                spread=max(means.values()) - min(means.values()),
+            )
+        )
+    out.sort(key=lambda d: d.spread, reverse=True)
+    return out
+
+
+def _between_agent_spread(per_universe: list[UniverseSurprisal]) -> float | None:
+    """Spread of per-agent medians — the implementation-bias estimate.
+
+    Compare against the between-universe spread (`iqr`). Decision variance
+    dominating is what licenses reading the multiverse as a statement about
+    the analysis rather than about the agent.
+    """
+    by_agent: dict[str, list[float]] = defaultdict(list)
+    for u in per_universe:
+        if u.agent:
+            by_agent[u.agent].append(u.surprisal)
+    if len(by_agent) < 2:
+        return None
+    medians = [statistics.median(v) for v in by_agent.values()]
+    return max(medians) - min(medians)

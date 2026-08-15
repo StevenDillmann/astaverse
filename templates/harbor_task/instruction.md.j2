@@ -1,0 +1,96 @@
+# Multiverse analysis
+
+You are running a **multiverse analysis**: the same hypothesis, evaluated under
+every combination of a set of analytic choices, so that the result can be
+reported as a distribution rather than as a single number.
+
+## Hypothesis
+
+{{ hypothesis }}
+
+## Dataset
+
+`/app/data.csv` — {{ dataset_name }}, {{ n_rows }} rows.
+
+{{ dataset_description }}
+
+{{ columns_markdown }}
+
+## The decisions
+
+Each decision below is a point where reasonable analysts disagree. A
+**universe** is one choice per decision.
+
+{% for did, decision in decisions.items() %}
+### `{{ did }}` — {{ decision.label }}
+
+{{ decision.rationale or "" }}
+
+{% for oid, option in decision.options.items() %}
+- **`{{ oid }}`** ({{ option.label }}): {{ option.description or "" }}
+{%- endfor %}
+{% endfor %}
+
+The {{ n_universes }} universes to evaluate are in `/app/universes/`, one YAML
+file each, listing a selected `option_id` per `decision_id`. The same decision
+space is in `/app/astra.yaml`.
+
+## What to build
+
+**`/app/analysis.py`**, structured as exactly one parameterised analysis plus a
+driver:
+
+```python
+def analyze(df, selections: dict[str, str]) -> dict:
+    """Run the analysis for ONE universe.
+
+    `selections` maps decision_id -> option_id. Every analytic choice this
+    function makes must be driven by `selections`; nothing may be branched on
+    universe id or on the loop index.
+
+    Returns: {"estimate", "std_error", "p_value", "n", "direction", "converged"}
+    """
+```
+
+plus a driver that loads every file in `/app/universes/`, calls `analyze` for
+each, and appends a line to `/app/universes.jsonl`.
+
+**This structure is required, and it is checked.** Every universe must go
+through the same code path. Do not special-case an individual universe, and do
+not hand-write a separate analysis per universe — if a universe needs different
+behaviour, that behaviour must be expressed through `selections`.
+
+## Deliverables
+
+**`/app/universes.jsonl`** — one JSON object per line, one line per universe:
+
+```json
+{"universe_id": "universe_000",
+ "decisions": {"<decision_id>": "<option_id>", ...},
+ "estimate": 0.243, "std_error": 0.101, "p_value": 0.019,
+ "n": 92, "direction": "positive", "converged": true,
+ "notes": "optional, brief"}
+```
+
+- `estimate` — the effect estimate that bears on the hypothesis (a
+  coefficient, a correlation, a mean difference — but the *same* quantity in
+  every universe, so the universes are comparable).
+- `direction` — `"positive"`, `"negative"`, or `"none"`, relative to the
+  hypothesis as stated.
+- Use `null` for a statistic that genuinely does not exist for a universe, and
+  set `"converged": false` if the model failed to fit. Do not drop the line.
+
+**There is deliberately no verdict field.** Report the numbers; whether the
+hypothesis is supported is decided downstream from these statistics. Do not add
+a verdict, a conclusion flag, or a significance boolean to the JSON.
+
+**`/app/results.md`** — a short report: what `analyze` does, how each decision
+is implemented, the spread of results across universes, and which decisions
+moved the estimate most. Prose conclusions belong here, not in the JSONL.
+
+## Notes
+
+- Every one of the {{ n_universes }} universes must appear in the JSONL exactly
+  once, keyed by the `id` in its YAML file.
+- Prefer a clear failure over a fabricated number: if a universe cannot be
+  computed, emit the line with nulls and `"converged": false`.

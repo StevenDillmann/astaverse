@@ -1,0 +1,143 @@
+#!/usr/bin/env python3
+"""Structural check on the agent's multiverse output.
+
+This enforces the two properties the downstream metric depends on:
+
+1. Coverage — every specified universe is present exactly once, with the
+   decision selections it was asked for.
+2. Parametric structure — `analysis.py` exposes a single `analyze` entry point
+   and does not special-case individual universes. A per-universe branch would
+   let implementation choices masquerade as decision effects.
+
+It also rejects a verdict field: verdicts are assigned downstream from the
+numbers, deliberately not by the agent.
+
+Exits non-zero with a specific message on failure.
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+# The workspace under test. Fixed at /app inside Harbor; overridable so the
+# check can be exercised directly in the test suite.
+APP = Path(os.environ.get("ASTAVERSE_APP_DIR", "/app"))
+
+EXPECTED = {{ expected_universes | tojson }}
+REQUIRED_FIELDS = ["estimate", "std_error", "p_value", "n", "direction", "converged"]
+FORBIDDEN_FIELDS = ["verdict", "supported", "significant", "conclusion", "is_supported"]
+
+failures: list[str] = []
+
+
+def fail(msg: str) -> None:
+    failures.append(msg)
+
+
+# -- 1. universes.jsonl ------------------------------------------------------
+
+path = APP / "universes.jsonl"
+rows: dict[str, dict] = {}
+if not path.exists():
+    fail(f"{path} is missing")
+else:
+    for lineno, line in enumerate(path.read_text().splitlines(), 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as exc:
+            fail(f"universes.jsonl line {lineno} is not valid JSON: {exc}")
+            continue
+        uid = row.get("universe_id")
+        if not uid:
+            fail(f"universes.jsonl line {lineno} has no universe_id")
+            continue
+        if uid in rows:
+            fail(f"universe {uid} appears more than once")
+        rows[uid] = row
+
+    missing = sorted(set(EXPECTED) - set(rows))
+    extra = sorted(set(rows) - set(EXPECTED))
+    if missing:
+        fail(f"missing {len(missing)} universes: {', '.join(missing[:8])}")
+    if extra:
+        fail(f"unexpected universe ids: {', '.join(extra[:8])}")
+
+    for uid, row in rows.items():
+        if uid not in EXPECTED:
+            continue
+        for field in REQUIRED_FIELDS:
+            if field not in row:
+                fail(f"{uid}: missing required field '{field}'")
+        for field in FORBIDDEN_FIELDS:
+            if field in row:
+                fail(
+                    f"{uid}: field '{field}' is not allowed — report statistics only, "
+                    "verdicts are assigned downstream"
+                )
+        for field in ("estimate", "std_error", "p_value"):
+            value = row.get(field)
+            if value is not None and not isinstance(value, (int, float)):
+                fail(f"{uid}: '{field}' must be a number or null, got {type(value).__name__}")
+        declared = row.get("decisions")
+        if isinstance(declared, dict) and declared and declared != EXPECTED[uid]:
+            fail(f"{uid}: reported decisions {declared} do not match the spec {EXPECTED[uid]}")
+
+
+# -- 2. analysis.py structure -----------------------------------------------
+
+analysis_path = APP / "analysis.py"
+if not analysis_path.exists():
+    fail(f"{analysis_path} is missing")
+else:
+    source = analysis_path.read_text()
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as exc:
+        fail(f"analysis.py does not parse: {exc}")
+        tree = None
+
+    if tree is not None:
+        functions = [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+        analyze_fns = [f for f in functions if f.name == "analyze"]
+        if not analyze_fns:
+            fail("analysis.py defines no `analyze` function — the parametric entry point is required")
+        elif len(analyze_fns) > 1:
+            fail("analysis.py defines `analyze` more than once")
+        else:
+            args = [a.arg for a in analyze_fns[0].args.args]
+            if len(args) < 2:
+                fail(f"`analyze` must take (df, selections); got ({', '.join(args)})")
+
+    # A literal universe id inside the source is the signature of a per-cell
+    # branch, which is exactly what this design forbids.
+    for uid in EXPECTED:
+        for match in re.finditer(re.escape(uid), source):
+            line = source[: match.start()].count("\n") + 1
+            context = source.splitlines()[line - 1] if line <= len(source.splitlines()) else ""
+            # Reading the id from the universe files is fine; comparing against
+            # a hard-coded one is not.
+            if re.search(r"==|!=|\bin\b\s*[\[({]|\bif\b", context):
+                fail(
+                    f"analysis.py line {line} branches on a specific universe id ({uid}): "
+                    "every universe must take the same code path"
+                )
+                break
+
+
+# -- report -----------------------------------------------------------------
+
+if failures:
+    print("STRUCTURAL CHECK FAILED")
+    for f in failures:
+        print(f"  - {f}")
+    sys.exit(1)
+
+print(f"structural check passed: {len(rows)} universes, parametric analyze() present")

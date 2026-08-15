@@ -1,0 +1,33 @@
+version = "1.0"
+
+[task]
+name = "astaverse/multiverse__{{ spec_id }}"
+description = "Execute a multiverse analysis: sweep {{ n_universes }} analytic universes over the {{ dataset_name }} dataset and report per-universe statistics."
+
+[metadata]
+difficulty = "hard"
+category = "data-analysis"
+tags = ["astaverse", "multiverse", "specification-curve", "statistics"]
+run_id = "{{ run_id }}"
+dataset = "{{ dataset_name }}"
+n_universes = {{ n_universes }}
+astra_schema_shape = "{{ astra_schema_shape }}"
+
+[agent]
+# A grid sweep is substantially longer than a single analysis.
+timeout_sec = 3600.0
+
+[verifier]
+timeout_sec = 300.0
+
+# The verifier grades /app/results.md with an LLM judge (LiteLLM) and structurally
+# checks /app/universes.jsonl. REWARDKIT_JUDGE selects the judge model.
+[verifier.env]
+OPENAI_API_KEY = "${OPENAI_API_KEY}"
+GEMINI_API_KEY = "${GEMINI_API_KEY}"
+REWARDKIT_JUDGE = "${REWARDKIT_JUDGE}"
+
+[environment]
+build_timeout_sec = 900.0
+cpus = 2
+memory_mb = 4096
