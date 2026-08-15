@@ -88,10 +88,25 @@ def plans(
     k: int = typer.Option(5, "-k", help="Number of plans to sample"),
     model: str = typer.Option(None, "--model", help="Overrides ASTAVERSE_PLAN_MODEL"),
     temperature: float = typer.Option(0.9, "--temperature"),
+    seed_plan: str = typer.Option(None, "--seed-plan", help="Plan text to include verbatim"),
+    seed_jsonl: str = typer.Option(
+        None, "--seed-jsonl", help="AutoDiscovery plans jsonl to take a plan from"
+    ),
+    seed_id: str = typer.Option(
+        None, "--seed-id", help="normalized_id within --seed-jsonl (default: first record)"
+    ),
 ) -> None:
-    """Sample K independent analysis plans (stage 2)."""
+    """Sample K independent analysis plans (stage 2).
+
+    With --seed-plan/--seed-jsonl, the supplied plan is kept verbatim and the
+    rest are drawn as alternatives to it — use this to build a multiverse
+    around an AutoDiscovery plan rather than around invented ones.
+    """
     run_obj = _run(run_id)
-    plan_set = s2_plans.run(run_obj, k=k, model=model, temperature=temperature)
+    seed = s2_plans.load_seed_plan(seed_plan, seed_jsonl, seed_id)
+    plan_set = s2_plans.run(
+        run_obj, k=k, model=model, temperature=temperature, seed_plan=seed
+    )
     _echo_stage("plans", f"{len(plan_set.plans)} sampled from {plan_set.model}")
     for plan in plan_set.plans:
         typer.echo(f"    {plan.id}: {plan.objective}")

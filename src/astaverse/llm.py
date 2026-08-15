@@ -52,6 +52,12 @@ def structured_call(
     """
     import litellm
 
+    # Providers differ on which sampling params they accept — gpt-5 models pin
+    # temperature to 1, for instance. Drop what a model rejects rather than
+    # failing the stage; diversity across plans comes from drawing `n`
+    # independent samples, not from the temperature value alone.
+    litellm.drop_params = True
+
     messages = []
     if system:
         messages.append({"role": "system", "content": system})

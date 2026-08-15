@@ -1,0 +1,175 @@
+# Hand-written decision spec for the BLADE `hurricane` study.
+#
+# Drop this in as a run's 03_astra.yaml to skip plan sampling and decision
+# extraction entirely — useful for validating stages 4-8 with no LLM in the
+# path, and as the ground-truth decision space to score extraction against.
+#
+# The axes are the ones documented in the sibling experiments repo
+# (findings/hurricane__node_0.md) plus the standard choices from Simonsohn
+# et al.'s specification curve paper, which this dataset comes from.
+
+id: hurricane_multiverse
+name: "hurricane: multiverse analysis"
+description: Hand-authored decision space for the feminine-hurricane-names hypothesis.
+
+inputs:
+  - id: dataset
+    type: data
+    source: data.csv
+    description: 94 Atlantic hurricanes making US landfall, 1950-2012
+
+outputs:
+  - id: universe_stats
+    type: table
+    description: Per-universe statistics. Carries no verdict by design.
+    inputs: [dataset]
+    decisions:
+      - min_pressure_direction
+      - femininity_measure
+      - outcome_transform
+      - outlier_handling
+      - covariates
+      - model_family
+    recipe:
+      command: python /app/analysis.py
+
+decisions:
+  min_pressure_direction:
+    label: Minimum pressure direction
+    rationale: >-
+      `min` is minimum pressure, so a LOWER value means a stronger storm.
+      Whether to negate it before use is left unstated by every plan, and it
+      is the fork that flipped the published result from r=0.039 (p=0.711) to
+      r=0.240 (p=0.020).
+    default: raw
+    options:
+      raw:
+        label: As recorded
+        description: Use minimum pressure as-is, so the covariate decreases with intensity.
+      flipped:
+        label: Negated
+        description: Negate minimum pressure so the covariate increases with intensity.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+
+  femininity_measure:
+    label: Femininity operationalisation
+    rationale: Femininity is available both as a 1-11 rating and as a binary indicator.
+    default: continuous
+    options:
+      continuous:
+        label: masfem rating
+        description: Use the continuous 1-11 masculinity-femininity index.
+      binary:
+        label: gender_mf
+        description: Use the binary male/female name indicator.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+
+  outcome_transform:
+    label: Outcome transformation
+    rationale: Deaths are heavily right-skewed, so the scale is a real choice.
+    default: raw
+    options:
+      raw:
+        label: Deaths
+        description: Model deaths on the raw count scale.
+      log1p:
+        label: log(1 + deaths)
+        description: Log-transform the outcome to tame the skew.
+        incompatible_with:
+          # A count model needs counts; log1p output is not one.
+          - model_family.negative_binomial
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+
+  model_family:
+    label: Model family
+    rationale: >-
+      Deaths are an overdispersed count. The original paper used negative
+      binomial regression; OLS is the more common default. This is the choice
+      most likely to move a p-value.
+    default: ols
+    options:
+      ols:
+        label: OLS
+        description: Ordinary least squares on the (possibly transformed) outcome.
+      negative_binomial:
+        label: Negative binomial
+        description: GLM with a negative binomial family, on raw counts.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+
+  outlier_handling:
+    label: Outlier handling
+    rationale: Katrina and Audrey dominate the outcome distribution.
+    default: keep
+    options:
+      keep:
+        label: Keep all
+        description: Retain every hurricane.
+      drop_extreme_deaths:
+        label: Drop top 2%
+        description: Drop hurricanes above the 98th percentile of the outcome.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+
+  covariates:
+    label: Covariate set
+    rationale: >-
+      Storm intensity can be adjusted for with a composite severity index
+      (z-scores of category, wind and pressure, averaged), with raw minimum
+      pressure, or with damage alone. Only the index route is sensitive to
+      min_pressure_direction.
+    default: severity_damage
+    options:
+      severity_damage:
+        label: Severity index + damage
+        description: Adjust for the composite severity index and log normalised damage.
+      severity_only:
+        label: Severity index only
+        description: Adjust for the composite severity index alone.
+      pressure_damage:
+        label: Raw pressure + damage
+        description: Adjust for raw minimum pressure and log normalised damage.
+      damage_only:
+        label: Damage only
+        description: Adjust for log normalised damage alone.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: >-
+      How reported statistics become a verdict. Left implicit by every plan,
+      and consequential on its own. Applied downstream, so it costs nothing
+      to execute.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: >-
+      Hurricanes with more feminine names cause more deaths, because people
+      take fewer precautions against them.
+
+x_astaverse:
+  astra_schema_shape: "0.0.13"
+  note: Hand-authored; ASTRA-shaped.

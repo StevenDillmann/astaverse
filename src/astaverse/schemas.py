@@ -70,6 +70,10 @@ class Plan(BaseModel):
     steps: str
     deliverables: str
     rationale: str | None = None
+    # True when the plan was supplied rather than sampled — the plan under
+    # evaluation. Extraction audits it for under-specification, not just for
+    # disagreement with the others.
+    seeded: bool = False
 
     def to_query(self) -> str:
         """Render in the `query` format used by asta-autodiscovery's plan records."""

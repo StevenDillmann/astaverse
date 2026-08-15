@@ -74,6 +74,28 @@ Rules:
   decisions.
 - A decision found in only ONE plan is still a real decision. Record the
   narrow support in `supported_by`; do not drop it for lack of consensus.
+- **A majority is not a resolution.** If any plan handles a step differently
+  from the others — even if the others agree, and even if their way is
+  clearly the methodologically correct one — that is a decision. You are not
+  adjudicating which plan is right; you are cataloguing what varies so its
+  effect can be measured. Recording a choice costs little; omitting one hides
+  a result's dependence on it.
+- Pay specific attention to steps where plans differ in the **orientation or
+  sign** of a variable (reversing, inverting, negating, or flipping a measure
+  before combining it with others), in whether a step happens **at all**
+  (a filter, transformation, or control one plan applies and another omits),
+  and in **how a composite or index is constructed** from components. These
+  are the choices most often left unstated, and they are frequently the ones
+  that move the conclusion.
+- **Silence is under-specification, and it counts.** The most consequential
+  decisions usually are not stated disagreements — they are steps a plan
+  describes at a level of detail that leaves an implementer a real choice.
+  If a plan says "combine these variables into an index" without saying how
+  they are oriented, or "adjust for severity" without saying with what, or
+  "remove outliers" without saying which, then two competent implementers
+  would write different code, and that gap is a decision. Enumerate the
+  options an implementer would actually pick between, and set
+  `supported_by: []` when no plan states a preference.{seed_note}
 - Options must be mutually exclusive and jointly cover what the plans do.
 - Prefer 2-4 options per decision, and at most {max_decisions} decisions.
 - Use `requires` / `incompatible_with` (referencing "decision_id.option_id")
@@ -81,6 +103,14 @@ Rules:
 - Do NOT include a decision about the significance threshold or how to word
   the final verdict. That is handled separately.
 """
+
+
+SEED_NOTE = """
+- **{seed_id} is the plan under evaluation** — it was supplied, not sampled.
+  Audit it specifically: walk its steps and ask, at each one, what an
+  implementer would still have to decide to turn that sentence into code. Where
+  the other plans spell out something it leaves implicit, that gap is a
+  decision, and the fact that the others agree does not close it."""
 
 
 class _OptionResponse(BaseModel):
@@ -152,11 +182,13 @@ def run(
     plan_set: PlanSet = run_obj.read_artifact("plans", PlanSet)
 
     rendered_plans = "\n\n".join(
-        f"### {p.id}\n**Objective:** {p.objective}\n\n**Steps:**\n{p.steps}\n\n"
+        f"### {p.id}{' — THE PLAN UNDER EVALUATION' if p.seeded else ''}\n"
+        f"**Objective:** {p.objective}\n\n**Steps:**\n{p.steps}\n\n"
         f"**Deliverables:**\n{p.deliverables}\n\n**Rationale:** {p.rationale or ''}"
         for p in plan_set.plans
     )
 
+    seeded = next((p for p in plan_set.plans if p.seeded), None)
     prompt = PROMPT.format(
         k=len(plan_set.plans),
         hypothesis=study.hypothesis,
@@ -165,6 +197,7 @@ def run(
         columns=render_columns_markdown(study),
         plans=rendered_plans,
         max_decisions=max_decisions,
+        seed_note=SEED_NOTE.format(seed_id=seeded.id) if seeded else "",
     )
 
     response = structured_call(
