@@ -187,12 +187,16 @@ def _describe_result(result) -> str:
         parts.append("the model did not converge")
     body = "; ".join(parts) if parts else "no statistics were reported"
     verdict = {
-        Verdict.supported: "the hypothesis is supported",
-        Verdict.not_supported: "the hypothesis is not supported",
-        Verdict.mixed: "the result is mixed",
-        Verdict.failed: "the analysis failed",
+        Verdict.supported: "On this analysis the hypothesis is supported",
+        Verdict.not_supported: "On this analysis the hypothesis is not supported",
+        Verdict.mixed: "On this analysis the result is mixed",
+        Verdict.failed: "This analysis failed to produce a usable result",
     }[result.verdict]
-    return f"{body}. Under the rule '{result.verdict_rule}', {verdict}."
+    # Deliberately does not name the verdict rule. The evidence is the numbers
+    # and what they imply; the label attached to the threshold is incidental,
+    # and leaving it out lets universes that differ only by rule name share an
+    # elicitation.
+    return f"{body}. {verdict}."
 
 
 # --------------------------------------------------------------------------
@@ -230,22 +234,41 @@ def run(
     prior = beta_from_counts(prior_counts, weight=1.0)
     max_shift = theoretical_max_shift(n_samples, weight=evidence_weight)
 
+    # The belief prompt is a function of the statistics and the verdict, not of
+    # which universe produced them. Universes that report the same numbers and
+    # land on the same verdict share an elicitation — on a grid where a verdict
+    # rule varies without changing the numbers, that alone cuts the call count
+    # by the number of rules.
+    cache: dict[str, dict[str, int]] = {}
+    n_elicited = 0
+
     per_universe: list[UniverseSurprisal] = []
     for result in verdicts.results:
+        # The verdict rule is excluded: it is a reading of the numbers, not an
+        # analytic choice made during the analysis.
         decisions_text = "\n".join(
-            f"- {did}: {oid}" for did, oid in sorted(result.decisions.items())
+            f"- {did}: {oid}"
+            for did, oid in sorted(result.decisions.items())
+            if did != "verdict_rule"
         )
-        counts = _elicit(
-            POSTERIOR_PROMPT.format(
-                hypothesis=spec.hypothesis,
-                decisions=decisions_text,
-                result=_describe_result(result),
-            ),
-            model,
-            n_samples,
-            run_obj,
-            f"s8_posterior::{result.universe_id}::{result.verdict_rule}",
+        described = _describe_result(result)
+        prompt = POSTERIOR_PROMPT.format(
+            hypothesis=spec.hypothesis,
+            decisions=decisions_text,
+            result=described,
         )
+        signature = f"{decisions_text}||{described}"
+        counts = cache.get(signature)
+        if counts is None:
+            counts = _elicit(
+                prompt,
+                model,
+                n_samples,
+                run_obj,
+                f"s8_posterior::{result.universe_id}::{result.verdict_rule}",
+            )
+            cache[signature] = counts
+            n_elicited += 1
         posterior = posterior_from_prior(prior, counts, weight=evidence_weight)
         per_universe.append(
             UniverseSurprisal(
@@ -293,6 +316,8 @@ def run(
     )
     run_obj.log(
         "surprisal",
+        f"{n_elicited} elicitations for {len(per_universe)} results "
+        f"({len(per_universe) - n_elicited} cache hits) | "
         f"median={robust.median:.3f} iqr={robust.iqr:.3f} "
         f"sign_consistency={robust.sign_consistency:.2f} "
         f"single_universe={single if single is None else round(single, 3)} "

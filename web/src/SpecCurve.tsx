@@ -41,8 +41,13 @@ export function SpecCurve({ universes, median, width = 860 }: Props) {
     }, new Set<string>()),
   );
 
-  // One row per (decision, option) pair, grouped by decision.
-  const rows: { decision: string; option: string; first: boolean }[] = [];
+  // A header row naming each decision, then one row per option. The header
+  // gets its own line so it cannot collide with the option labels.
+  type Row =
+    | { kind: "header"; decision: string }
+    | { kind: "option"; decision: string; option: string };
+
+  const rows: Row[] = [];
   decisionIds.forEach((decision) => {
     const options = Array.from(
       sorted.reduce((set, u) => {
@@ -50,7 +55,8 @@ export function SpecCurve({ universes, median, width = 860 }: Props) {
         return set;
       }, new Set<string>()),
     ).sort();
-    options.forEach((option, i) => rows.push({ decision, option, first: i === 0 }));
+    rows.push({ kind: "header", decision });
+    options.forEach((option) => rows.push({ kind: "option", decision, option }));
   });
 
   const plotW = width - LABEL_W - PAD * 2;
@@ -128,28 +134,30 @@ export function SpecCurve({ universes, median, width = 860 }: Props) {
         {/* decision assignment matrix */}
         {rows.map((row, r) => {
           const rowY = PAD + CURVE_H + 24 + r * ROW_H;
+          if (row.kind === "header") {
+            return (
+              <g key={`h.${row.decision}`}>
+                <line
+                  x1={PAD}
+                  x2={width - PAD}
+                  y1={rowY - ROW_H / 2}
+                  y2={rowY - ROW_H / 2}
+                  stroke="var(--rule)"
+                />
+                <text
+                  x={PAD}
+                  y={rowY + 4}
+                  fontSize={9}
+                  fill="var(--ink-3)"
+                  letterSpacing="0.1em"
+                >
+                  {row.decision.replace(/_/g, " ").toUpperCase()}
+                </text>
+              </g>
+            );
+          }
           return (
             <g key={`${row.decision}.${row.option}`}>
-              {row.first && (
-                <>
-                  <line
-                    x1={PAD}
-                    x2={width - PAD}
-                    y1={rowY - ROW_H / 2}
-                    y2={rowY - ROW_H / 2}
-                    stroke="var(--rule)"
-                  />
-                  <text
-                    x={PAD}
-                    y={rowY + 3}
-                    fontSize={9}
-                    fill="var(--ink-3)"
-                    letterSpacing="0.08em"
-                  >
-                    {row.decision.toUpperCase()}
-                  </text>
-                </>
-              )}
               <text x={LABEL_W} y={rowY + 3} textAnchor="end" fontSize={10} fill="var(--ink-2)">
                 {row.option}
               </text>

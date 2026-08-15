@@ -17,9 +17,14 @@ from pydantic import BaseModel
 
 T = TypeVar("T", bound=BaseModel)
 
-DEFAULT_PLAN_MODEL = os.environ.get("ASTAVERSE_PLAN_MODEL", "openai/gpt-5-mini")
-DEFAULT_DECISION_MODEL = os.environ.get("ASTAVERSE_DECISION_MODEL", "gemini/gemini-2.5-pro")
-DEFAULT_BELIEF_MODEL = os.environ.get("ASTAVERSE_BELIEF_MODEL", "openai/gpt-5-mini")
+DEFAULT_MODEL = "openai/gpt-5.6-luna"
+
+# Plan generation and decision extraction can be pointed at different models
+# (bias control 4: one model doing both misses forks it never entertains).
+# They currently default to the same one — override either to re-separate them.
+DEFAULT_PLAN_MODEL = os.environ.get("ASTAVERSE_PLAN_MODEL", DEFAULT_MODEL)
+DEFAULT_DECISION_MODEL = os.environ.get("ASTAVERSE_DECISION_MODEL", DEFAULT_MODEL)
+DEFAULT_BELIEF_MODEL = os.environ.get("ASTAVERSE_BELIEF_MODEL", DEFAULT_MODEL)
 
 
 class LLMError(RuntimeError):

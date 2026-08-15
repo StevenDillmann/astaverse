@@ -112,13 +112,56 @@ For evaluating AutoDiscovery, the seeded mode is the correct one.
   p<0.05 and p<0.01 changes the count of supported results at zero execution
   cost, because it is applied post-hoc to stored statistics.
 
+## 6. Robust surprisal: the single universe *understates* the finding
+
+Stage 8 on the 96-universe hurricane multiverse (288 results × 3 verdict
+rules), belief elicitation on `gpt-5.6-luna`, 5 draws each:
+
+| | |
+|---|---|
+| prior mean | 0.583 |
+| median surprisal | **−0.325** |
+| IQR | 0.049 |
+| sign agreement | 96% |
+| surprising (\|s\| ≥ 0.2) | 88% of universes |
+| single-universe (default) | **−0.130** |
+| **fragility index** | **0.195** |
+
+The surprisal threshold is 0.2. The default universe returns −0.130, which is
+**below** it — a single-universe pipeline reports "not surprising, inconclusive"
+and moves on. The multiverse median is −0.325, comfortably past it, with 96%
+sign agreement and an IQR of 0.049.
+
+So the multiverse is not merely more cautious than the single universe here —
+it is more *confident*, in the opposite direction. The evidence robustly
+disconfirms the hypothesis, and the one arbitrary default specification is
+the one that fails to see it. Fragility cuts both ways: a single universe can
+manufacture a discovery, and it can also bury one.
+
+De-duplication by (analytic decisions, reported statistics, verdict) cut this
+from 288 elicitations to 99.
+
+### The estimand determines which decisions matter
+
+`min_pressure_direction` came out with a sensitivity spread of **0.001** —
+effectively inert — despite being the fork that flipped AutoDiscovery's
+reported result. This is not a contradiction. The reference analysis reports
+the **femininity coefficient**, whereas the documented divergence was about the
+**severity index's own correlation with deaths**. Orientation wrecks the index
+as a standalone predictor while barely perturbing another regressor's
+coefficient.
+
+The lesson generalises: sensitivity is a property of a (decision, estimand)
+pair, not of a decision alone. A multiverse that reports the wrong estimand
+will pronounce a genuinely consequential fork harmless. Any future work on
+extraction recall (§3) has to pin the estimand at the same time.
+
+Ranked sensitivity for this estimand: covariates 0.106, model family 0.074,
+outcome transform 0.070, outlier handling 0.068, femininity measure 0.007,
+verdict rule 0.005, min-pressure direction 0.001.
+
 ## Not yet run
 
 - **Stage 6** (`harbor run`) — the task emits and passes its own structural
   check, but no agent has swept the grid yet.
-- **Stage 8** (robust surprisal) on real data — needs belief elicitation per
-  universe. At 96 universes × 3 verdict rules × 5 draws this is ~1,440 LLM
-  calls, so it wants either a cost decision or the de-duplication described
-  below (belief only depends on the reported statistics, and many universes
-  share a verdict and a similar estimate, so distinct-signature caching should
-  cut it by roughly an order of magnitude).
+Stage 8 has since run — see §6 above.
