@@ -14,6 +14,8 @@ import typer
 from dotenv import load_dotenv
 
 from . import astra_io
+from . import config as run_cfg
+from . import runner
 from .schemas import DecisionSpec, PlanSet, RobustSurprisal, StudySpec, UniverseSet
 from .stages import (
     s1_study,
@@ -271,54 +273,106 @@ def surprisal(
 
 
 @app.command()
-def pipeline(
+def config(
     run_id: str,
-    through: str = typer.Option("universes", "--through", help=f"One of: {', '.join(STAGES)}"),
-    k: int = typer.Option(5, "-k"),
-    cap: int = typer.Option(24, "--max"),
-    agent: str = typer.Option("terminus-2", "--agent", "-a"),
-    model: list[str] = typer.Option(None, "--model", "-m"),
+    show: bool = typer.Option(False, "--show", help="Print the saved config and exit"),
+    through: str = typer.Option(None, "--through", help=f"Run-all target: {', '.join(STAGES)}"),
+    k: int = typer.Option(None, "-k", help="Plans to sample"),
+    mode: str = typer.Option(None, "--mode", help="Decision extraction mode"),
+    critique: bool = typer.Option(None, "--critique/--no-critique"),
+    max_decisions: int = typer.Option(None, "--max-decisions"),
+    cap: int = typer.Option(None, "--max", help="Universe cap"),
+    exclude: list[str] = typer.Option(None, "--exclude", help="Drop these decisions"),
+    agent: str = typer.Option(None, "--agent", "-a"),
+    execute_model: list[str] = typer.Option(None, "--execute-model"),
+    decision_model: list[str] = typer.Option(None, "--decision-model"),
+    plan_model: str = typer.Option(None, "--plan-model"),
+    belief_model: str = typer.Option(None, "--belief-model"),
+    n_samples: int = typer.Option(None, "--n-samples"),
 ) -> None:
-    """Run the remaining stages up to and including --through."""
-    if through not in STAGES:
-        raise typer.BadParameter(f"unknown stage '{through}' (have: {', '.join(STAGES)})")
-    run_obj = _run(run_id)
-    stop = STAGES.index(through)
-    status = run_obj.status()
+    """Set the knobs for a run, once, then `run-all` uses them.
 
-    for index, stage in enumerate(STAGES):
-        if index > stop:
-            break
-        if status.get(stage) == "complete":
-            typer.echo(f"· {stage} (already complete)")
-            continue
+    Stages run individually use the same saved config, so a stage cannot
+    behave differently depending on how it was launched.
+    """
+    run_obj = _run(run_id)
+    if show:
+        typer.echo(run_cfg.load(run_obj).model_dump_json(indent=2))
+        return
+
+    patch: dict = {}
+
+    def section(name: str, **values):
+        kept = {k2: v for k2, v in values.items() if v not in (None, (), [])}
+        if kept:
+            patch[name] = kept
+
+    section("plans", k=k, model=plan_model)
+    section(
+        "decisions",
+        mode=mode,
+        critique=critique,
+        max_decisions=max_decisions,
+        models=list(decision_model or []),
+    )
+    section("universes", cap=cap, exclude=list(exclude or []))
+    section("execute", agent=agent, models=list(execute_model or []))
+    section("surprisal", model=belief_model, n_samples=n_samples)
+    if through:
+        patch["through"] = through
+
+    if not patch:
+        typer.echo("Nothing to change. Use --show to inspect, or pass some options.")
+        raise typer.Exit(1)
+
+    updated = run_cfg.update(run_obj, patch)
+    typer.secho("✓ config saved", fg=typer.colors.GREEN, bold=True)
+    typer.echo(updated.model_dump_json(indent=2))
+
+
+@app.command("run-all")
+def run_all(
+    run_id: str,
+    through: str = typer.Option(None, "--through", help="Overrides the configured target"),
+    force: bool = typer.Option(False, "--force", help="Re-run stages already complete"),
+) -> None:
+    """Run every stage up to the configured target, in order.
+
+    Stages already complete are skipped unless --force. Runs in the
+    foreground here, so you see each stage as it happens.
+    """
+    run_obj = _run(run_id)
+    cfg = run_cfg.load(run_obj)
+    target = through or cfg.through
+    typer.secho(f"Running {run_obj.run_id} through '{target}'", bold=True)
+    typer.echo(f"  plans      k={cfg.plans.k} model={cfg.plans.model or 'default'}")
+    typer.echo(
+        f"  decisions  mode={cfg.decisions.mode}"
+        f" models={','.join(cfg.decisions.models) or 'default'}"
+        f"{' +critique' if cfg.decisions.critique else ''}"
+    )
+    typer.echo(f"  universes  cap={cfg.universes.cap}")
+    if STAGES.index(target) >= STAGES.index("execute"):
+        typer.secho(
+            f"  execute    agent={cfg.execute.agent} "
+            f"models={','.join(cfg.execute.models) or 'default'}"
+            "   ← this spends money",
+            fg=typer.colors.YELLOW,
+        )
+    typer.echo("")
+
+    def announce(stage: str) -> None:
         typer.secho(f"→ {stage}", bold=True)
-        if stage == "study":
-            manifest = run_obj.manifest()
-            s1_study.run(run_obj, manifest["hypothesis"], manifest["dataset"])
-        elif stage == "plans":
-            seed_info = run_obj.manifest().get("seed") or {}
-            seed = (
-                s2_plans.load_seed_plan(
-                    jsonl=seed_info["source_path"], normalized_id=seed_info["normalized_id"]
-                )
-                if seed_info.get("source_path")
-                else None
-            )
-            s2_plans.run(run_obj, k=k, seed_plan=seed)
-        elif stage == "decisions":
-            s3_decisions.run(run_obj)
-        elif stage == "universes":
-            s4_universes.run(run_obj, cap=cap)
-        elif stage == "task":
-            s5_task.run(run_obj)
-        elif stage == "execute":
-            s6_execute.run(run_obj, agent=agent, models=list(model or []) or None)
-        elif stage == "verdicts":
-            s7_verdicts.run(run_obj)
-        elif stage == "surprisal":
-            s8_surprisal.run(run_obj)
-    typer.secho(f"\npipeline complete through '{through}'", fg=typer.colors.GREEN, bold=True)
+
+    progress = runner.run_sequence(run_obj, through=target, on_stage=announce)
+
+    for stage in progress.skipped:
+        typer.echo(f"· {stage} (already complete)")
+    if progress.failed:
+        typer.secho(f"\n✗ failed at '{progress.failed}'", fg=typer.colors.RED, bold=True)
+        typer.echo(f"  {progress.error}")
+        raise typer.Exit(1)
+    typer.secho(f"\n✓ complete through '{target}'", fg=typer.colors.GREEN, bold=True)
 
 
 @app.command("list")

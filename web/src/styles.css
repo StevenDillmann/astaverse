@@ -836,3 +836,108 @@ pre {
   height: 100%;
   background: var(--single);
 }
+
+/* -- configuration and run-all -------------------------------------------- */
+
+.runbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--u) * 4);
+  flex-wrap: wrap;
+  margin-bottom: calc(var(--u) * 4);
+}
+
+.node.is-active {
+  border-color: var(--dist);
+  box-shadow: inset 0 0 0 1px var(--dist);
+}
+
+.dot.active {
+  background: var(--dist);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(43, 92, 230, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(43, 92, 230, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot.active { animation: none; box-shadow: 0 0 0 3px rgba(43, 92, 230, 0.25); }
+}
+
+.cfg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: calc(var(--u) * 8);
+  align-items: start;
+}
+
+.cfg-row {
+  display: block;
+  margin-bottom: calc(var(--u) * 3);
+}
+
+.cfg-row > span {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-bottom: var(--u);
+}
+
+.cfg-row .field {
+  margin-bottom: 0;
+}
+
+select.field {
+  appearance: none;
+  background: var(--surface);
+}
+
+.cfg-check {
+  display: flex;
+  gap: calc(var(--u) * 2);
+  align-items: flex-start;
+  font-size: 11px;
+  color: var(--ink-2);
+  margin-bottom: calc(var(--u) * 3);
+}
+
+.cfg-check em {
+  color: var(--ink-3);
+  font-style: normal;
+}
+
+.cfg-note {
+  font-family: var(--sans);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  margin: 0 0 calc(var(--u) * 3);
+}
+
+.cfg-warn {
+  font-family: var(--sans);
+  font-size: 11px;
+  line-height: 1.5;
+  color: #8f5a24;
+  background: #fdf6ec;
+  border-left: 2px solid #d98324;
+  padding: calc(var(--u) * 2) calc(var(--u) * 3);
+  margin: 0 0 calc(var(--u) * 3);
+}
+
+.cfg-actions {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 4);
+  margin-top: calc(var(--u) * 8);
+  padding-top: calc(var(--u) * 5);
+  border-top: 1px solid var(--rule);
+}
+
+.cfg-saved {
+  font-size: 11px;
+  color: var(--ok);
+}

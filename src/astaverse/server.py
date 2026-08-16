@@ -19,7 +19,8 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import datasets, plans_index
+from . import config as run_config
+from . import datasets, plans_index, runner
 from .schemas import PlanSet, RobustSurprisal, StudySpec, UniverseSet
 from .stages import (
     s1_study,
@@ -75,24 +76,9 @@ class NewRunRequest(BaseModel):
 
 
 class StageRequest(BaseModel):
-    """Per-stage options. Unused keys are ignored by the stage that runs."""
+    """Optional config patch applied before the stage runs."""
 
-    k: int = 5
-    model: str | None = None
-    temperature: float = 0.9
-    max_decisions: int = 6
-    # Stage 3 knobs: which extraction strategy, and which model(s).
-    mode: str = "plan_diff"
-    models_extract: list[str] | None = None
-    critique: bool = False
-    union_modes: list[str] | None = None
-    cap: int = 24
-    include: list[str] | None = None
-    exclude: list[str] | None = None
-    agent: str = "terminus-2"
-    models: list[str] | None = None
-    dry_run: bool = False
-    n_samples: int = 5
+    config: dict[str, Any] | None = None
 
 
 @app.get("/api/stages")
@@ -310,10 +296,17 @@ _MODELS = {
 
 @app.post("/api/runs/{run_id}/stages/{stage}")
 def run_stage(run_id: str, stage: str, request: StageRequest | None = None) -> dict[str, Any]:
+    """Run one stage, using the run's saved configuration.
+
+    Any knobs in the body are merged into that config first, so running a
+    stage from the UI and running it as part of "run all" cannot diverge.
+    """
     if stage not in STAGES:
         raise HTTPException(404, f"unknown stage '{stage}'")
     run_obj = _run(run_id)
-    req = request or StageRequest()
+
+    if runner.is_running(run_id):
+        raise HTTPException(409, detail={"error": "a sequential run is already in progress"})
 
     # Refuse a stage whose inputs are not ready. A disabled button in the UI is
     # not a guard — the client can be stale, and `execute` in particular spends
@@ -333,50 +326,11 @@ def run_stage(run_id: str, stage: str, request: StageRequest | None = None) -> d
             },
         )
 
+    if request is not None and request.config:
+        run_config.update(run_obj, request.config)
+
     try:
-        if stage == "study":
-            manifest = run_obj.manifest()
-            s1_study.run(run_obj, manifest["hypothesis"], manifest["dataset"])
-        elif stage == "plans":
-            # If the study was started from an AutoDiscovery hypothesis, seed
-            # stage 2 with its plan. Recording the seed at creation and then
-            # ignoring it here would silently give the wrong decision space.
-            seed_info = run_obj.manifest().get("seed") or {}
-            seed = (
-                s2_plans.load_seed_plan(
-                    jsonl=seed_info["source_path"],
-                    normalized_id=seed_info["normalized_id"],
-                )
-                if seed_info.get("source_path")
-                else None
-            )
-            s2_plans.run(
-                run_obj,
-                k=req.k,
-                model=req.model,
-                temperature=req.temperature,
-                seed_plan=seed,
-            )
-        elif stage == "decisions":
-            s3_decisions.run(
-                run_obj,
-                model=req.model,
-                models=req.models_extract,
-                mode=req.mode,
-                critique=req.critique,
-                union_modes=req.union_modes,
-                max_decisions=req.max_decisions,
-            )
-        elif stage == "universes":
-            s4_universes.run(run_obj, cap=req.cap, include=req.include, exclude=req.exclude)
-        elif stage == "task":
-            s5_task.run(run_obj)
-        elif stage == "execute":
-            s6_execute.run(run_obj, agent=req.agent, models=req.models, dry_run=req.dry_run)
-        elif stage == "verdicts":
-            s7_verdicts.run(run_obj)
-        elif stage == "surprisal":
-            s8_surprisal.run(run_obj, model=req.model, n_samples=req.n_samples)
+        runner.run_stage(run_obj, stage)
     except Exception as exc:  # noqa: BLE001 - surface the real error to the UI
         raise HTTPException(
             500,
@@ -393,6 +347,43 @@ def run_stage(run_id: str, stage: str, request: StageRequest | None = None) -> d
         "status": run_obj.status(),
         "artifact": _artifact(run_obj, stage),
     }
+
+
+@app.get("/api/runs/{run_id}/config")
+def get_config(run_id: str) -> dict[str, Any]:
+    return run_config.load(_run(run_id)).model_dump()
+
+
+@app.put("/api/runs/{run_id}/config")
+def put_config(run_id: str, patch: dict[str, Any]) -> dict[str, Any]:
+    """Merge a partial config. Sections are merged, not replaced wholesale."""
+    run_obj = _run(run_id)
+    try:
+        return run_config.update(run_obj, patch).model_dump()
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(400, str(exc)) from exc
+
+
+@app.post("/api/runs/{run_id}/run-all")
+def run_all(run_id: str, through: str | None = None, force: bool = False) -> dict[str, Any]:
+    """Run every stage up to the configured target, in the background.
+
+    Returns immediately; poll /progress. An agent sweep takes many minutes,
+    which is far too long to hold a request open.
+    """
+    run_obj = _run(run_id)
+    try:
+        return runner.start_sequence(run_obj, through=through, force=force)
+    except RuntimeError as exc:
+        raise HTTPException(409, detail={"error": str(exc)}) from exc
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+@app.get("/api/runs/{run_id}/progress")
+def get_progress(run_id: str) -> dict[str, Any]:
+    _run(run_id)
+    return runner.progress_for(run_id) or {"running": False, "finished": True}
 
 
 # --------------------------------------------------------------------------

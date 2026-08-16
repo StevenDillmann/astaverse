@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { STAGES, getRun, listRuns, runStage } from "./api";
-import type { RunDetail, RunSummary, Stage } from "./api";
+import { STAGES, getProgress, getRun, listRuns, runAll, runStage } from "./api";
+import type { RunDetail, RunProgress, RunSummary, Stage } from "./api";
+import { Config } from "./Config";
 import { Files } from "./Files";
 import { NewRun } from "./NewRun";
 import { StagePanel } from "./StagePanel";
@@ -24,7 +25,8 @@ export default function App() {
   const [stage, setStage] = useState<Stage>("study");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<"pipeline" | "files" | "new">("pipeline");
+  const [view, setView] = useState<"pipeline" | "config" | "files" | "new">("pipeline");
+  const [progress, setProgress] = useState<RunProgress | null>(null);
 
   useEffect(() => {
     listRuns()
@@ -44,6 +46,47 @@ export default function App() {
   useEffect(() => {
     if (runId) refresh(runId).catch((e) => setError(e.message));
   }, [runId, refresh]);
+
+  // While a sequential run is in flight, poll for progress and keep the stage
+  // panel current — each stage writes its artifact as it completes, so the
+  // pipeline fills in as you watch.
+  useEffect(() => {
+    if (!runId || !progress?.running) return;
+    const timer = setInterval(async () => {
+      try {
+        const p = await getProgress(runId);
+        setProgress(p);
+        await refresh(runId);
+        if (p.finished) {
+          setRuns(await listRuns());
+          if (p.error) setError(`${p.failed}: ${p.error}`);
+        }
+      } catch {
+        /* transient; the next tick retries */
+      }
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [runId, progress?.running, refresh]);
+
+  async function startRunAll() {
+    if (!runId || !detail) return;
+    const target = String((detail.manifest.config as any)?.through ?? "universes");
+    const spends = STAGES.indexOf(target as Stage) >= STAGES.indexOf("execute");
+    if (
+      spends &&
+      !window.confirm(
+        `Run all stages through "${target}"?\n\nThis target includes execute, which ` +
+          `launches a coding agent in a container. It takes minutes and costs money.`,
+      )
+    )
+      return;
+    setError(null);
+    try {
+      setProgress(await runAll(runId));
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
 
   async function execute() {
     if (!runId) return;
@@ -140,12 +183,21 @@ export default function App() {
               >
                 Pipeline
               </button>
+              <button aria-current={view === "config"} onClick={() => setView("config")}>
+                Configure
+              </button>
               <button aria-current={view === "files"} onClick={() => setView("files")}>
                 Artifacts &amp; history
               </button>
             </div>
 
-            {view === "files" ? (
+            {view === "config" ? (
+              <section className="panel">
+                <div className="panel-body">
+                  <Config runId={detail.run_id} onSaved={() => refresh(detail.run_id)} />
+                </div>
+              </section>
+            ) : view === "files" ? (
               <section className="panel">
                 <div className="panel-body">
                   <Files runId={detail.run_id} />
@@ -153,19 +205,52 @@ export default function App() {
               </section>
             ) : (
               <>
-            <nav className="track" aria-label="Pipeline stages">
-              {STAGES.map((s, i) => (
+            <div className="runbar">
+              <div>
                 <button
-                  key={s}
-                  className="node"
-                  aria-current={s === stage}
-                  onClick={() => setStage(s)}
+                  className="run-btn"
+                  onClick={startRunAll}
+                  disabled={!!progress?.running}
                 >
-                  <span className={`dot ${status?.[s] ?? "pending"}`} />
-                  <span className="idx">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="name">{s}</span>
+                  {progress?.running ? "Running…" : "Run all"}
                 </button>
-              ))}
+                <span className="empty" style={{ marginLeft: 12 }}>
+                  through{" "}
+                  <code>{String((detail.manifest.config as any)?.through ?? "universes")}</code>,
+                  using the saved configuration. Already-complete stages are skipped.
+                </span>
+              </div>
+              {progress && (
+                <span className="empty">
+                  {progress.running
+                    ? `${progress.current ?? "starting"} · ${progress.done?.length ?? 0}/${
+                        (progress.done?.length ?? 0) + (progress.pending?.length ?? 0) + 1
+                      }`
+                    : progress.failed
+                      ? `failed at ${progress.failed}`
+                      : "finished"}
+                </span>
+              )}
+            </div>
+
+            <nav className="track" aria-label="Pipeline stages">
+              {STAGES.map((s, i) => {
+                const active = progress?.running && progress.current === s;
+                return (
+                  <button
+                    key={s}
+                    className={`node${active ? " is-active" : ""}`}
+                    aria-current={s === stage}
+                    onClick={() => setStage(s)}
+                  >
+                    <span
+                      className={`dot ${active ? "active" : (status?.[s] ?? "pending")}`}
+                    />
+                    <span className="idx">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="name">{s}</span>
+                  </button>
+                );
+              })}
             </nav>
 
             <section className="panel">

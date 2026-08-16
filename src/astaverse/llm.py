@@ -31,6 +31,22 @@ class LLMError(RuntimeError):
     pass
 
 
+#: Sampling params safe to drop and retry without. Dropping one changes how
+#: varied the samples are, never what was asked.
+DROPPABLE = ("temperature", "top_p", "presence_penalty", "frequency_penalty")
+
+
+def _unsupported_param(message: str) -> str | None:
+    """Find which parameter a provider rejected, if that is what went wrong."""
+    lowered = message.lower()
+    if "unsupported" not in lowered and "does not support" not in lowered:
+        return None
+    for param in DROPPABLE:
+        if param in lowered:
+            return param
+    return None
+
+
 def _log(log_dir: Path | None, record: dict) -> None:
     if log_dir is None:
         return
@@ -78,13 +94,28 @@ def structured_call(
     if temperature:
         kwargs["temperature"] = temperature
 
+    def _complete(**extra):
+        return litellm.completion(**{**kwargs, **extra})
+
     try:
-        if n > 1:
-            response = litellm.completion(n=n, **kwargs)
-        else:
-            response = litellm.completion(**kwargs)
-    except Exception as exc:  # noqa: BLE001 - surface provider errors verbatim
-        raise LLMError(f"{tag or 'llm'} call to {model} failed: {exc}") from exc
+        response = _complete(n=n) if n > 1 else _complete()
+    except Exception as exc:  # noqa: BLE001
+        # `drop_params` only drops what LiteLLM *knows* a model rejects, and a
+        # model newer than its map is passed through verbatim — the provider
+        # then rejects it. Sampling params are advisory here (diversity comes
+        # from drawing n samples), so drop the offender and retry rather than
+        # failing a stage over it.
+        offender = _unsupported_param(str(exc))
+        if offender is None or offender not in kwargs:
+            raise LLMError(f"{tag or 'llm'} call to {model} failed: {exc}") from exc
+        kwargs.pop(offender)
+        try:
+            response = _complete(n=n) if n > 1 else _complete()
+        except Exception as retry_exc:  # noqa: BLE001
+            raise LLMError(
+                f"{tag or 'llm'} call to {model} failed even without "
+                f"'{offender}': {retry_exc}"
+            ) from retry_exc
 
     contents = [choice.message.content for choice in response.choices]
     # Providers that ignore `n` give back one choice; top up sequentially.

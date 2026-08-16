@@ -121,3 +121,55 @@ export const createSeededRun = (
     method: "POST",
     body: JSON.stringify({ hypothesis, dataset, ...(seed ?? {}) }),
   });
+
+export interface RunConfig {
+  plans: { k: number; model: string | null; temperature: number };
+  decisions: {
+    mode: string;
+    models: string[];
+    critique: boolean;
+    union_modes: string[];
+    max_decisions: number;
+  };
+  universes: { cap: number; include: string[]; exclude: string[] };
+  execute: { agent: string; models: string[]; dry_run: boolean };
+  surprisal: { model: string | null; n_samples: number };
+  through: string;
+}
+
+export interface ExtractionModeInfo {
+  id: string;
+  description: string;
+  needs_plans: boolean;
+}
+
+export interface RunProgress {
+  run_id?: string;
+  target?: string;
+  pending?: string[];
+  current?: string | null;
+  done?: string[];
+  skipped?: string[];
+  failed?: string | null;
+  error?: string | null;
+  finished: boolean;
+  running: boolean;
+}
+
+export const getConfig = (id: string) => request<RunConfig>(`/api/runs/${id}/config`);
+
+export const putConfig = (id: string, patch: Record<string, unknown>) =>
+  request<RunConfig>(`/api/runs/${id}/config`, {
+    method: "PUT",
+    body: JSON.stringify(patch),
+  });
+
+export const listModes = () => request<ExtractionModeInfo[]>("/api/extraction-modes");
+
+export const runAll = (id: string, through?: string) =>
+  request<RunProgress>(
+    `/api/runs/${id}/run-all${through ? `?through=${encodeURIComponent(through)}` : ""}`,
+    { method: "POST" },
+  );
+
+export const getProgress = (id: string) => request<RunProgress>(`/api/runs/${id}/progress`);
