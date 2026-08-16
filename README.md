@@ -37,8 +37,9 @@ single-universe answer sits from the multiverse median.
 
 ## Pipeline
 
-Eight stages. Each is a pure function `(run, config) → artifact`, so any stage
-re-runs alone from disk, and the CLI and the web viewer call identical code.
+Eight stages. Each is a pure function `(analysis, config) → artifact`, so any
+stage re-runs alone from disk, and the CLI and the web interface call the same
+`core.runner`.
 
 | # | Stage | In → Out |
 |---|---|---|
@@ -53,11 +54,17 @@ re-runs alone from disk, and the CLI and the web viewer call identical code.
 
 ```bash
 astaverse new --hypothesis "…" --dataset path/to/blade/hurricane
-astaverse pipeline <run_id> --through universes   # offline, no Harbor needed
-astaverse task <run_id> && astaverse execute <run_id> -m openai/gpt-5-mini
-astaverse verdicts <run_id> && astaverse surprisal <run_id>
-astaverse serve                                   # the pipeline viewer
+astaverse ls
+astaverse run <id>                                  # through the configured target
+astaverse run <id> --decisions.mode schema_lint --universes.cap 12
+astaverse stage <id> decisions --decisions.critique # one stage, with overrides
+astaverse config <id>                               # inspect; only flags you pass change
+astaverse schema                                    # the config schema the UI renders
+astaverse serve                                     # the web interface
 ```
+
+Every option is generated from `core/config.py`, so `astaverse run --help`
+documents each knob — including what each extraction mode is blind to.
 
 ## Bias controls
 
