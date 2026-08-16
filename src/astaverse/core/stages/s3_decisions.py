@@ -36,8 +36,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
-from ..astra_io import write_astra_yaml
-from ..llm import DEFAULT_DECISION_MODEL, structured_call
+from ...integrations.astra_io import write_astra_yaml
+from ...integrations.llm import DEFAULT_DECISION_MODEL, structured_call
 from ..schemas import (
     Decision,
     DecisionKind,

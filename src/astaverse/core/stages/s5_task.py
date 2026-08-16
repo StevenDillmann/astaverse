@@ -17,12 +17,13 @@ import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from pydantic import BaseModel
 
-from ..astra_io import read_astra_yaml
+from ...paths import HARBOR_TASK_TEMPLATE
+from ...integrations.astra_io import read_astra_yaml
 from ..schemas import DecisionSpec, StudySpec, UniverseSet
 from ..store import Run
 from .s1_study import render_columns_markdown
 
-TEMPLATES = Path(__file__).resolve().parents[3] / "templates" / "harbor_task"
+TEMPLATES = HARBOR_TASK_TEMPLATE
 
 
 class TaskArtifact(BaseModel):

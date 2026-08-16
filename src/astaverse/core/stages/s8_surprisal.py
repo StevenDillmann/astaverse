@@ -17,8 +17,8 @@ from collections import Counter, defaultdict
 
 from pydantic import BaseModel, Field
 
-from ..astra_io import read_astra_yaml
-from ..llm import DEFAULT_BELIEF_MODEL, structured_call
+from ...integrations.astra_io import read_astra_yaml
+from ...integrations.llm import DEFAULT_BELIEF_MODEL, structured_call
 from ..schemas import (
     BeliefDistribution,
     DecisionSensitivity,

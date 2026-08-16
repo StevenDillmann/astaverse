@@ -11,9 +11,9 @@ import inspect
 
 import pytest
 
-from astaverse.schemas import UniverseStats, Verdict
-from astaverse.stages import s7_verdicts
-from astaverse.stages.s7_verdicts import VERDICT_RULES, apply_verdict
+from astaverse.core.schemas import UniverseStats, Verdict
+from astaverse.core.stages import s7_verdicts
+from astaverse.core.stages.s7_verdicts import VERDICT_RULES, apply_verdict
 
 
 def stats(**kwargs) -> UniverseStats:

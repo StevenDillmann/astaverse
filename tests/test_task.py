@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
-from astaverse.astra_io import enumerate_universes, write_astra_yaml, write_universe_files
-from astaverse.schemas import (
+from astaverse.integrations.astra_io import enumerate_universes, write_astra_yaml, write_universe_files
+from astaverse.core.schemas import (
     Column,
     Decision,
     DecisionKind,
@@ -24,8 +24,8 @@ from astaverse.schemas import (
     Option,
     StudySpec,
 )
-from astaverse.stages import s5_task
-from astaverse.store import Run
+from astaverse.core.stages import s5_task
+from astaverse.core.store import Run
 
 GOOD_ANALYSIS = '''
 import json, yaml
@@ -168,7 +168,7 @@ def _write_submission(app_dir: Path, universes: list[dict], analysis: str) -> No
 
 
 def _valid_rows(prepared_run) -> list[dict]:
-    from astaverse.schemas import UniverseSet
+    from astaverse.core.schemas import UniverseSet
 
     universe_set = prepared_run.read_artifact("universes", UniverseSet)
     return [

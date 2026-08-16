@@ -33,7 +33,7 @@ export default function App() {
     listRuns()
       .then((r) => {
         setRuns(r);
-        if (r.length && !runId) setRunId(r[0].run_id);
+        if (r.length && !runId) setRunId(r[0].id);
       })
       .catch((e) => setError(e.message));
   }, [runId]);
@@ -140,11 +140,11 @@ export default function App() {
         {runs.length === 0 && <p className="empty">None yet.</p>}
         {runs.map((r) => (
           <button
-            key={r.run_id}
+            key={r.id}
             className="run-item"
-            aria-current={r.run_id === runId && view !== "new"}
+            aria-current={r.id === runId && view !== "new"}
             onClick={() => {
-              setRunId(r.run_id);
+              setRunId(r.id);
               setView("pipeline");
             }}
           >
@@ -155,7 +155,7 @@ export default function App() {
                   <i key={s} className={r.status[s] === "complete" ? "on" : ""} />
                 ))}
               </span>
-              {r.n_complete}/{STAGES.length} · {r.run_id.slice(0, 13)}
+              {r.n_complete}/{STAGES.length} · {r.id.slice(0, 13)}
             </span>
           </button>
         ))}
@@ -197,13 +197,13 @@ export default function App() {
             {view === "config" ? (
               <section className="panel">
                 <div className="panel-body">
-                  <Config runId={detail.run_id} onSaved={() => refresh(detail.run_id)} />
+                  <Config runId={detail.id} onSaved={() => refresh(detail.id)} />
                 </div>
               </section>
             ) : view === "files" ? (
               <section className="panel">
                 <div className="panel-body">
-                  <Files runId={detail.run_id} />
+                  <Files runId={detail.id} />
                 </div>
               </section>
             ) : (

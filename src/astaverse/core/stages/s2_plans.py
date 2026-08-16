@@ -19,7 +19,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from ..llm import DEFAULT_PLAN_MODEL, structured_call
+from ...integrations.llm import DEFAULT_PLAN_MODEL, structured_call
 from ..schemas import Plan, PlanSet, StudySpec
 from ..store import Run
 from .s1_study import render_columns_markdown

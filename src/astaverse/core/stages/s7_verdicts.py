@@ -17,7 +17,7 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from ..astra_io import read_astra_yaml
+from ...integrations.astra_io import read_astra_yaml
 from ..schemas import (
     DecisionSpec,
     StudySpec,

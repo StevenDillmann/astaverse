@@ -12,8 +12,8 @@ import pytest
 from pathlib import Path  # noqa: F401  (used by the absolute-path test)
 from fastapi.testclient import TestClient
 
-from astaverse.schemas import Column, StudySpec
-from astaverse.store import Run
+from astaverse.core.schemas import Column, StudySpec
+from astaverse.core.store import Run
 
 
 @pytest.fixture
@@ -26,7 +26,7 @@ def runs_dir(tmp_path, monkeypatch):
 
 @pytest.fixture
 def client(runs_dir):
-    from astaverse import server
+    from astaverse.adapters import api as server
 
     return TestClient(server.app)
 
@@ -65,7 +65,7 @@ def test_run_root_is_always_absolute(runs_dir, monkeypatch, tmp_path):
 
 def test_api_refuses_a_stage_whose_inputs_are_missing(client, bare_run):
     """The UI disabling a button is not a guard — the server must check."""
-    response = client.post(f"/api/runs/{bare_run.run_id}/stages/execute")
+    response = client.post(f"/api/analyses/{bare_run.run_id}/stages/execute")
     assert response.status_code == 409
     detail = response.json()["detail"]
     assert "cannot run 'execute'" in detail["error"]
@@ -74,7 +74,7 @@ def test_api_refuses_a_stage_whose_inputs_are_missing(client, bare_run):
 
 def test_api_allows_the_next_ready_stage(client, bare_run):
     """The guard must not block legitimate work — plans is next after study."""
-    response = client.post(f"/api/runs/{bare_run.run_id}/stages/plans")
+    response = client.post(f"/api/analyses/{bare_run.run_id}/stages/plans")
     # It will fail for want of an API key in the test environment, but it must
     # get past the prerequisite guard to do so.
     assert response.status_code != 409
@@ -83,8 +83,8 @@ def test_api_allows_the_next_ready_stage(client, bare_run):
 def test_failed_harbor_run_is_not_recorded_as_complete(bare_run, monkeypatch):
     import subprocess
 
-    from astaverse.stages import s6_execute
-    from astaverse.stages.s5_task import TaskArtifact
+    from astaverse.core.stages import s6_execute
+    from astaverse.core.stages.s5_task import TaskArtifact
 
     task_dir = bare_run.task_dir
     task_dir.mkdir(parents=True)
@@ -108,8 +108,8 @@ def test_failed_harbor_run_is_not_recorded_as_complete(bare_run, monkeypatch):
 
 
 def test_dry_run_never_marks_execute_complete(bare_run):
-    from astaverse.stages import s6_execute
-    from astaverse.stages.s5_task import TaskArtifact
+    from astaverse.core.stages import s6_execute
+    from astaverse.core.stages.s5_task import TaskArtifact
 
     task_dir = bare_run.task_dir
     task_dir.mkdir(parents=True)

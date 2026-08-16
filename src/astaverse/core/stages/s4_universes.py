@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..astra_io import enumerate_universes, read_astra_yaml, write_universe_files
+from ...integrations.astra_io import enumerate_universes, read_astra_yaml, write_universe_files
 from ..schemas import DecisionSpec, UniverseSet
 from ..store import Run
 

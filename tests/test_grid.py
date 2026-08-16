@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import pytest
 
-from astaverse.astra_io import (
+from astaverse.integrations.astra_io import (
     enumerate_universes,
     read_astra_yaml,
     satisfies_constraints,
     write_astra_yaml,
     write_universe_files,
 )
-from astaverse.schemas import Decision, DecisionKind, DecisionSpec, Option
+from astaverse.core.schemas import Decision, DecisionKind, DecisionSpec, Option
 
 
 def _decisions() -> dict[str, Decision]:

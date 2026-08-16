@@ -17,7 +17,7 @@ from typing import Iterable
 
 import yaml
 
-from .schemas import ASTRA_SCHEMA_SHAPE, Decision, DecisionSpec, Universe, UniverseSet
+from ..core.schemas import ASTRA_SCHEMA_SHAPE, Decision, DecisionSpec, Universe, UniverseSet
 
 
 # --------------------------------------------------------------------------

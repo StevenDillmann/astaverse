@@ -15,7 +15,7 @@ export type Stage = (typeof STAGES)[number];
 export type StageState = "complete" | "ready" | "pending";
 
 export interface RunSummary {
-  run_id: string;
+  id: string;
   hypothesis: string;
   dataset: string;
   created_at: string;
@@ -24,7 +24,7 @@ export interface RunSummary {
 }
 
 export interface RunDetail {
-  run_id: string;
+  id: string;
   manifest: Record<string, unknown>;
   status: Record<Stage, StageState>;
   artifacts: Record<Stage, unknown>;
@@ -43,18 +43,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json();
 }
 
-export const listRuns = () => request<RunSummary[]>("/api/runs");
-export const getRun = (id: string) => request<RunDetail>(`/api/runs/${id}`);
-export const getLog = (id: string) => request<{ log: string }>(`/api/runs/${id}/log`);
+export const listRuns = () => request<RunSummary[]>("/api/analyses");
+export const getRun = (id: string) => request<RunDetail>(`/api/analyses/${id}`);
+export const getLog = (id: string) => request<{ log: string }>(`/api/analyses/${id}/log`);
 
 export const runStage = (id: string, stage: Stage, options: Record<string, unknown> = {}) =>
   request<{ status: Record<Stage, StageState>; artifact: unknown }>(
-    `/api/runs/${id}/stages/${stage}`,
+    `/api/analyses/${id}/stages/${stage}`,
     { method: "POST", body: JSON.stringify(options) },
   );
 
 export const createRun = (hypothesis: string, dataset: string) =>
-  request<{ run_id: string }>("/api/runs", {
+  request<{ id: string }>("/api/analyses", {
     method: "POST",
     body: JSON.stringify({ hypothesis, dataset }),
   });
@@ -87,12 +87,12 @@ export interface HistoryEntry {
 }
 
 export const listDatasets = () => request<DatasetInfo[]>("/api/datasets");
-export const listFiles = (id: string) => request<RunFile[]>(`/api/runs/${id}/files`);
+export const listFiles = (id: string) => request<RunFile[]>(`/api/analyses/${id}/files`);
 export const readFile = (id: string, path: string) =>
   request<{ path: string; bytes: number; content: string }>(
-    `/api/runs/${id}/file?path=${encodeURIComponent(path)}`,
+    `/api/analyses/${id}/file?path=${encodeURIComponent(path)}`,
   );
-export const getHistory = (id: string) => request<HistoryEntry[]>(`/api/runs/${id}/history`);
+export const getHistory = (id: string) => request<HistoryEntry[]>(`/api/analyses/${id}/history`);
 
 export interface PlanRecord {
   normalized_id: string;
@@ -117,7 +117,7 @@ export const createSeededRun = (
   dataset: string,
   seed?: { seed_dataset: string; seed_normalized_id: string },
 ) =>
-  request<{ run_id: string }>("/api/runs", {
+  request<{ id: string }>("/api/analyses", {
     method: "POST",
     body: JSON.stringify({ hypothesis, dataset, ...(seed ?? {}) }),
   });
@@ -156,10 +156,10 @@ export interface RunProgress {
   running: boolean;
 }
 
-export const getConfig = (id: string) => request<RunConfig>(`/api/runs/${id}/config`);
+export const getConfig = (id: string) => request<RunConfig>(`/api/analyses/${id}/config`);
 
 export const putConfig = (id: string, patch: Record<string, unknown>) =>
-  request<RunConfig>(`/api/runs/${id}/config`, {
+  request<RunConfig>(`/api/analyses/${id}/config`, {
     method: "PUT",
     body: JSON.stringify(patch),
   });
@@ -168,8 +168,8 @@ export const listModes = () => request<ExtractionModeInfo[]>("/api/extraction-mo
 
 export const runAll = (id: string, through?: string) =>
   request<RunProgress>(
-    `/api/runs/${id}/run-all${through ? `?through=${encodeURIComponent(through)}` : ""}`,
+    `/api/analyses/${id}/run${through ? `?through=${encodeURIComponent(through)}` : ""}`,
     { method: "POST" },
   );
 
-export const getProgress = (id: string) => request<RunProgress>(`/api/runs/${id}/progress`);
+export const getProgress = (id: string) => request<RunProgress>(`/api/analyses/${id}/progress`);

@@ -118,13 +118,26 @@ Harbor is needed only for stages 6+; stages 1–5 run offline.
 
 ```
 src/astaverse/
-  schemas.py     wire format between stages (ASTRA-shaped decision models)
-  astra_io.py    astra.yaml emit/load, constraint pruning, grid enumeration
-  store.py       run directories, artifacts, downstream invalidation
-  llm.py         LiteLLM wrapper (OpenAI + Gemini)
-  stages/        s1_study … s8_surprisal
-  cli.py         typer CLI
-  server.py      FastAPI viewer backend
+  core/            the domain — no opinion about how it is invoked
+    config.py        every knob, defined once; generates CLI flags AND the UI form
+    schemas.py       wire format between stages (ASTRA-shaped decision models)
+    store.py         analysis directories, artifacts, downstream invalidation
+    runner.py        the one place a stage is run, sequentially or alone
+    stages/          s1_study … s8_surprisal
+  adapters/        thin surfaces over core
+    cli.py           tyro CLI, generated from RunConfig
+    api/             FastAPI routers (analyses, files, catalog)
+  integrations/    the outside world
+    llm.py           LiteLLM wrapper
+    astra_io.py      astra.yaml emit/load, constraint pruning, grid enumeration
+    datasets.py      dataset discovery
+    plans_index.py   AutoDiscovery's hypotheses and plans
+  paths.py         where the repo's assets live
 templates/harbor_task/   jinja2 task template
 web/                     Vite + React SPA
 ```
+
+**One config, two surfaces.** `core/config.py` is the only place a knob is
+defined. tyro turns each field into a CLI flag using its `description` as help
+text; `/api/config-schema` serves the same model as JSON Schema for the UI
+form. Adding a knob means adding a field, and nothing else.

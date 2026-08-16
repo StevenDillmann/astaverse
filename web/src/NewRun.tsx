@@ -61,14 +61,14 @@ export function NewRun({
     setBusy(true);
     setError(null);
     try {
-      const { run_id } = await createSeededRun(
+      const { id } = await createSeededRun(
         hypothesis.trim(),
         selected.path,
         seed
           ? { seed_dataset: seed.dataset, seed_normalized_id: seed.normalized_id }
           : undefined,
       );
-      onCreated(run_id);
+      onCreated(id);
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);

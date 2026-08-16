@@ -6,8 +6,8 @@ import math
 
 import pytest
 
-from astaverse.schemas import DecisionSpec, Decision, Option, UniverseSurprisal, Verdict
-from astaverse.stages.s8_surprisal import (
+from astaverse.core.schemas import DecisionSpec, Decision, Option, UniverseSurprisal, Verdict
+from astaverse.core.stages.s8_surprisal import (
     JEFFREYS,
     _between_agent_spread,
     _decision_sensitivity,
