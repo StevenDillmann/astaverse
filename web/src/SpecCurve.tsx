@@ -30,10 +30,10 @@ interface Props {
 }
 
 const VERDICT_COLOR: Record<string, string> = {
-  supported: "var(--ok)",
-  not_supported: "var(--ink-3)",
-  mixed: "var(--muted-signal)",
-  failed: "var(--muted-signal)",
+  supported: "hsl(var(--ok))",
+  not_supported: "hsl(var(--muted-foreground))",
+  mixed: "hsl(var(--muted-foreground))",
+  failed: "hsl(var(--muted-foreground))",
 };
 
 const CURVE_H = 190;
@@ -90,7 +90,7 @@ export function SpecCurve({
   const height = PAD * 2 + CURVE_H + 24 + rows.length * ROW_H;
 
   return (
-    <div className="scroll-x">
+    <div className="overflow-x-auto">
       <svg
         width={width}
         height={height}
@@ -104,25 +104,25 @@ export function SpecCurve({
           x2={width - PAD}
           y1={y(0)}
           y2={y(0)}
-          stroke="var(--rule-strong)"
+          stroke="hsl(var(--input))"
         />
         <line
           x1={LABEL_W + PAD}
           x2={width - PAD}
           y1={y(median)}
           y2={y(median)}
-          stroke="var(--dist)"
+          stroke="hsl(var(--multiverse))"
           strokeDasharray="3 3"
           opacity={0.5}
         />
-        <text x={LABEL_W} y={y(0) + 3} textAnchor="end" fontSize={10} fill="var(--ink-3)">
+        <text x={LABEL_W} y={y(0) + 3} textAnchor="end" fontSize={10} fill="hsl(var(--muted-foreground))">
           0
         </text>
         <text
           x={PAD}
           y={PAD + 8}
           fontSize={9}
-          fill="var(--ink-3)"
+          fill="hsl(var(--muted-foreground))"
           letterSpacing="0.1em"
         >
           {valueLabel.toUpperCase()}, SORTED
@@ -133,7 +133,7 @@ export function SpecCurve({
           y={y(median) + (Math.abs(y(median) - y(0)) < 11 ? 15 : 3)}
           textAnchor="end"
           fontSize={10}
-          fill="var(--dist)"
+          fill="hsl(var(--multiverse))"
         >
           median
         </text>
@@ -146,7 +146,7 @@ export function SpecCurve({
               x2={x(i)}
               y1={y(0)}
               y2={y(u.value)}
-              stroke={u.is_default ? "var(--single)" : "var(--rule-strong)"}
+              stroke={u.is_default ? "hsl(var(--single))" : "hsl(var(--input))"}
               strokeWidth={u.is_default ? 1.5 : 1}
             />
             <circle
@@ -155,10 +155,10 @@ export function SpecCurve({
               r={u.is_default ? 4 : 3}
               fill={
                 u.is_default
-                  ? "var(--single)"
+                  ? "hsl(var(--single))"
                   : colorByVerdict
-                    ? (VERDICT_COLOR[u.verdict] ?? "var(--dist)")
-                    : "var(--dist)"
+                    ? (VERDICT_COLOR[u.verdict] ?? "hsl(var(--multiverse))")
+                    : "hsl(var(--multiverse))"
               }
             >
               <title>
@@ -182,13 +182,13 @@ export function SpecCurve({
                   x2={width - PAD}
                   y1={rowY - ROW_H / 2}
                   y2={rowY - ROW_H / 2}
-                  stroke="var(--rule)"
+                  stroke="hsl(var(--border))"
                 />
                 <text
                   x={PAD}
                   y={rowY + 4}
                   fontSize={9}
-                  fill="var(--ink-3)"
+                  fill="hsl(var(--muted-foreground))"
                   letterSpacing="0.1em"
                 >
                   {row.decision.replace(/_/g, " ").toUpperCase()}
@@ -198,7 +198,7 @@ export function SpecCurve({
           }
           return (
             <g key={`${row.decision}.${row.option}`}>
-              <text x={LABEL_W} y={rowY + 3} textAnchor="end" fontSize={10} fill="var(--ink-2)">
+              <text x={LABEL_W} y={rowY + 3} textAnchor="end" fontSize={10} fill="hsl(var(--muted-foreground))">
                 {row.option}
               </text>
               {sorted.map((u, i) =>
@@ -208,7 +208,7 @@ export function SpecCurve({
                     cx={x(i)}
                     cy={rowY}
                     r={2.5}
-                    fill={u.is_default ? "var(--single)" : "var(--ink-2)"}
+                    fill={u.is_default ? "hsl(var(--single))" : "hsl(var(--muted-foreground))"}
                   />
                 ) : null,
               )}

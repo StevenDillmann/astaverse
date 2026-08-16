@@ -1,14 +1,15 @@
-/** Everything on disk for a run: artifacts, the emitted task, what the agent
- * actually wrote, and artifact sets superseded by re-running an earlier stage.
+/** Everything on disk for an analysis: artifacts, the emitted task, what the
+ *  agent actually wrote, and artifact sets superseded by re-running a stage.
  *
- * The stage panels render the current result. This is for going back — reading
- * the agent's own analysis.py, or comparing against a decision space you have
- * since replaced.
+ *  The stage panels show the current result. This is for going back — reading
+ *  the agent's own analysis.py, or comparing against a decision space you
+ *  have since replaced.
  */
 
 import { useEffect, useState } from "react";
 import { getHistory, listFiles, readFile } from "./api";
 import type { HistoryEntry, RunFile } from "./api";
+import { Empty, ErrorNote, Eyebrow, Tag, cn } from "./ui";
 
 const ORDER = ["artifact", "agent output", "history", "task", "universes", "job"];
 
@@ -22,7 +23,7 @@ export function Files({ runId }: { runId: string }) {
   const [files, setFiles] = useState<RunFile[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [open, setOpen] = useState<string | null>(null);
-  const [content, setContent] = useState<string>("");
+  const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,8 +37,7 @@ export function Files({ runId }: { runId: string }) {
     setOpen(path);
     setContent("");
     try {
-      const { content } = await readFile(runId, path);
-      setContent(content);
+      setContent((await readFile(runId, path)).content);
     } catch (e) {
       setContent(`Could not read this file: ${(e as Error).message}`);
     }
@@ -47,59 +47,62 @@ export function Files({ runId }: { runId: string }) {
 
   return (
     <>
-      {error && <div className="error">{error}</div>}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
       {history.length > 0 && (
-        <>
-          <p className="eyebrow">Superseded by re-running a stage</p>
+        <div className="mb-5 rounded-md border border-border bg-muted/40 px-3 py-2.5">
+          <Eyebrow className="mb-1.5">Superseded by re-running a stage</Eyebrow>
           {history.map((h) => (
-            <p key={h.directory} className="empty" style={{ marginBottom: 6 }}>
-              <span className="tag">{h.superseded_by}</span> archived {h.stages.join(", ")} ·{" "}
-              <code>history/{h.directory}</code>
+            <p key={h.directory} className="text-xs text-muted-foreground">
+              <Tag>{h.superseded_by}</Tag> archived {h.stages.join(", ")}
             </p>
           ))}
-          <p className="empty" style={{ margin: "8px 0 24px" }}>
-            Nothing is deleted when you re-run — the old artifacts are below under history.
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Nothing is deleted when you re-run — the old artifacts are below, under history.
           </p>
-        </>
+        </div>
       )}
 
-      <div className="files-grid">
-        <div className="file-list">
+      <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+        <div className="max-h-[620px] overflow-y-auto">
           {groups.map((category) => (
-            <div key={category}>
-              <p className="eyebrow" style={{ marginTop: 14 }}>
-                {category}
-              </p>
+            <div key={category} className="mb-3">
+              <Eyebrow className="mb-1.5">{category}</Eyebrow>
               {files
                 .filter((f) => f.category === category)
                 .map((f) => (
                   <button
                     key={f.path}
-                    className="file-item"
-                    aria-current={open === f.path}
                     onClick={() => show(f.path)}
                     title={f.path}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-3 rounded px-2 py-1 text-left text-xs transition-colors",
+                      open === f.path
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+                    )}
                   >
-                    <span className="file-name">{f.name}</span>
-                    <span className="file-size">{human(f.bytes)}</span>
+                    <span className="truncate font-mono">{f.name}</span>
+                    <span className="shrink-0 font-mono text-[11px] opacity-70">
+                      {human(f.bytes)}
+                    </span>
                   </button>
                 ))}
             </div>
           ))}
-          {files.length === 0 && !error && <p className="empty">No files yet.</p>}
+          {files.length === 0 && !error && <Empty>No files yet.</Empty>}
         </div>
 
-        <div className="file-view">
+        <div className="min-w-0">
           {open ? (
             <>
-              <p className="eyebrow" style={{ wordBreak: "break-all" }}>
-                {open}
-              </p>
-              <pre>{content || "Loading…"}</pre>
+              <Eyebrow className="mb-2 break-all">{open}</Eyebrow>
+              <pre className="max-h-[620px] overflow-auto rounded-md border border-border bg-muted/40 p-3 font-mono text-[11px] leading-relaxed">
+                {content || "Loading…"}
+              </pre>
             </>
           ) : (
-            <p className="empty">Select a file to read it.</p>
+            <Empty>Select a file to read it.</Empty>
           )}
         </div>
       </div>

@@ -21,6 +21,7 @@ export interface RunSummary {
   created_at: string;
   status: Record<Stage, StageState>;
   n_complete: number;
+  running?: boolean;
 }
 
 export interface RunDetail {
@@ -165,6 +166,15 @@ export const putConfig = (id: string, patch: Record<string, unknown>) =>
   });
 
 export const listModes = () => request<ExtractionModeInfo[]>("/api/extraction-modes");
+
+/** JSON Schema of RunConfig — the same model that generates the CLI flags. */
+export interface JsonSchema {
+  properties?: Record<string, any>;
+  $defs?: Record<string, any>;
+  [k: string]: any;
+}
+
+export const getConfigSchema = () => request<JsonSchema>("/api/config-schema");
 
 export const runAll = (id: string, through?: string) =>
   request<RunProgress>(

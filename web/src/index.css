@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Semantic tokens, shadcn-style. Components never name a colour directly, so
+   the theme is a token swap rather than a rewrite.
+
+   Two domain colours carry meaning and are used for nothing else:
+   `multiverse` is the distribution, `single` is the one default specification
+   that would have been reported alone. */
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 220 20% 12%;
+  --card: 0 0% 100%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 220 9% 46%;
+  --border: 220 13% 91%;
+  --input: 220 13% 88%;
+  --ring: 226 78% 54%;
+  --accent: 220 14% 96%;
+  --accent-foreground: 220 20% 12%;
+
+  --multiverse: 226 78% 54%;
+  --single: 4 66% 54%;
+  --ok: 162 63% 30%;
+  --warn: 33 84% 44%;
+
+  color-scheme: light;
+}
+
+/* "System" sets no attribute, so the media query serves it. The :not() guard
+   stops a dark OS from overriding a deliberate light choice. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: 222 24% 7%;
+    --foreground: 210 20% 92%;
+    --card: 220 20% 11%;
+    --muted: 220 18% 15%;
+    --muted-foreground: 218 11% 60%;
+    --border: 220 16% 19%;
+    --input: 220 16% 24%;
+    --ring: 222 90% 68%;
+    --accent: 220 18% 15%;
+    --accent-foreground: 210 20% 92%;
+
+    --multiverse: 222 100% 71%;
+    --single: 6 100% 69%;
+    --ok: 162 50% 49%;
+    --warn: 33 80% 62%;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: 222 24% 7%;
+  --foreground: 210 20% 92%;
+  --card: 220 20% 11%;
+  --muted: 220 18% 15%;
+  --muted-foreground: 218 11% 60%;
+  --border: 220 16% 19%;
+  --input: 220 16% 24%;
+  --ring: 222 90% 68%;
+  --accent: 220 18% 15%;
+  --accent-foreground: 210 20% 92%;
+
+  --multiverse: 222 100% 71%;
+  --single: 6 100% 69%;
+  --ok: 162 50% 49%;
+  --warn: 33 80% 62%;
+
+  color-scheme: dark;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04";
+  }
+  /* Numbers in tables must line up to be comparable at a glance. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}

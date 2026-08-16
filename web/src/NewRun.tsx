@@ -1,20 +1,23 @@
-/** Start a study: pick a dataset, then state the hypothesis.
+/** Start an analysis: pick the data, then say what you think is true of it.
  *
- * Datasets carry their own research questions, so the common case is picking
- * one rather than composing a hypothesis from scratch — but the field stays
- * editable, because the interesting studies are usually a variation on the
- * published question rather than the question itself.
+ * A BLADE dataset carries one published research question, but AutoDiscovery
+ * has generated hundreds against the same data, each with the plan it
+ * produced. Picking one of those seeds stage 2 with that plan, so the
+ * decision space describes the plan under evaluation rather than one invented
+ * from scratch — which is the mode that matters for evaluating AutoDiscovery.
  */
 
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 import { createSeededRun, listDatasets, listHypotheses } from "./api";
 import type { DatasetInfo, PlanRecord } from "./api";
+import { Button, Card, Empty, ErrorNote, Eyebrow, Input, Tag, cn } from "./ui";
 
 export function NewRun({
   onCreated,
   onCancel,
 }: {
-  onCreated: (runId: string) => void;
+  onCreated: (id: string) => void;
   onCancel: () => void;
 }) {
   const [datasets, setDatasets] = useState<DatasetInfo[]>([]);
@@ -24,9 +27,6 @@ export function NewRun({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // AutoDiscovery's own hypotheses for the selected dataset. A BLADE dataset
-  // has one published research question; AutoDiscovery has generated hundreds,
-  // each with the plan it produced.
   const [records, setRecords] = useState<PlanRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [hypFilter, setHypFilter] = useState("");
@@ -64,9 +64,7 @@ export function NewRun({
       const { id } = await createSeededRun(
         hypothesis.trim(),
         selected.path,
-        seed
-          ? { seed_dataset: seed.dataset, seed_normalized_id: seed.normalized_id }
-          : undefined,
+        seed ? { seed_dataset: seed.dataset, seed_normalized_id: seed.normalized_id } : undefined,
       );
       onCreated(id);
     } catch (e) {
@@ -76,41 +74,41 @@ export function NewRun({
   }
 
   return (
-    <div className="newrun">
-      <div className="newrun-head">
+    <>
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div>
-          <p className="eyebrow" style={{ margin: 0 }}>
-            New study
-          </p>
-          <h2 className="hypothesis" style={{ fontSize: 18, margin: "6px 0 0" }}>
+          <Eyebrow>New analysis</Eyebrow>
+          <h1 className="mt-1 text-[17px] font-medium">
             Pick the data, then say what you think is true of it.
-          </h2>
+          </h1>
         </div>
-        <button className="ghost-btn" onClick={onCancel}>
-          Cancel
-        </button>
+        <Button onClick={onCancel}>Cancel</Button>
       </div>
 
-      {error && <div className="error">{error}</div>}
+      {error && <ErrorNote>{error}</ErrorNote>}
 
-      <div className="newrun-grid">
+      <div className="grid gap-8 lg:grid-cols-2">
         <section>
-          <p className="eyebrow">
-            Dataset {datasets.length > 0 && <span>· {shown.length} of {datasets.length}</span>}
-          </p>
-          <input
-            className="field"
-            placeholder="Filter by name or research question"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-          <div className="ds-list">
-            {datasets.length === 0 && !error && <p className="empty">Looking for datasets…</p>}
+          <Eyebrow className="mb-2">
+            Dataset {datasets.length > 0 && `· ${shown.length} of ${datasets.length}`}
+          </Eyebrow>
+          <div className="relative mb-2">
+            <Search
+              size={13}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              className="pl-7"
+              placeholder="Filter by name or research question"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            />
+          </div>
+          <Card className="max-h-[460px] overflow-y-auto">
+            {datasets.length === 0 && !error && <Empty>Looking for datasets…</Empty>}
             {shown.map((d) => (
               <button
                 key={d.path}
-                className="ds-item"
-                aria-current={selected?.path === d.path}
                 onClick={() => {
                   setSelected(d);
                   setSeed(null);
@@ -118,38 +116,44 @@ export function NewRun({
                   if (!hypothesis.trim() && d.research_questions[0])
                     setHypothesis(d.research_questions[0]);
                 }}
+                className={cn(
+                  "block w-full border-b border-border/60 px-4 py-3 text-left last:border-0 transition-colors",
+                  selected?.path === d.path
+                    ? "bg-accent"
+                    : "hover:bg-accent/60",
+                )}
               >
-                <span className="ds-name">{d.name}</span>
-                <span className="ds-meta">
+                <span className="font-mono text-[13px]">{d.name}</span>
+                <span className="mt-0.5 block font-mono text-[11px] text-muted-foreground">
                   {d.n_rows ?? "?"} rows · {d.n_columns} cols
-                  {(d as any).n_autodiscovery_hypotheses > 0 && (
-                    <> · {(d as any).n_autodiscovery_hypotheses} hypotheses</>
-                  )}
+                  {(d as any).n_autodiscovery_hypotheses > 0 &&
+                    ` · ${(d as any).n_autodiscovery_hypotheses} hypotheses`}
                 </span>
                 {d.research_questions[0] && (
-                  <span className="ds-rq">{d.research_questions[0]}</span>
+                  <span className="mt-1.5 block text-xs leading-relaxed text-muted-foreground">
+                    {d.research_questions[0]}
+                  </span>
                 )}
               </button>
             ))}
-          </div>
+          </Card>
         </section>
 
         <section>
-          <p className="eyebrow">Hypothesis</p>
+          <Eyebrow className="mb-2">Hypothesis</Eyebrow>
           <textarea
-            className="field"
             rows={5}
+            className="w-full rounded-md border border-input bg-background px-2.5 py-2 text-[13px] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="A claim the data can bear on, stated so it could turn out false."
             value={hypothesis}
             onChange={(e) => setHypothesis(e.target.value)}
           />
 
           {seed && (
-            <p className="seed-note">
-              Seeded with AutoDiscovery plan <code>{seed.normalized_id}</code>. Stage 2 keeps
-              this plan verbatim and samples alternatives against it, so the decision space
-              describes the plan under evaluation.{" "}
-              <button className="link-btn" onClick={() => setSeed(null)}>
+            <p className="mt-2 rounded-md border-l-2 border-multiverse bg-multiverse/5 px-3 py-2 text-xs leading-relaxed text-multiverse">
+              Seeded with AutoDiscovery plan <code className="font-mono">{seed.normalized_id}</code>.
+              Stage 2 keeps this plan verbatim and samples alternatives against it.{" "}
+              <button className="underline" onClick={() => setSeed(null)}>
                 Clear
               </button>
             </p>
@@ -159,17 +163,15 @@ export function NewRun({
             <>
               {selected.research_questions.length > 0 && (
                 <>
-                  <p className="eyebrow" style={{ marginTop: 20 }}>
-                    Published research question
-                  </p>
+                  <Eyebrow className="mb-1.5 mt-5">Published research question</Eyebrow>
                   {selected.research_questions.map((q, i) => (
                     <button
                       key={i}
-                      className="rq-btn"
                       onClick={() => {
                         setHypothesis(q);
                         setSeed(null);
                       }}
+                      className="mb-1 block w-full rounded-md border border-border px-3 py-2 text-left text-xs leading-relaxed text-muted-foreground transition-colors hover:border-multiverse hover:text-foreground"
                     >
                       {q}
                     </button>
@@ -179,85 +181,71 @@ export function NewRun({
 
               {total > 0 && (
                 <>
-                  <p className="eyebrow" style={{ marginTop: 24 }}>
+                  <Eyebrow className="mb-1 mt-5">
                     AutoDiscovery hypotheses · {records.length} of {total}
+                  </Eyebrow>
+                  <p className="mb-2 text-xs text-muted-foreground">
+                    Each carries the plan AutoDiscovery wrote for it.
                   </p>
-                  <p className="empty" style={{ marginBottom: 8 }}>
-                    Each carries the plan AutoDiscovery wrote for it. Picking one seeds
-                    stage 2 with that plan.
-                  </p>
-                  <input
-                    className="field"
+                  <Input
+                    className="mb-2"
                     placeholder="Filter hypotheses"
                     value={hypFilter}
                     onChange={(e) => setHypFilter(e.target.value)}
                   />
-                  <div className="hyp-list">
+                  <Card className="max-h-[300px] overflow-y-auto">
                     {records.map((r) => (
                       <button
                         key={r.normalized_id}
-                        className="hyp-item"
-                        aria-current={seed?.normalized_id === r.normalized_id}
                         onClick={() => {
                           setSeed(r);
                           setHypothesis(r.hypothesis);
                         }}
+                        className={cn(
+                          "block w-full border-b border-border/60 px-3 py-2 text-left last:border-0 transition-colors",
+                          seed?.normalized_id === r.normalized_id
+                            ? "bg-accent"
+                            : "hover:bg-accent/60",
+                        )}
                       >
-                        <span className="hyp-meta">
+                        <span className="block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                           {r.normalized_id}
                           {r.level != null && ` · depth ${r.level}`}
                           {!r.success && " · failed"}
-                          {r.has_code && " · has code"}
                         </span>
-                        <span className="hyp-text">{r.hypothesis}</span>
+                        <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                          {r.hypothesis}
+                        </span>
                       </button>
                     ))}
-                    {records.length === 0 && (
-                      <p className="empty" style={{ padding: 12 }}>
-                        No hypotheses match that filter.
-                      </p>
-                    )}
-                  </div>
+                    {records.length === 0 && <Empty>No hypotheses match that filter.</Empty>}
+                  </Card>
                 </>
               )}
-              {selected.description && (
-                <>
-                  <p className="eyebrow" style={{ marginTop: 20 }}>
-                    About this dataset
-                  </p>
-                  <p className="prose" style={{ fontSize: 12 }}>
-                    {selected.description}
-                  </p>
-                </>
-              )}
-              <p className="eyebrow" style={{ marginTop: 20 }}>
-                Columns
-              </p>
-              <p className="empty" style={{ lineHeight: 1.8 }}>
+
+              <Eyebrow className="mb-1.5 mt-5">Columns</Eyebrow>
+              <div className="flex flex-wrap gap-1">
                 {selected.columns.map((c) => (
-                  <span className="tag" key={c} style={{ marginRight: 4 }}>
-                    {c}
-                  </span>
+                  <Tag key={c}>{c}</Tag>
                 ))}
-              </p>
+              </div>
             </>
           )}
 
-          <button
-            className="run-btn"
-            style={{ marginTop: 24 }}
-            disabled={!selected || !hypothesis.trim() || busy}
-            onClick={create}
-          >
-            {busy ? "Creating…" : "Create study"}
-          </button>
-          {!selected && (
-            <p className="empty" style={{ marginTop: 8 }}>
-              Select a dataset to continue.
-            </p>
-          )}
+          <div className="mt-6 flex items-center gap-3">
+            <Button
+              variant="primary"
+              disabled={!selected || !hypothesis.trim() || busy}
+              onClick={create}
+            >
+              {busy ? "Creating…" : "Create analysis"}
+            </Button>
+            {!selected && (
+              <span className="text-xs text-muted-foreground">Select a dataset to continue.</span>
+            )}
+          </div>
         </section>
       </div>
-    </div>
+    </>
   );
 }
