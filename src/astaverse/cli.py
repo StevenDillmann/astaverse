@@ -115,12 +115,46 @@ def plans(
 @app.command()
 def decisions(
     run_id: str,
-    model: str = typer.Option(None, "--model", help="Overrides ASTAVERSE_DECISION_MODEL"),
+    mode: str = typer.Option(
+        "plan_diff",
+        "--mode",
+        help="plan_diff | plan_audit | direct | schema_lint | union",
+    ),
+    model: list[str] = typer.Option(
+        None, "--model", "-m", help="Repeatable; >1 unions across models"
+    ),
+    critique: bool = typer.Option(
+        False, "--critique", help="Second pass asking what the extraction missed"
+    ),
+    union_mode: list[str] = typer.Option(
+        None, "--union-mode", help="With --mode union: which modes to combine"
+    ),
     max_decisions: int = typer.Option(6, "--max-decisions"),
 ) -> None:
-    """Extract the decision space from the sampled plans (stage 3)."""
+    """Extract the decision space (stage 3).
+
+    Modes differ in what they can see:
+
+      plan_diff    where K sampled plans disagree. Grounded, but blind to
+                   under-specification by silence.
+      plan_audit   one plan, audited for what it leaves an implementer to
+                   decide. Targets silence directly.
+      direct       hypothesis + schema only, no plans. Cheapest.
+      schema_lint  what the data itself forces — orientation, scale,
+                   missingness. Catches forks no plan mentions.
+      union        several of the above, merged. Their blind spots differ.
+    """
     run_obj = _run(run_id)
-    spec = s3_decisions.run(run_obj, model=model, max_decisions=max_decisions)
+    models = list(model or []) or None
+    spec = s3_decisions.run(
+        run_obj,
+        model=models[0] if models else None,
+        models=models,
+        mode=mode,
+        critique=critique,
+        union_modes=list(union_mode or []) or None,
+        max_decisions=max_decisions,
+    )
     _echo_stage("decisions", f"{len(spec.decisions)} decisions -> {run_obj.artifact_path('decisions').name}")
     for did, decision in spec.decisions.items():
         marker = " (post-hoc)" if decision.post_hoc else ""

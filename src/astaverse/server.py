@@ -81,6 +81,11 @@ class StageRequest(BaseModel):
     model: str | None = None
     temperature: float = 0.9
     max_decisions: int = 6
+    # Stage 3 knobs: which extraction strategy, and which model(s).
+    mode: str = "plan_diff"
+    models_extract: list[str] | None = None
+    critique: bool = False
+    union_modes: list[str] | None = None
     cap: int = 24
     include: list[str] | None = None
     exclude: list[str] | None = None
@@ -353,7 +358,15 @@ def run_stage(run_id: str, stage: str, request: StageRequest | None = None) -> d
                 seed_plan=seed,
             )
         elif stage == "decisions":
-            s3_decisions.run(run_obj, model=req.model, max_decisions=req.max_decisions)
+            s3_decisions.run(
+                run_obj,
+                model=req.model,
+                models=req.models_extract,
+                mode=req.mode,
+                critique=req.critique,
+                union_modes=req.union_modes,
+                max_decisions=req.max_decisions,
+            )
         elif stage == "universes":
             s4_universes.run(run_obj, cap=req.cap, include=req.include, exclude=req.exclude)
         elif stage == "task":
@@ -403,3 +416,45 @@ else:
                 "or `npm run dev` for the dev server on :5173."
             )
         }
+
+
+@app.get("/api/extraction-modes")
+def list_extraction_modes() -> list[dict[str, Any]]:
+    """Stage-3 strategies, with what each is blind to.
+
+    Surfaced so the choice is made knowingly: these modes fail differently,
+    and picking one is a methodological decision, not a preference.
+    """
+    from .stages.s3_decisions import ExtractionMode
+
+    blurbs = {
+        ExtractionMode.plan_diff: (
+            "Where K sampled plans disagree. Grounded in what analysts do; "
+            "blind to steps no plan mentions at all."
+        ),
+        ExtractionMode.plan_audit: (
+            "One plan, audited for what it leaves an implementer to decide. "
+            "Targets under-specification by silence; no disagreement signal."
+        ),
+        ExtractionMode.direct: (
+            "Hypothesis and schema only, no plans. Cheapest; tends toward "
+            "textbook axes rather than ones this study would hit."
+        ),
+        ExtractionMode.schema_lint: (
+            "What the data itself forces — orientation, scale, missingness. "
+            "Catches forks that appear in code but never in plan text."
+        ),
+        ExtractionMode.union: (
+            "Several modes merged. The blind spots differ, so the union "
+            "covers more than any single mode; costs one call per mode."
+        ),
+    }
+    needs_plans = {ExtractionMode.plan_diff, ExtractionMode.plan_audit}
+    return [
+        {
+            "id": m.value,
+            "description": blurbs[m],
+            "needs_plans": m in needs_plans,
+        }
+        for m in ExtractionMode
+    ]

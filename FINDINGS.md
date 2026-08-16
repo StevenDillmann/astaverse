@@ -203,6 +203,51 @@ competent implementers agree on without discussing — which is why it never
 appears in plan text, and why extracting against data semantics rather than
 plan text is the fix.
 
+## 8. The extraction blind spot is fixed — `schema_lint` recovers the fork
+
+§3 predicted that extracting against *data semantics* rather than plan text
+would catch the min-pressure fork, and named it as a testable claim with a
+known answer. It does.
+
+Stage 3 is now pluggable, with modes that have deliberately different blind
+spots: `plan_diff` (where K plans disagree), `plan_audit` (one plan, audited
+for what it leaves unsaid), `direct` (no plans at all), `schema_lint` (what
+the data itself forces), and `union` (several merged). `--critique` composes
+a what-is-missing pass on top of any of them, and passing `-m` more than once
+unions across models.
+
+On the seeded hurricane study, `--mode schema_lint` returned:
+
+```
+pressure_orientation:
+  reverse_pressure            [default]
+  retain_pressure_direction
+  omit_pressure
+```
+
+with the rationale *"Should minimum pressure be reverse-coded before combining
+it with category and wind, given that lower pressure indicates greater
+hurricane intensity?"*
+
+That is the fork `plan_diff` missed across three separate prompt formulations,
+recovered on the first attempt by a mode that reads the column descriptions
+instead of the plans. It also proposed an option neither the earlier
+extraction nor the hand-written spec contained — dropping pressure from the
+composite entirely, which is a perfectly defensible third choice.
+
+**Why it works.** The fork is derivable from the schema: `info.json` says
+`min` is *minimum* pressure, and `category` and `wind` both run higher =
+stronger. Nothing about plan text is needed to notice the mismatch, and
+nothing about plan text can supply it, because no plan mentions orientation.
+Extraction was reading the wrong artifact.
+
+**The general lesson.** The decisions most worth testing are the ones
+competent implementers resolve silently and identically. Silence is what makes
+them invisible to plan-diffing, and agreement is what makes them look
+unimportant — but AutoDiscovery's own code got this one wrong while every
+agent got it right, which is precisely a case where the "obvious" resolution
+was not universal. Extraction has to include a mode that reads the data.
+
 ## Not yet run
 
 - **Stage 6** (`harbor run`) — the task emits and passes its own structural
