@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-CSS = Path(__file__).resolve().parents[1] / "web" / "src" / "styles.css"
+CSS = Path(__file__).resolve().parents[1] / "web" / "src" / "index.css"
 
 
 @pytest.fixture(scope="module")
@@ -74,11 +74,25 @@ def test_no_hardcoded_colours_outside_the_palettes(css):
     for span in palette_spans:
         body = body.replace(span, "")
 
-    # #fff on a hover state of an accent-filled button is acceptable: the
-    # button's background is an accent in both themes.
-    offenders = [
-        m
-        for m in re.findall(r"#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)", body)
-        if m.lower() not in {"#fff", "#ffffff"}
-    ]
+    offenders = re.findall(r"#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)", body)
     assert not offenders, f"hardcoded colours outside the palette: {sorted(set(offenders))}"
+
+
+def test_components_never_name_a_colour_directly():
+    """Tailwind classes must use semantic tokens, not palette literals.
+
+    `bg-blue-500` cannot respond to the theme; `bg-multiverse` can, and also
+    says what it means.
+    """
+    src = Path(__file__).resolve().parents[1] / "web" / "src"
+    palette_classes = re.compile(
+        r"\b(?:bg|text|border|ring|fill|stroke)-"
+        r"(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|"
+        r"emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b"
+    )
+    offenders: dict[str, set[str]] = {}
+    for path in src.rglob("*.tsx"):
+        found = set(palette_classes.findall(path.read_text()))
+        if found:
+            offenders[path.name] = found
+    assert not offenders, f"literal palette classes found: {offenders}"
