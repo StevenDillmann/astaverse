@@ -3,6 +3,7 @@ import { STAGES, getProgress, getRun, listRuns, runAll, runStage } from "./api";
 import type { RunDetail, RunProgress, RunSummary, Stage } from "./api";
 import { Config } from "./Config";
 import { Files } from "./Files";
+import { ThemeSwitch } from "./ThemeSwitch";
 import { NewRun } from "./NewRun";
 import { StagePanel } from "./StagePanel";
 import "./styles.css";
@@ -158,6 +159,8 @@ export default function App() {
             </span>
           </button>
         ))}
+
+        <ThemeSwitch />
       </aside>
 
       <main className="main">

@@ -20,8 +20,25 @@
   --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
   --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 
+  --surface-hover: #f7f9fb;
+  --code-bg: #f6f8fa;
+  --on-invert-dim: #99a3b3;
+
+  --dist-halo: rgba(43, 92, 230, 0.16);
+  --dist-halo-strong: rgba(43, 92, 230, 0.5);
+
+  --danger-bg: #fdf3f2;
+  --danger-fg: #8f2b24;
+  --info-bg: #eef2fd;
+  --info-fg: #1c3a94;
+  --warn-bg: #fdf6ec;
+  --warn-fg: #8f5a24;
+  --warn-edge: #d98324;
+
   --u: 4px;
   --rail: 264px;
+
+  color-scheme: light;
 }
 
 * {
@@ -194,7 +211,7 @@ button {
 }
 
 .node:hover {
-  background: #f7f9fb;
+  background: var(--surface-hover);
 }
 
 .node[aria-current="true"] {
@@ -211,7 +228,7 @@ button {
 }
 
 .node[aria-current="true"] .idx {
-  color: #99a3b3;
+  color: var(--on-invert-dim);
 }
 
 .node .name {
@@ -237,7 +254,7 @@ button {
 
 .dot.ready {
   background: var(--dist);
-  box-shadow: 0 0 0 3px rgba(43, 92, 230, 0.16);
+  box-shadow: 0 0 0 3px var(--dist-halo);
 }
 
 /* -- panel ---------------------------------------------------------------- */
@@ -292,8 +309,8 @@ button {
 
 .error {
   border-left: 2px solid var(--single);
-  background: #fdf3f2;
-  color: #8f2b24;
+  background: var(--danger-bg);
+  color: var(--danger-fg);
   padding: calc(var(--u) * 3) calc(var(--u) * 4);
   margin-bottom: calc(var(--u) * 4);
   white-space: pre-wrap;
@@ -395,7 +412,7 @@ td {
 }
 
 pre {
-  background: #f6f8fa;
+  background: var(--code-bg);
   border: 1px solid var(--rule);
   border-radius: 2px;
   padding: calc(var(--u) * 3);
@@ -780,8 +797,8 @@ pre {
 
 .seed-note {
   border-left: 2px solid var(--dist);
-  background: #eef2fd;
-  color: #1c3a94;
+  background: var(--info-bg);
+  color: var(--info-fg);
   font-size: 11px;
   line-height: 1.5;
   padding: calc(var(--u) * 2) calc(var(--u) * 3);
@@ -859,12 +876,12 @@ pre {
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(43, 92, 230, 0.5); }
-  50% { box-shadow: 0 0 0 5px rgba(43, 92, 230, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 var(--dist-halo-strong); }
+  50% { box-shadow: 0 0 0 5px transparent; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dot.active { animation: none; box-shadow: 0 0 0 3px rgba(43, 92, 230, 0.25); }
+  .dot.active { animation: none; box-shadow: 0 0 0 3px var(--dist-halo); }
 }
 
 .cfg-grid {
@@ -921,9 +938,9 @@ select.field {
   font-family: var(--sans);
   font-size: 11px;
   line-height: 1.5;
-  color: #8f5a24;
-  background: #fdf6ec;
-  border-left: 2px solid #d98324;
+  color: var(--warn-fg);
+  background: var(--warn-bg);
+  border-left: 2px solid var(--warn-edge);
   padding: calc(var(--u) * 2) calc(var(--u) * 3);
   margin: 0 0 calc(var(--u) * 3);
 }
@@ -940,4 +957,118 @@ select.field {
 .cfg-saved {
   font-size: 11px;
   color: var(--ok);
+}
+
+/* -- dark palette ---------------------------------------------------------
+   The instrument at night. Same semantics: blue is the multiverse, red is
+   the single universe that would have misled you, green is a supported
+   verdict. Both accents lift toward the light end so they stay legible on a
+   dark ground without turning neon.
+
+   Only tokens are redefined. Components that invert — the selected pipeline
+   node, the primary button — are already written as `background: var(--ink);
+   color: var(--surface)`, so they flip correctly on their own.
+
+   Declared twice on purpose. The media query serves "system", which sets no
+   attribute, and is guarded with :not([data-theme="light"]) so a system-dark
+   machine cannot override a deliberate light choice. The attribute selector
+   serves an explicit dark choice on a light machine.
+
+   Both blocks must stay in sync; there is a test asserting they do. */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+  --paper: #0d1117;
+  --surface: #151b23;
+  --surface-hover: #1b232d;
+  --code-bg: #10161d;
+  --ink: #e6edf3;
+  --ink-2: #a9b5c2;
+  --ink-3: #6e7d8d;
+  --rule: #262d36;
+  --rule-strong: #3a434e;
+  --on-invert-dim: #6e7d8d;
+
+  --dist: #6b93ff;
+  --single: #ff6f61;
+  --muted-signal: #9b95b8;
+  --ok: #3fb98d;
+
+  --dist-halo: rgba(107, 147, 255, 0.22);
+  --dist-halo-strong: rgba(107, 147, 255, 0.55);
+
+  --danger-bg: #2a1614;
+  --danger-fg: #ff9d92;
+  --info-bg: #131d33;
+  --info-fg: #9db8ff;
+  --warn-bg: #2a2013;
+  --warn-fg: #f0bf82;
+  --warn-edge: #b8802f;
+
+  color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0d1117;
+  --surface: #151b23;
+  --surface-hover: #1b232d;
+  --code-bg: #10161d;
+  --ink: #e6edf3;
+  --ink-2: #a9b5c2;
+  --ink-3: #6e7d8d;
+  --rule: #262d36;
+  --rule-strong: #3a434e;
+  --on-invert-dim: #6e7d8d;
+
+  --dist: #6b93ff;
+  --single: #ff6f61;
+  --muted-signal: #9b95b8;
+  --ok: #3fb98d;
+
+  --dist-halo: rgba(107, 147, 255, 0.22);
+  --dist-halo-strong: rgba(107, 147, 255, 0.55);
+
+  --danger-bg: #2a1614;
+  --danger-fg: #ff9d92;
+  --info-bg: #131d33;
+  --info-fg: #9db8ff;
+  --warn-bg: #2a2013;
+  --warn-fg: #f0bf82;
+  --warn-edge: #b8802f;
+
+  color-scheme: dark;
+}
+
+/* -- theme switch ---------------------------------------------------------- */
+
+.theme-switch {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  margin-top: calc(var(--u) * 6);
+}
+
+.theme-switch button {
+  flex: 1 1 0;
+  background: none;
+  border: 0;
+  border-radius: 2px;
+  padding: calc(var(--u) * 1) 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.theme-switch button:hover {
+  color: var(--ink);
+  background: var(--surface-hover);
+}
+
+.theme-switch button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--surface);
 }
