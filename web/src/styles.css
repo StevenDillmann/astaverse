@@ -730,3 +730,109 @@ pre {
     grid-template-columns: 1fr;
   }
 }
+
+/* -- AutoDiscovery hypothesis picker -------------------------------------- */
+
+.hyp-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--surface);
+}
+
+.hyp-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--paper);
+  border-left: 2px solid transparent;
+  padding: calc(var(--u) * 2) calc(var(--u) * 3);
+}
+
+.hyp-item:hover {
+  background: var(--paper);
+}
+
+.hyp-item[aria-current="true"] {
+  border-left-color: var(--dist);
+  background: var(--paper);
+}
+
+.hyp-meta {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+
+.hyp-text {
+  display: block;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin-top: 2px;
+}
+
+.seed-note {
+  border-left: 2px solid var(--dist);
+  background: #eef2fd;
+  color: #1c3a94;
+  font-size: 11px;
+  line-height: 1.5;
+  padding: calc(var(--u) * 2) calc(var(--u) * 3);
+  margin: 0 0 calc(var(--u) * 3);
+}
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+/* -- headline number and flip bars ---------------------------------------- */
+
+.headline {
+  border: 1px solid var(--ink);
+  border-left-width: 3px;
+  border-radius: 3px;
+  padding: calc(var(--u) * 5);
+  background: var(--surface);
+}
+
+.headline .label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.headline .big {
+  display: block;
+  font-size: 44px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: calc(var(--u) * 2) 0 calc(var(--u) * 3);
+}
+
+.bar {
+  display: block;
+  height: 4px;
+  background: var(--paper);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--single);
+}

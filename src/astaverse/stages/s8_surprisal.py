@@ -146,6 +146,29 @@ Answer with one of: definitely_false, maybe_false, uncertain, maybe_true,
 definitely_true, cannot_comment.
 """
 
+JOINT_PROMPT = """\
+Judge the following hypothesis in light of a multiverse analysis: the same
+data analysed under every combination of the analytic choices that reasonable
+analysts disagree about.
+
+Hypothesis: {hypothesis}
+
+## How the {n} analyses came out
+{summary}
+
+## Where the specifications disagree
+{sensitivity}
+
+Weigh this as ONE body of evidence, not as {n} independent studies — every
+specification uses the same dataset. What matters is how the conclusion holds
+up across defensible choices: a result that survives most specifications is
+stronger evidence than any single one, and a result that depends on one
+arbitrary choice is weaker than its best specification makes it look.
+
+Answer with one of: definitely_false, maybe_false, uncertain, maybe_true,
+definitely_true, cannot_comment.
+"""
+
 
 def _elicit(
     prompt: str, model: str, n_samples: int, run_obj: Run, tag: str
@@ -287,6 +310,50 @@ def run(
             )
         )
 
+    # --- the belief update: one posterior conditioned on the whole multiverse
+    verdict_counts = Counter(u.verdict.value for u in per_universe)
+    summary_lines = [
+        f"- {count} of {len(per_universe)} specifications: {verdict.replace('_', ' ')}"
+        for verdict, count in verdict_counts.most_common()
+    ]
+    finite = [
+        r.stats.p_value for r in verdicts.results if r.stats.p_value is not None
+    ]
+    if finite:
+        summary_lines.append(f"- median p-value across specifications: {statistics.median(finite):.4g}")
+    estimates = [
+        r.stats.estimate_standardized
+        for r in verdicts.results
+        if r.stats.estimate_standardized is not None
+    ]
+    if estimates:
+        summary_lines.append(
+            f"- standardized effect ranges {min(estimates):+.3g} to {max(estimates):+.3g}, "
+            f"median {statistics.median(estimates):+.3g}"
+        )
+
+    sensitivity_preview = _decision_sensitivity(per_universe, spec)
+    sensitivity_lines = [
+        f"- {s.decision_id}: "
+        + ", ".join(f"{oid} -> {mean:+.3f}" for oid, mean in sorted(s.option_means.items()))
+        for s in sensitivity_preview[:6]
+    ] or ["- (only one specification; no sensitivity to report)"]
+
+    joint_counts = _elicit(
+        JOINT_PROMPT.format(
+            hypothesis=spec.hypothesis,
+            n=len(per_universe),
+            summary="\n".join(summary_lines),
+            sensitivity="\n".join(sensitivity_lines),
+        ),
+        model,
+        n_samples,
+        run_obj,
+        "s8_joint",
+    )
+    joint_posterior = posterior_from_prior(prior, joint_counts, weight=evidence_weight)
+    joint_surprisal = (joint_posterior.mean - prior.mean) / max_shift
+
     values = [u.surprisal for u in per_universe]
     median = statistics.median(values)
     positive = sum(1 for v in values if v > 0)
@@ -298,6 +365,8 @@ def run(
     robust = RobustSurprisal(
         prior_mean=prior.mean,
         n_universes=len(per_universe),
+        joint_surprisal=joint_surprisal,
+        joint_posterior_mean=joint_posterior.mean,
         per_universe=per_universe,
         median=median,
         mean=statistics.mean(values),
@@ -316,6 +385,7 @@ def run(
         "surprisal",
         model=model,
         n_universes=len(per_universe),
+        joint_surprisal=robust.joint_surprisal,
         median=robust.median,
         fragility_index=robust.fragility_index,
     )
@@ -323,6 +393,7 @@ def run(
         "surprisal",
         f"{n_elicited} elicitations for {len(per_universe)} results "
         f"({len(per_universe) - n_elicited} cache hits) | "
+        f"JOINT={joint_surprisal:+.3f} | "
         f"median={robust.median:.3f} iqr={robust.iqr:.3f} "
         f"sign_consistency={robust.sign_consistency:.2f} "
         f"single_universe={single if single is None else round(single, 3)} "

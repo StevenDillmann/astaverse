@@ -93,3 +93,31 @@ export const readFile = (id: string, path: string) =>
     `/api/runs/${id}/file?path=${encodeURIComponent(path)}`,
   );
 export const getHistory = (id: string) => request<HistoryEntry[]>(`/api/runs/${id}/history`);
+
+export interface PlanRecord {
+  normalized_id: string;
+  dataset: string;
+  hypothesis: string;
+  source_path: string;
+  success: boolean;
+  has_code: boolean;
+  query_preview: string;
+  level: number | null;
+  parent_idx: number | null;
+  visits: number | null;
+}
+
+export const listHypotheses = (dataset: string, q = "") =>
+  request<{ dataset: string; total: number; matched: number; hypotheses: PlanRecord[] }>(
+    `/api/datasets/${encodeURIComponent(dataset)}/hypotheses?q=${encodeURIComponent(q)}`,
+  );
+
+export const createSeededRun = (
+  hypothesis: string,
+  dataset: string,
+  seed?: { seed_dataset: string; seed_normalized_id: string },
+) =>
+  request<{ run_id: string }>("/api/runs", {
+    method: "POST",
+    body: JSON.stringify({ hypothesis, dataset, ...(seed ?? {}) }),
+  });

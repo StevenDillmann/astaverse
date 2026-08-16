@@ -7,8 +7,8 @@
  */
 
 import { useEffect, useState } from "react";
-import { createRun, listDatasets } from "./api";
-import type { DatasetInfo } from "./api";
+import { createSeededRun, listDatasets, listHypotheses } from "./api";
+import type { DatasetInfo, PlanRecord } from "./api";
 
 export function NewRun({
   onCreated,
@@ -24,9 +24,30 @@ export function NewRun({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // AutoDiscovery's own hypotheses for the selected dataset. A BLADE dataset
+  // has one published research question; AutoDiscovery has generated hundreds,
+  // each with the plan it produced.
+  const [records, setRecords] = useState<PlanRecord[]>([]);
+  const [total, setTotal] = useState(0);
+  const [hypFilter, setHypFilter] = useState("");
+  const [seed, setSeed] = useState<PlanRecord | null>(null);
+
   useEffect(() => {
     listDatasets().then(setDatasets).catch((e) => setError(e.message));
   }, []);
+
+  useEffect(() => {
+    if (!selected) return;
+    listHypotheses(selected.name, hypFilter)
+      .then((r) => {
+        setRecords(r.hypotheses);
+        setTotal(r.total);
+      })
+      .catch(() => {
+        setRecords([]);
+        setTotal(0);
+      });
+  }, [selected, hypFilter]);
 
   const shown = datasets.filter(
     (d) =>
@@ -40,7 +61,13 @@ export function NewRun({
     setBusy(true);
     setError(null);
     try {
-      const { run_id } = await createRun(hypothesis.trim(), selected.path);
+      const { run_id } = await createSeededRun(
+        hypothesis.trim(),
+        selected.path,
+        seed
+          ? { seed_dataset: seed.dataset, seed_normalized_id: seed.normalized_id }
+          : undefined,
+      );
       onCreated(run_id);
     } catch (e) {
       setError((e as Error).message);
@@ -86,13 +113,18 @@ export function NewRun({
                 aria-current={selected?.path === d.path}
                 onClick={() => {
                   setSelected(d);
+                  setSeed(null);
+                  setHypFilter("");
                   if (!hypothesis.trim() && d.research_questions[0])
                     setHypothesis(d.research_questions[0]);
                 }}
               >
                 <span className="ds-name">{d.name}</span>
                 <span className="ds-meta">
-                  {d.n_rows ?? "?"} rows · {d.n_columns} cols · {d.kind}
+                  {d.n_rows ?? "?"} rows · {d.n_columns} cols
+                  {(d as any).n_autodiscovery_hypotheses > 0 && (
+                    <> · {(d as any).n_autodiscovery_hypotheses} hypotheses</>
+                  )}
                 </span>
                 {d.research_questions[0] && (
                   <span className="ds-rq">{d.research_questions[0]}</span>
@@ -112,18 +144,80 @@ export function NewRun({
             onChange={(e) => setHypothesis(e.target.value)}
           />
 
+          {seed && (
+            <p className="seed-note">
+              Seeded with AutoDiscovery plan <code>{seed.normalized_id}</code>. Stage 2 keeps
+              this plan verbatim and samples alternatives against it, so the decision space
+              describes the plan under evaluation.{" "}
+              <button className="link-btn" onClick={() => setSeed(null)}>
+                Clear
+              </button>
+            </p>
+          )}
+
           {selected && (
             <>
               {selected.research_questions.length > 0 && (
                 <>
                   <p className="eyebrow" style={{ marginTop: 20 }}>
-                    Published research questions
+                    Published research question
                   </p>
                   {selected.research_questions.map((q, i) => (
-                    <button key={i} className="rq-btn" onClick={() => setHypothesis(q)}>
+                    <button
+                      key={i}
+                      className="rq-btn"
+                      onClick={() => {
+                        setHypothesis(q);
+                        setSeed(null);
+                      }}
+                    >
                       {q}
                     </button>
                   ))}
+                </>
+              )}
+
+              {total > 0 && (
+                <>
+                  <p className="eyebrow" style={{ marginTop: 24 }}>
+                    AutoDiscovery hypotheses · {records.length} of {total}
+                  </p>
+                  <p className="empty" style={{ marginBottom: 8 }}>
+                    Each carries the plan AutoDiscovery wrote for it. Picking one seeds
+                    stage 2 with that plan.
+                  </p>
+                  <input
+                    className="field"
+                    placeholder="Filter hypotheses"
+                    value={hypFilter}
+                    onChange={(e) => setHypFilter(e.target.value)}
+                  />
+                  <div className="hyp-list">
+                    {records.map((r) => (
+                      <button
+                        key={r.normalized_id}
+                        className="hyp-item"
+                        aria-current={seed?.normalized_id === r.normalized_id}
+                        onClick={() => {
+                          setSeed(r);
+                          setHypothesis(r.hypothesis);
+                        }}
+                      >
+                        <span className="hyp-meta">
+                          {r.normalized_id}
+                          {r.level != null && ` · depth ${r.level}`}
+                          {!r.success && " · failed"}
+                          {r.has_code && " · has code"}
+                        </span>
+                        <span className="hyp-text">{r.hypothesis}</span>
+                      </button>
+                    ))}
+                    {records.length === 0 && (
+                      <p className="empty" style={{ padding: 12 }}>
+                        No hypotheses match that filter.
+                      </p>
+                    )}
+                  </div>
                 </>
               )}
               {selected.description && (

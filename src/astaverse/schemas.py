@@ -272,10 +272,27 @@ class DecisionSensitivity(BaseModel):
 
 
 class RobustSurprisal(BaseModel):
-    """The headline artifact: surprisal as a distribution, not a point."""
+    """What the multiverse taught us, and how much to trust it.
+
+    Two different quantities live here, and conflating them is a mistake:
+
+    * `joint_surprisal` is the belief update. Every universe analyses the SAME
+      data, so they are not independent evidence — updating once on the whole
+      multiverse is the coherent thing to do, and an average of per-universe
+      posteriors is not a posterior at all. This is the number that should
+      feed a reward signal.
+    * everything else is diagnostic. The per-universe distribution is a
+      sensitivity analysis: it says how much the conclusion depends on
+      arbitrary analytic choices, and which ones.
+    """
 
     prior_mean: float
     n_universes: int
+
+    # The belief update, conditioned on the multiverse as a whole.
+    joint_surprisal: float | None = None
+    joint_posterior_mean: float | None = None
+
     per_universe: list[UniverseSurprisal]
 
     median: float

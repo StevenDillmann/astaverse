@@ -215,12 +215,31 @@ function Execute({ a }: { a: any }) {
 function Verdicts({ a }: { a: any }) {
   const counts: Record<string, number> = {};
   a.results.forEach((r: any) => (counts[r.verdict] = (counts[r.verdict] ?? 0) + 1));
+
+  // The classic specification curve: the effect estimate per specification.
+  // Uses the standardized estimand, since raw coefficients across different
+  // outcome scales are not comparable and would plot unit changes as spread.
+  const points = a.results
+    .filter((r: any) => (r.stats.estimate_standardized ?? r.stats.estimate) != null)
+    .map((r: any) => ({
+      universe_id: `${r.universe_id} · ${r.verdict_rule}`,
+      decisions: r.decisions,
+      verdict: r.verdict,
+      value: r.stats.estimate_standardized ?? r.stats.estimate,
+      is_default: r.is_default,
+    }));
+  const standardized = a.results.some((r: any) => r.stats.estimate_standardized != null);
+  const sortedVals = points.map((p: any) => p.value).sort((x: number, y: number) => x - y);
+  const median = sortedVals.length
+    ? sortedVals[Math.floor(sortedVals.length / 2)]
+    : 0;
+
   return (
     <>
       {a.missing_universe_ids?.length > 0 && (
         <div className="error">
           Incomplete: {a.missing_universe_ids.length} universes were never reported (
-          {a.missing_universe_ids.slice(0, 6).join(", ")}). The distribution below covers only what
+          {a.missing_universe_ids.slice(0, 6).join(", ")}). Everything below covers only what
           came back.
         </div>
       )}
@@ -235,6 +254,89 @@ function Verdicts({ a }: { a: any }) {
       <p className="empty" style={{ marginBottom: 16 }}>
         Verdict rules applied: {a.verdict_rules.join(", ")}. Assigned here from the reported
         statistics — the agent never saw a verdict field.
+      </p>
+
+      {a.decision_flips?.length > 0 && (
+        <>
+          <p className="eyebrow" style={{ marginTop: 28 }}>
+            Which decisions flip the verdict
+          </p>
+          <p className="empty" style={{ marginBottom: 10 }}>
+            Over matched pairs — two specifications identical except for this one choice. A high
+            rate means the conclusion turns on an analytic decision rather than on the data.
+          </p>
+          <div className="scroll-x">
+            <table>
+              <thead>
+                <tr>
+                  <th>decision</th>
+                  <th>flips</th>
+                  <th>matched pairs</th>
+                  <th />
+                  <th>which swaps flip it</th>
+                </tr>
+              </thead>
+              <tbody>
+                {a.decision_flips.map((f: any) => (
+                  <tr key={f.decision_id}>
+                    <td>{f.decision_id}</td>
+                    <td className="num" style={{ color: f.n_flips ? "var(--single)" : undefined }}>
+                      {(f.flip_rate * 100).toFixed(1)}%
+                    </td>
+                    <td className="num" style={{ color: "var(--ink-3)" }}>
+                      {f.n_flips}/{f.n_pairs}
+                    </td>
+                    <td style={{ width: 90 }}>
+                      <span className="bar">
+                        <i style={{ width: `${Math.min(f.flip_rate * 100 * 4, 100)}%` }} />
+                      </span>
+                    </td>
+                    <td style={{ color: "var(--ink-2)" }}>{f.flip_examples.join(", ") || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+
+      {points.length > 1 && (
+        <>
+          <p className="eyebrow" style={{ marginTop: 32 }}>
+            Specification curve
+          </p>
+          <p className="empty" style={{ marginBottom: 10 }}>
+            {standardized
+              ? "Standardized effect per specification, sorted."
+              : "Raw effect per specification — NOT standardized, so values on different outcome scales are not comparable."}{" "}
+            Below the curve, each row marks which option a specification used; a band that tracks
+            the curve is the decision driving it.
+          </p>
+          <div className="legend">
+            <span>
+              <i style={{ background: "var(--ok)" }} />
+              supported
+            </span>
+            <span>
+              <i style={{ background: "var(--ink-3)" }} />
+              not supported
+            </span>
+            <span>
+              <i style={{ background: "var(--single)" }} />
+              default / single-universe
+            </span>
+          </div>
+          <SpecCurve
+            universes={points}
+            median={median}
+            valueLabel={standardized ? "standardized effect" : "effect (unstandardized)"}
+            colorByVerdict
+          />
+        </>
+      )}
+
+      <p className="eyebrow" style={{ marginTop: 32 }}>
+        All results
       </p>
       <div className="scroll-x">
         <table>
@@ -281,6 +383,28 @@ function Surprisal({ a }: { a: any }) {
   const fragile = (a.fragility_index ?? 0) > 0.1;
   return (
     <>
+      {/* The belief update. Every universe analyses the same data, so they are
+          not independent evidence — this is one posterior conditioned on the
+          multiverse as a whole, and it is the number a reward should use. */}
+      <div className="headline">
+        <span className="label">Joint surprisal — the belief update</span>
+        <span className="big num">
+          {a.joint_surprisal == null ? "—" : signed(a.joint_surprisal)}
+        </span>
+        <p className="empty" style={{ margin: 0 }}>
+          One update conditioned on all {a.n_universes} specifications at once. They share a
+          dataset, so they are one body of evidence rather than {a.n_universes} independent
+          studies — an average of per-universe posteriors would not be a posterior at all.
+          Prior {fmt(a.prior_mean)} → posterior {fmt(a.joint_posterior_mean)}.
+        </p>
+      </div>
+
+      <p className="eyebrow" style={{ marginTop: 28 }}>
+        Diagnostics — how much to trust it
+      </p>
+      <p className="empty" style={{ marginBottom: 10 }}>
+        A sensitivity analysis over the same evidence, not extra evidence.
+      </p>
       <div className="stats">
         <div className="stat">
           <span className="label">median</span>
@@ -314,10 +438,15 @@ function Surprisal({ a }: { a: any }) {
         </div>
       )}
 
+      <p className="empty" style={{ marginBottom: 10 }}>
+        Per-specification surprisal, sorted. The specification curve of the underlying{" "}
+        <em>effects</em> is on the verdicts stage; this one shows how belief would move if you
+        took each specification alone.
+      </p>
       <div className="legend">
         <span>
           <i style={{ background: "var(--dist)" }} />
-          universe
+          specification
         </span>
         <span>
           <i style={{ background: "var(--single)" }} />
@@ -325,7 +454,11 @@ function Surprisal({ a }: { a: any }) {
         </span>
       </div>
 
-      <SpecCurve universes={a.per_universe} median={a.median} />
+      <SpecCurve
+        universes={a.per_universe.map((u: any) => ({ ...u, value: u.surprisal }))}
+        median={a.median}
+        valueLabel="surprisal"
+      />
 
       {a.between_agent_spread !== null && a.between_agent_spread !== undefined && (
         <p className="empty" style={{ marginTop: 16 }}>

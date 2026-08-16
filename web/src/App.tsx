@@ -13,8 +13,8 @@ const STAGE_CAPTION: Record<Stage, string> = {
   universes: "The decision grid",
   task: "Executable Harbor task",
   execute: "Sweep every universe",
-  verdicts: "Statistics become verdicts",
-  surprisal: "Surprisal as a distribution",
+  verdicts: "Verdicts, and which decisions flip them",
+  surprisal: "One belief update, plus how fragile it is",
 };
 
 export default function App() {

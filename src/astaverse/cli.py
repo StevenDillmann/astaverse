@@ -210,6 +210,13 @@ def surprisal(
     robust = s8_surprisal.run(run_obj, model=model, n_samples=n_samples)
     _echo_stage("surprisal", f"{robust.n_universes} universes")
     typer.echo(f"    prior mean          {robust.prior_mean:.3f}")
+    if robust.joint_surprisal is not None:
+        typer.secho(
+            f"    JOINT surprisal     {robust.joint_surprisal:+.3f}"
+            "   ← the belief update",
+            bold=True,
+        )
+    typer.echo("\n    diagnostics (sensitivity, not independent evidence):")
     typer.echo(f"    median surprisal    {robust.median:+.3f}")
     typer.echo(f"    IQR                 {robust.iqr:.3f}")
     typer.echo(f"    sign consistency    {robust.sign_consistency:.0%}")
@@ -256,7 +263,15 @@ def pipeline(
             manifest = run_obj.manifest()
             s1_study.run(run_obj, manifest["hypothesis"], manifest["dataset"])
         elif stage == "plans":
-            s2_plans.run(run_obj, k=k)
+            seed_info = run_obj.manifest().get("seed") or {}
+            seed = (
+                s2_plans.load_seed_plan(
+                    jsonl=seed_info["source_path"], normalized_id=seed_info["normalized_id"]
+                )
+                if seed_info.get("source_path")
+                else None
+            )
+            s2_plans.run(run_obj, k=k, seed_plan=seed)
         elif stage == "decisions":
             s3_decisions.run(run_obj)
         elif stage == "universes":

@@ -12,6 +12,7 @@ from `universes.jsonl` alone — `tests/test_verdicts.py` asserts it.
 from __future__ import annotations
 
 import json
+from collections import Counter, defaultdict
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -29,9 +30,27 @@ from ..store import Run
 from .s6_execute import ExecuteArtifact
 
 
+class DecisionFlips(BaseModel):
+    """How often changing one decision, alone, changes the conclusion.
+
+    Computed over *matched pairs*: two universes identical in every decision
+    but one. That isolates the decision's effect from everything else, and
+    answers the question people actually ask of a multiverse — "does this
+    choice change the answer?" — in a way a spread of means does not.
+    """
+
+    decision_id: str
+    n_pairs: int
+    n_flips: int
+    flip_rate: float
+    # ("option_a -> option_b", number of flips), worst first.
+    flip_examples: list[str] = []
+
+
 class VerdictsArtifact(BaseModel):
     results: list[UniverseResult]
     verdict_rules: list[str]
+    decision_flips: list[DecisionFlips] = []
     n_expected: int
     n_reported: int
     missing_universe_ids: list[str] = []
@@ -124,6 +143,58 @@ def _parse_stats(path: Path) -> dict[str, UniverseStats]:
     return out
 
 
+def compute_decision_flips(results: list[UniverseResult]) -> list[DecisionFlips]:
+    """Rank decisions by how often flipping only that one flips the verdict.
+
+    Groups results by "all decisions except D"; every pair inside a group
+    differs in D alone. Linear in the number of results per decision rather
+    than quadratic over all of them.
+    """
+    if not results:
+        return []
+
+    decision_ids = sorted({d for r in results for d in r.decisions})
+    out: list[DecisionFlips] = []
+
+    for did in decision_ids:
+        # key = the rest of the specification, held fixed
+        groups: dict[tuple, list[UniverseResult]] = defaultdict(list)
+        for r in results:
+            if did not in r.decisions:
+                continue
+            key = tuple(sorted((k, v) for k, v in r.decisions.items() if k != did))
+            # Two agents running the same universe are not a matched pair.
+            groups[(r.agent, key)].append(r)
+
+        n_pairs = 0
+        n_flips = 0
+        flips_by_swap: Counter[str] = Counter()
+        for members in groups.values():
+            for i in range(len(members)):
+                for j in range(i + 1, len(members)):
+                    a, b = members[i], members[j]
+                    if a.decisions[did] == b.decisions[did]:
+                        continue
+                    n_pairs += 1
+                    if a.verdict != b.verdict:
+                        n_flips += 1
+                        lo, hi = sorted([a.decisions[did], b.decisions[did]])
+                        flips_by_swap[f"{lo} vs {hi}"] += 1
+        if n_pairs:
+            out.append(
+                DecisionFlips(
+                    decision_id=did,
+                    n_pairs=n_pairs,
+                    n_flips=n_flips,
+                    flip_rate=n_flips / n_pairs,
+                    flip_examples=[f"{swap} ({n})" for swap, n in flips_by_swap.most_common(3)],
+                )
+            )
+
+    out.sort(key=lambda d: (d.flip_rate, d.n_flips), reverse=True)
+    return out
+
+
 def run(run_obj: Run, universes_jsonl: str | None = None) -> VerdictsArtifact:
     spec: DecisionSpec = read_astra_yaml(run_obj.artifact_path("decisions"))
     universe_set: UniverseSet = run_obj.read_artifact("universes", UniverseSet)
@@ -188,6 +259,7 @@ def run(run_obj: Run, universes_jsonl: str | None = None) -> VerdictsArtifact:
     artifact = VerdictsArtifact(
         results=results,
         verdict_rules=rules,
+        decision_flips=compute_decision_flips(results),
         n_expected=len(expected) * len(rules) * len(sources),
         n_reported=len(results),
         missing_universe_ids=sorted(missing),

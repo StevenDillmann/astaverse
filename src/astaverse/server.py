@@ -19,7 +19,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import datasets
+from . import datasets, plans_index
 from .schemas import PlanSet, RobustSurprisal, StudySpec, UniverseSet
 from .stages import (
     s1_study,
@@ -67,6 +67,11 @@ class NewRunRequest(BaseModel):
     hypothesis: str
     dataset: str
     description: str | None = None
+    # When the hypothesis came from an AutoDiscovery record, carry the plan
+    # with it: the multiverse should describe the plan under evaluation, not
+    # one invented from scratch.
+    seed_dataset: str | None = None
+    seed_normalized_id: str | None = None
 
 
 class StageRequest(BaseModel):
@@ -113,6 +118,19 @@ def list_runs() -> list[dict[str, Any]]:
 def create_run(request: NewRunRequest) -> dict[str, Any]:
     try:
         run_obj = Run.create(runs_dir(), request.hypothesis, request.dataset)
+        if request.seed_dataset and request.seed_normalized_id:
+            record = plans_index.get(request.seed_dataset, request.seed_normalized_id)
+            if record is None:
+                raise ValueError(
+                    f"no plan record '{request.seed_normalized_id}' in {request.seed_dataset}"
+                )
+            manifest = run_obj.manifest()
+            manifest["seed"] = {
+                "normalized_id": record.normalized_id,
+                "dataset": record.dataset,
+                "source_path": record.source_path,
+            }
+            run_obj.write_manifest(manifest)
         s1_study.run(run_obj, request.hypothesis, request.dataset, request.description)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(400, str(exc)) from exc
@@ -141,8 +159,32 @@ def get_run(run_id: str) -> dict[str, Any]:
 
 @app.get("/api/datasets")
 def list_datasets() -> list[dict[str, Any]]:
-    """Datasets available to start a study from."""
-    return [d.to_dict() for d in datasets.discover()]
+    """Datasets available to start a study from, with AutoDiscovery plan counts."""
+    out = []
+    for d in datasets.discover():
+        entry = d.to_dict()
+        entry["n_autodiscovery_hypotheses"] = plans_index.count_for_dataset(d.name)
+        out.append(entry)
+    return out
+
+
+@app.get("/api/datasets/{name}/hypotheses")
+def list_hypotheses(name: str, q: str = "", limit: int = 300) -> dict[str, Any]:
+    """AutoDiscovery's own hypotheses for a dataset.
+
+    A BLADE dataset has one published research question; AutoDiscovery has
+    generated hundreds against the same data, each with the plan it produced.
+    """
+    records = plans_index.for_dataset(name)
+    if q:
+        needle = q.lower()
+        records = [r for r in records if needle in r.hypothesis.lower()]
+    return {
+        "dataset": name,
+        "total": plans_index.count_for_dataset(name),
+        "matched": len(records),
+        "hypotheses": [r.to_dict() for r in records[:limit]],
+    }
 
 
 # Files worth surfacing in the browser. Everything else in a run directory is
@@ -291,7 +333,25 @@ def run_stage(run_id: str, stage: str, request: StageRequest | None = None) -> d
             manifest = run_obj.manifest()
             s1_study.run(run_obj, manifest["hypothesis"], manifest["dataset"])
         elif stage == "plans":
-            s2_plans.run(run_obj, k=req.k, model=req.model, temperature=req.temperature)
+            # If the study was started from an AutoDiscovery hypothesis, seed
+            # stage 2 with its plan. Recording the seed at creation and then
+            # ignoring it here would silently give the wrong decision space.
+            seed_info = run_obj.manifest().get("seed") or {}
+            seed = (
+                s2_plans.load_seed_plan(
+                    jsonl=seed_info["source_path"],
+                    normalized_id=seed_info["normalized_id"],
+                )
+                if seed_info.get("source_path")
+                else None
+            )
+            s2_plans.run(
+                run_obj,
+                k=req.k,
+                model=req.model,
+                temperature=req.temperature,
+                seed_plan=seed,
+            )
         elif stage == "decisions":
             s3_decisions.run(run_obj, model=req.model, max_decisions=req.max_decisions)
         elif stage == "universes":

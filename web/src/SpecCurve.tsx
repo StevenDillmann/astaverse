@@ -1,38 +1,56 @@
 /**
  * The specification curve — the instrument this whole pipeline exists to draw.
  *
- * Top: every universe's surprisal, sorted. Bottom: which option each universe
- * used, aligned column-for-column, so a band of marks that tracks the sorted
- * curve identifies the decision doing the work.
+ * Top: one point per universe, sorted by value. Bottom: the decision matrix —
+ * each column is that same universe, each row is one option of one decision,
+ * and a mark means the universe used that option. Read it by looking for a
+ * band of marks that tracks the sorted curve: that decision is doing the work.
  *
- * The default universe is drawn in red. That is the single answer the old
- * pipeline would have reported, and seeing where it falls in the distribution
- * is the point.
+ * The default universe is drawn in red throughout. That is the single answer
+ * the old pipeline would have reported, and seeing where it falls in the
+ * distribution is the point.
  */
 
-interface UniverseSurprisal {
+export interface CurvePoint {
   universe_id: string;
   decisions: Record<string, string>;
   verdict: string;
-  surprisal: number;
+  value: number;
   is_default: boolean;
 }
 
 interface Props {
-  universes: UniverseSurprisal[];
+  universes: CurvePoint[];
   median: number;
   width?: number;
+  /** Axis label — what the height of each point means. */
+  valueLabel?: string;
+  /** Colour points by verdict rather than uniformly. */
+  colorByVerdict?: boolean;
 }
+
+const VERDICT_COLOR: Record<string, string> = {
+  supported: "var(--ok)",
+  not_supported: "var(--ink-3)",
+  mixed: "var(--muted-signal)",
+  failed: "var(--muted-signal)",
+};
 
 const CURVE_H = 190;
 const ROW_H = 15;
 const LABEL_W = 168;
 const PAD = 16;
 
-export function SpecCurve({ universes, median, width = 860 }: Props) {
+export function SpecCurve({
+  universes,
+  median,
+  width = 860,
+  valueLabel = "surprisal",
+  colorByVerdict = false,
+}: Props) {
   if (!universes.length) return null;
 
-  const sorted = [...universes].sort((a, b) => a.surprisal - b.surprisal);
+  const sorted = [...universes].sort((a, b) => a.value - b.value);
 
   const decisionIds = Array.from(
     sorted.reduce((set, u) => {
@@ -63,7 +81,7 @@ export function SpecCurve({ universes, median, width = 860 }: Props) {
   const step = plotW / Math.max(sorted.length, 1);
   const x = (i: number) => LABEL_W + PAD + step * (i + 0.5);
 
-  const values = sorted.map((u) => u.surprisal);
+  const values = sorted.map((u) => u.value);
   const lo = Math.min(...values, -0.05);
   const hi = Math.max(...values, 0.05);
   const span = hi - lo || 1;
@@ -77,7 +95,7 @@ export function SpecCurve({ universes, median, width = 860 }: Props) {
         width={width}
         height={height}
         role="img"
-        aria-label={`Specification curve across ${sorted.length} universes`}
+        aria-label={`Specification curve of ${valueLabel} across ${sorted.length} universes`}
         style={{ display: "block" }}
       >
         {/* zero line and median */}
@@ -100,7 +118,23 @@ export function SpecCurve({ universes, median, width = 860 }: Props) {
         <text x={LABEL_W} y={y(0) + 3} textAnchor="end" fontSize={10} fill="var(--ink-3)">
           0
         </text>
-        <text x={LABEL_W} y={y(median) + 3} textAnchor="end" fontSize={10} fill="var(--dist)">
+        <text
+          x={PAD}
+          y={PAD + 8}
+          fontSize={9}
+          fill="var(--ink-3)"
+          letterSpacing="0.1em"
+        >
+          {valueLabel.toUpperCase()}, SORTED
+        </text>
+        {/* Nudge the median label clear of the zero label when they coincide. */}
+        <text
+          x={LABEL_W}
+          y={y(median) + (Math.abs(y(median) - y(0)) < 11 ? 15 : 3)}
+          textAnchor="end"
+          fontSize={10}
+          fill="var(--dist)"
+        >
           median
         </text>
 
@@ -111,18 +145,24 @@ export function SpecCurve({ universes, median, width = 860 }: Props) {
               x1={x(i)}
               x2={x(i)}
               y1={y(0)}
-              y2={y(u.surprisal)}
+              y2={y(u.value)}
               stroke={u.is_default ? "var(--single)" : "var(--rule-strong)"}
               strokeWidth={u.is_default ? 1.5 : 1}
             />
             <circle
               cx={x(i)}
-              cy={y(u.surprisal)}
+              cy={y(u.value)}
               r={u.is_default ? 4 : 3}
-              fill={u.is_default ? "var(--single)" : "var(--dist)"}
+              fill={
+                u.is_default
+                  ? "var(--single)"
+                  : colorByVerdict
+                    ? (VERDICT_COLOR[u.verdict] ?? "var(--dist)")
+                    : "var(--dist)"
+              }
             >
               <title>
-                {`${u.universe_id}\nsurprisal ${u.surprisal.toFixed(3)}\n${u.verdict}\n` +
+                {`${u.universe_id}\n${valueLabel} ${u.value.toFixed(4)}\n${u.verdict}\n` +
                   Object.entries(u.decisions)
                     .map(([d, o]) => `${d} = ${o}`)
                     .join("\n")}
