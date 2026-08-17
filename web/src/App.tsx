@@ -1,27 +1,38 @@
 import { useCallback, useEffect, useState } from "react";
-import { listRuns } from "./api";
-import type { RunSummary } from "./api";
+import { listClaims } from "./api";
+import type { ClaimDetail } from "./api";
 import { AnalysisDetail } from "./AnalysisDetail";
-import { AnalysisList } from "./AnalysisList";
+import { ClaimList } from "./ClaimList";
+import { ClaimView } from "./ClaimView";
 import { NewRun } from "./NewRun";
 import { TopBar } from "./TopBar";
 import { ErrorNote } from "./ui";
 import "./index.css";
 
-type View = { name: "list" } | { name: "new" } | { name: "detail"; id: string };
+/** Claim → attempt → stage. Each level answers a different question:
+ *  which claims do I have, do my attempts at one agree, and what did a
+ *  particular attempt actually do. */
+type View =
+  | { name: "claims" }
+  | { name: "new" }
+  | { name: "claim"; id: string }
+  | { name: "attempt"; id: string; claimId?: string };
 
 export default function App() {
-  const [analyses, setAnalyses] = useState<RunSummary[]>([]);
-  const [view, setView] = useState<View>({ name: "list" });
+  const [claims, setClaims] = useState<ClaimDetail[]>([]);
+  const [view, setView] = useState<View>({ name: "claims" });
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    setAnalyses(await listRuns());
+    setClaims(await listClaims());
   }, []);
 
   useEffect(() => {
     refresh().catch((e) => setError(e.message));
   }, [refresh, view]);
+
+  const claimOf = (attemptId: string) =>
+    claims.find((c) => c.attempts.some((a) => a.id === attemptId))?.id;
 
   return (
     <div className="min-h-full">
@@ -29,26 +40,40 @@ export default function App() {
       <main className="mx-auto w-full max-w-[1400px] px-6 py-6">
         {error && <ErrorNote>{error}</ErrorNote>}
 
-        {view.name === "list" && (
-          <AnalysisList
-            analyses={analyses}
-            onOpen={(id) => setView({ name: "detail", id })}
+        {view.name === "claims" && (
+          <ClaimList
+            claims={claims}
+            onOpen={(id) => setView({ name: "claim", id })}
             onNew={() => setView({ name: "new" })}
           />
         )}
 
         {view.name === "new" && (
           <NewRun
-            onCancel={() => setView({ name: "list" })}
+            onCancel={() => setView({ name: "claims" })}
             onCreated={async (id) => {
               await refresh();
-              setView({ name: "detail", id });
+              setView({ name: "attempt", id });
             }}
           />
         )}
 
-        {view.name === "detail" && (
-          <AnalysisDetail id={view.id} onBack={() => setView({ name: "list" })} />
+        {view.name === "claim" && (
+          <ClaimView
+            claimId={view.id}
+            onBack={() => setView({ name: "claims" })}
+            onOpenAttempt={(id) => setView({ name: "attempt", id, claimId: view.id })}
+          />
+        )}
+
+        {view.name === "attempt" && (
+          <AnalysisDetail
+            id={view.id}
+            onBack={() => {
+              const claimId = view.claimId ?? claimOf(view.id);
+              setView(claimId ? { name: "claim", id: claimId } : { name: "claims" });
+            }}
+          />
         )}
       </main>
     </div>

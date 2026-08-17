@@ -24,6 +24,7 @@ from typing import Annotated, Any
 import tyro
 from dotenv import load_dotenv
 
+from ..core import claims as claims_core
 from ..core import config as run_cfg
 from ..core import runner
 from ..core.config import RunConfig
@@ -158,6 +159,69 @@ def ls() -> None:
         print(f"{DIM}          {manifest['hypothesis'][:88]}{OFF}")
 
 
+def claims() -> None:
+    """List claims — a hypothesis about a dataset — and their attempts.
+
+    A claim groups every run of the same hypothesis on the same dataset, so
+    attempts under different configurations sit together and can be compared.
+    """
+    found = claims_core.all_claims(_runs_dir())
+    if not found:
+        print(f"{DIM}no claims in {_runs_dir()}{OFF}")
+        return
+    for claim in found:
+        print(f"{BOLD}{claim.id}{OFF}  {claim.hypothesis[:76]}")
+        print(f"{DIM}             {claim.dataset_name} · {len(claim.attempts)} attempt(s){OFF}")
+        for a in claim.attempts:
+            bits = [f"mode={a.mode or 'default'}"]
+            if a.critique:
+                bits.append("+critique")
+            if a.n_universes is not None:
+                bits.append(f"{a.n_universes} universes")
+            if a.fragility is not None:
+                bits.append(f"fragility={a.fragility:.3f}")
+            print(f"    {claims_core.stages_done(a)}  {a.id[:13]}  {DIM}{' · '.join(bits)}{OFF}")
+
+        summary = claims_core.comparison(claim.attempts)
+        if summary["unique_decisions"]:
+            print(f"{DIM}    found by only some attempts:{OFF}")
+            for decision, finders in summary["unique_decisions"].items():
+                print(f"{DIM}      {decision:34s} {', '.join(f[:13] for f in finders)}{OFF}")
+        if summary["agreement"] == "disagree":
+            print(
+                f"{YELLOW}    attempts disagree about whether this claim is fragile{OFF}"
+            )
+        print()
+
+
+def again(analysis_id: str, /, config: Config = RunConfig()) -> None:
+    """Start another attempt at the same claim, under a different config.
+
+    Inherits the previous configuration, so a comparison differs only in what
+    you deliberately change:
+
+        astaverse again <id> --decisions.mode schema_lint
+
+    Args:
+        analysis_id: The run to repeat.
+    """
+    previous = _load(analysis_id)
+    manifest = previous.manifest()
+    analysis = Run.create(_runs_dir(), manifest["hypothesis"], manifest["dataset"])
+    run_cfg.save(analysis, run_cfg.load(previous))
+    patch = _explicit_patch(config)
+    if patch:
+        run_cfg.update(analysis, patch)
+    if manifest.get("seed"):
+        fresh = analysis.manifest()
+        fresh["seed"] = manifest["seed"]
+        analysis.write_manifest(fresh)
+    s1_study.run(analysis, manifest["hypothesis"], manifest["dataset"])
+    print(f"{GREEN}created{OFF} {analysis.run_id}")
+    print(f"{DIM}  another attempt at claim {claims_core.claim_id(manifest['hypothesis'], manifest['dataset'])}{OFF}")
+    _echo_config(run_cfg.load(analysis))
+
+
 def show(analysis_id: str, /) -> None:
     """Show an analysis: its status, and the configuration it will use."""
     analysis = _load(analysis_id)
@@ -282,6 +346,8 @@ def main() -> None:
         {
             "new": new,
             "ls": ls,
+            "claims": claims,
+            "again": again,
             "show": show,
             "config": configure,
             "stage": stage,

@@ -105,7 +105,7 @@ export function AnalysisDetail({ id, onBack }: { id: string; onBack: () => void 
     <>
       <div className="mb-5 flex items-start gap-4">
         <Button variant="ghost" size="sm" onClick={onBack} className="mt-0.5 shrink-0">
-          <ArrowLeft size={13} /> All analyses
+          <ArrowLeft size={13} /> Claim
         </Button>
         <div className="min-w-0">
           <h1 className="max-w-[80ch] text-[17px] font-medium leading-snug">

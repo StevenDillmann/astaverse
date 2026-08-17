@@ -8,6 +8,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from ...core import claims as claims_core
 from ...core import config as run_cfg
 from ...core import runner
 from ...core.stages import s1_study, s2_plans
@@ -78,9 +79,13 @@ def create_analysis(request: NewAnalysis) -> dict[str, Any]:
 @router.get("/{analysis_id}")
 def get_analysis_detail(analysis_id: str) -> dict[str, Any]:
     analysis = get_analysis(analysis_id)
+    manifest = analysis.manifest()
     return {
         "id": analysis.run_id,
-        "manifest": analysis.manifest(),
+        "claim_id": claims_core.claim_id(
+            manifest.get("hypothesis", ""), manifest.get("dataset", "")
+        ),
+        "manifest": manifest,
         "status": analysis.status(),
         "config": run_cfg.load(analysis).model_dump(),
         "artifacts": {stage: artifact(analysis, stage) for stage in STAGES},

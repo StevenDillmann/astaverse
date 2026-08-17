@@ -67,7 +67,17 @@ class Run:
         runs_dir = Path(runs_dir)
         runs_dir.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-        run_id = f"{stamp}__{_slug(hypothesis)}"
+        base = f"{stamp}__{_slug(hypothesis)}"
+
+        # The id is second-resolution, and two attempts at the same claim are
+        # routinely created back to back — from "New attempt", or from a script
+        # sweeping configurations. Collisions are therefore normal, not
+        # exceptional, so disambiguate rather than fail.
+        run_id, suffix = base, 2
+        while (runs_dir / run_id).exists():
+            run_id = f"{base}-{suffix}"
+            suffix += 1
+
         root = runs_dir / run_id
         root.mkdir(parents=True, exist_ok=False)
         run = cls(root)

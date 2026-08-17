@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from ...paths import WEB_DIST
-from . import analyses, catalog, files
+from . import analyses, catalog, claims, files
 
 app = FastAPI(title="Astaverse", version="0.1.0")
 app.add_middleware(
@@ -25,6 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(catalog.router)
+app.include_router(claims.router)
 app.include_router(analyses.router)
 app.include_router(files.router)
 

@@ -183,3 +183,50 @@ export const runAll = (id: string, through?: string) =>
   );
 
 export const getProgress = (id: string) => request<RunProgress>(`/api/analyses/${id}/progress`);
+
+// -- claims ----------------------------------------------------------------
+
+export interface Attempt {
+  id: string;
+  created_at: string;
+  status: Record<Stage, StageState>;
+  n_complete: number;
+  running: boolean;
+  mode: string | null;
+  models: string[];
+  critique: boolean;
+  cap: number | null;
+  seeded: string | null;
+  agent_models: string[];
+  n_plans: number | null;
+  decisions: string[];
+  n_universes: number | null;
+  n_grid: number | null;
+  verdicts: Record<string, number>;
+  joint_surprisal: number | null;
+  fragility: number | null;
+  top_flip: string | null;
+  top_flip_rate: number | null;
+  coverage: number | null;
+}
+
+export interface ClaimDetail {
+  id: string;
+  hypothesis: string;
+  dataset: string;
+  dataset_name: string;
+  n_attempts: number;
+  attempts: Attempt[];
+  shared_decisions: string[];
+  unique_decisions: Record<string, string[]>;
+  agreement: "agree" | "disagree" | null;
+  fragility_range: { min: number; max: number; n: number } | null;
+}
+
+export const listClaims = () => request<ClaimDetail[]>("/api/claims");
+export const getClaim = (id: string) => request<ClaimDetail>(`/api/claims/${id}`);
+export const newAttempt = (claimId: string, config?: Record<string, unknown>) =>
+  request<{ id: string }>(`/api/claims/${claimId}/attempts`, {
+    method: "POST",
+    body: JSON.stringify({ config: config ?? null }),
+  });
