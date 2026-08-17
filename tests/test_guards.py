@@ -65,7 +65,7 @@ def test_run_root_is_always_absolute(runs_dir, monkeypatch, tmp_path):
 
 def test_api_refuses_a_stage_whose_inputs_are_missing(client, bare_run):
     """The UI disabling a button is not a guard — the server must check."""
-    response = client.post(f"/api/analyses/{bare_run.run_id}/stages/execute")
+    response = client.post(f"/api/runs/{bare_run.run_id}/stages/execute")
     assert response.status_code == 409
     detail = response.json()["detail"]
     assert "cannot run 'execute'" in detail["error"]
@@ -74,7 +74,7 @@ def test_api_refuses_a_stage_whose_inputs_are_missing(client, bare_run):
 
 def test_api_allows_the_next_ready_stage(client, bare_run):
     """The guard must not block legitimate work — plans is next after study."""
-    response = client.post(f"/api/analyses/{bare_run.run_id}/stages/plans")
+    response = client.post(f"/api/runs/{bare_run.run_id}/stages/plans")
     # It will fail for want of an API key in the test environment, but it must
     # get past the prerequisite guard to do so.
     assert response.status_code != 409

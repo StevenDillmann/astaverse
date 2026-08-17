@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException
 
 from .deps import get_analysis
 
-router = APIRouter(prefix="/api/analyses", tags=["files"])
+router = APIRouter(prefix="/api/runs", tags=["files"])
 
 # Everything else in an analysis directory is container plumbing.
 BROWSABLE_SUFFIXES = {
@@ -39,10 +39,10 @@ def _category(parts: tuple[str, ...]) -> str:
     return "artifact"
 
 
-@router.get("/{analysis_id}/files")
-def list_files(analysis_id: str) -> list[dict[str, Any]]:
+@router.get("/{run_id}/files")
+def list_files(run_id: str) -> list[dict[str, Any]]:
     """Every readable file, including agent output and superseded artifacts."""
-    analysis = get_analysis(analysis_id)
+    analysis = get_analysis(run_id)
     out: list[dict[str, Any]] = []
     for path in sorted(analysis.root.rglob("*")):
         if not path.is_file() or path.suffix not in BROWSABLE_SUFFIXES:
@@ -61,9 +61,9 @@ def list_files(analysis_id: str) -> list[dict[str, Any]]:
     return out
 
 
-@router.get("/{analysis_id}/file")
-def read_file(analysis_id: str, path: str) -> dict[str, Any]:
-    analysis = get_analysis(analysis_id)
+@router.get("/{run_id}/file")
+def read_file(run_id: str, path: str) -> dict[str, Any]:
+    analysis = get_analysis(run_id)
     target = (analysis.root / path).resolve()
     # `path` is client-supplied: refuse anything outside the analysis.
     if not str(target).startswith(str(analysis.root)) or not target.is_file():
@@ -76,14 +76,14 @@ def read_file(analysis_id: str, path: str) -> dict[str, Any]:
     return {"path": path, "bytes": size, "content": target.read_text(errors="replace")}
 
 
-@router.get("/{analysis_id}/history")
-def get_history(analysis_id: str) -> list[dict[str, Any]]:
+@router.get("/{run_id}/history")
+def get_history(run_id: str) -> list[dict[str, Any]]:
     """Artifact sets superseded by re-running an earlier stage, newest first."""
-    return get_analysis(analysis_id).history()
+    return get_analysis(run_id).history()
 
 
-@router.get("/{analysis_id}/log")
-def get_log(analysis_id: str) -> dict[str, str]:
-    analysis = get_analysis(analysis_id)
+@router.get("/{run_id}/log")
+def get_log(run_id: str) -> dict[str, str]:
+    analysis = get_analysis(run_id)
     path = analysis.root / "run.log"
     return {"log": path.read_text() if path.exists() else ""}

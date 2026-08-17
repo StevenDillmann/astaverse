@@ -84,13 +84,13 @@ def test_stages_through_rejects_an_unknown_target(run_obj):
 
 def test_config_endpoints_round_trip(client, run_obj):
     response = client.put(
-        f"/api/analyses/{run_obj.run_id}/config",
+        f"/api/runs/{run_obj.run_id}/config",
         json={"plans": {"k": 9}, "through": "decisions"},
     )
     assert response.status_code == 200
     assert response.json()["plans"]["k"] == 9
 
-    fetched = client.get(f"/api/analyses/{run_obj.run_id}/config").json()
+    fetched = client.get(f"/api/runs/{run_obj.run_id}/config").json()
     assert fetched["plans"]["k"] == 9
     assert fetched["through"] == "decisions"
 
@@ -161,6 +161,6 @@ def test_force_reruns_completed_stages(run_obj, monkeypatch):
 
 def test_api_refuses_a_single_stage_while_a_sequence_runs(client, run_obj, monkeypatch):
     monkeypatch.setattr(runner, "is_running", lambda run_id: True)
-    response = client.post(f"/api/analyses/{run_obj.run_id}/stages/plans")
+    response = client.post(f"/api/runs/{run_obj.run_id}/stages/plans")
     assert response.status_code == 409
     assert "already in progress" in response.json()["detail"]["error"]

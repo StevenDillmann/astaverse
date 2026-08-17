@@ -89,6 +89,102 @@ class Attempt:
 
 
 @dataclass
+class Support:
+    """What the attempts say, without pretending they measured the same thing.
+
+    Each attempt explores its own decision space, so `4 of 96` from one and
+    `9 of 288` from another are not two readings of one quantity — they are
+    two estimates of the same underlying robustness over different universes
+    of specification. Raw counts therefore cannot be pooled; rates can be
+    compared, because "fraction of explored specifications" is at least the
+    same kind of number.
+
+    So the claim-level statement is a concordance, not an average: do the
+    attempts reach the same verdict, and over what spread of rates. When they
+    do not, that disagreement is the finding and is reported as such.
+    """
+
+    #: "supported" | "not_supported" | "mixed" | "disputed" | None
+    verdict: str | None
+    rate_min: float | None
+    rate_max: float | None
+    #: Attempts that got far enough to have verdicts, and attempts in total.
+    n_scored: int
+    n_attempts: int
+    per_attempt: list[dict[str, Any]] = field(default_factory=list)
+
+    @property
+    def corroborated(self) -> bool:
+        return self.n_scored > 1
+
+    def to_dict(self) -> dict[str, Any]:
+        d = asdict(self)
+        d["corroborated"] = self.corroborated
+        return d
+
+
+def _dominant_verdict(verdicts: dict[str, int]) -> tuple[str | None, float | None]:
+    """The verdict most of this attempt's specifications reached, and its rate.
+
+    Failed universes are excluded from the denominator: a specification that
+    could not be computed is an absence of evidence, and counting it as
+    "not supported" would quietly turn a broken run into a negative result.
+    """
+    usable = {k: v for k, v in verdicts.items() if k != "failed"}
+    total = sum(usable.values())
+    if not total:
+        return None, None
+    supported = usable.get("supported", 0)
+    rate = supported / total
+    if supported == 0:
+        return "not_supported", rate
+    if supported == total:
+        return "supported", rate
+    # A claim holding in some specifications and not others is the ordinary
+    # multiverse outcome; which way it leans is what the rate is for.
+    return ("supported" if rate > 0.5 else "not_supported"), rate
+
+
+def support(attempts: list[Attempt]) -> Support:
+    scored: list[dict[str, Any]] = []
+    for a in attempts:
+        verdict, rate = _dominant_verdict(a.verdicts)
+        if verdict is None:
+            continue
+        usable = {k: v for k, v in a.verdicts.items() if k != "failed"}
+        scored.append(
+            {
+                "id": a.id,
+                "verdict": verdict,
+                "rate": rate,
+                "n_supported": usable.get("supported", 0),
+                "n_specs": sum(usable.values()),
+                "coverage": a.coverage,
+            }
+        )
+
+    if not scored:
+        return Support(
+            verdict=None,
+            rate_min=None,
+            rate_max=None,
+            n_scored=0,
+            n_attempts=len(attempts),
+        )
+
+    verdicts = {s["verdict"] for s in scored}
+    rates = [s["rate"] for s in scored]
+    return Support(
+        verdict="disputed" if len(verdicts) > 1 else next(iter(verdicts)),
+        rate_min=min(rates),
+        rate_max=max(rates),
+        n_scored=len(scored),
+        n_attempts=len(attempts),
+        per_attempt=scored,
+    )
+
+
+@dataclass
 class Claim:
     id: str
     hypothesis: str
@@ -107,8 +203,83 @@ class Claim:
             "dataset_name": self.dataset_name,
             "n_attempts": len(self.attempts),
             "attempts": [a.to_dict() for a in self.attempts],
+            "support": support(self.attempts).to_dict(),
+            "updated_at": max((a.created_at for a in self.attempts), default=""),
             **comparison(self.attempts),
         }
+
+
+def config_label(attempt: Attempt) -> str:
+    """What this attempt did *differently*, in as few words as possible.
+
+    Only non-default settings appear. A label listing every knob would be the
+    same on every row and so would distinguish nothing — the point is to name
+    the change, not to restate the configuration.
+    """
+    from .config import RunConfig
+
+    defaults = RunConfig()
+    bits: list[str] = []
+
+    if attempt.mode and attempt.mode != defaults.decisions.mode:
+        bits.append(attempt.mode)
+    if attempt.critique != defaults.decisions.critique:
+        bits.append("+critique" if attempt.critique else "-critique")
+    if attempt.models:
+        bits.append("/".join(attempt.models))
+    if attempt.cap is not None and attempt.cap != defaults.universes.cap:
+        bits.append(f"cap {attempt.cap}")
+    if attempt.agent_models:
+        bits.append("+".join(attempt.agent_models))
+    if attempt.seeded:
+        bits.append("seeded")
+
+    return " · ".join(bits) if bits else "default"
+
+
+def _discriminator(run_id: str) -> str:
+    """A short, human-meaningful way to tell two run ids apart.
+
+    Run ids are `YYYYMMDD-HHMMSS__slug`, optionally with a `-N` suffix added
+    when two were created in the same second. The time plus that suffix is the
+    part that actually varies.
+    """
+    time = run_id[9:15]
+    tail = run_id.rsplit("-", 1)[-1]
+    return f"{time}-{tail}" if tail.isdigit() and "__" not in tail else time
+
+
+def config_labels(attempts: list[Attempt]) -> dict[str, str]:
+    """Labels that actually tell attempts apart.
+
+    Two attempts can share a configuration — most obviously when both predate
+    a knob, so both read "default". A label that fails to distinguish them
+    makes a comparison table unreadable, so collisions fall back to the time,
+    and then to a counter, because two runs can share a minute *and* a second.
+    """
+    summaries = {a.id: config_label(a) for a in attempts}
+
+    counts: dict[str, int] = {}
+    for summary in summaries.values():
+        counts[summary] = counts.get(summary, 0) + 1
+
+    labelled = {
+        aid: (f"{summary} · {_discriminator(aid)}" if counts[summary] > 1 else summary)
+        for aid, summary in summaries.items()
+    }
+
+    # Belt and braces: whatever happens above, no two attempts may share a
+    # label, or the comparison table becomes unreadable in exactly the case
+    # that matters most.
+    seen: dict[str, int] = {}
+    for aid in sorted(labelled):
+        label = labelled[aid]
+        if label in seen:
+            seen[label] += 1
+            labelled[aid] = f"{label} #{seen[label]}"
+        else:
+            seen[label] = 1
+    return labelled
 
 
 def _read(analysis: Run, stage: str) -> Any:

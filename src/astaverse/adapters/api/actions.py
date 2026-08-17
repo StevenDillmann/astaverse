@@ -1,4 +1,9 @@
-"""Analyses: create, list, inspect, configure, and run."""
+"""Mutations: everything that changes state.
+
+Kept apart from the read models because they have different risks. A read is
+cheap and idempotent; an action can spend money, overwrite configuration, or
+supersede artifacts, and each of those needs a guard rather than a shape.
+"""
 
 from __future__ import annotations
 
@@ -14,51 +19,34 @@ from ...core import runner
 from ...core.stages import s1_study, s2_plans
 from ...core.store import STAGES, Run
 from ...integrations import plans_index
-from .deps import artifact, get_analysis, runs_dir
+from .deps import get_analysis, runs_dir
 
-router = APIRouter(prefix="/api/analyses", tags=["analyses"])
+router = APIRouter(prefix="/api", tags=["actions"])
 
 
-class NewAnalysis(BaseModel):
+class NewClaim(BaseModel):
     hypothesis: str
     dataset: str
     description: str | None = None
-    # When the hypothesis came from an AutoDiscovery record, carry its plan so
-    # the decision space describes the plan under evaluation.
+    #: When the hypothesis came from an AutoDiscovery record, carry its plan so
+    #: the decision space describes the plan under evaluation.
     seed_dataset: str | None = None
     seed_normalized_id: str | None = None
+    config: dict[str, Any] | None = None
 
 
-class ConfigPatch(BaseModel):
-    """A partial config, merged section by section."""
+class NewAttempt(BaseModel):
+    """Another attempt at an existing claim, under a different configuration."""
 
     config: dict[str, Any] | None = None
 
 
-@router.get("")
-def list_analyses() -> list[dict[str, Any]]:
-    out = []
-    for analysis in Run.list_all(runs_dir()):
-        manifest = analysis.manifest()
-        status = analysis.status()
-        out.append(
-            {
-                "id": analysis.run_id,
-                "hypothesis": manifest.get("hypothesis"),
-                "dataset": manifest.get("dataset"),
-                "created_at": manifest.get("created_at"),
-                "status": status,
-                "n_complete": sum(1 for v in status.values() if v == "complete"),
-                "running": runner.is_running(analysis.run_id),
-            }
-        )
-    return out
-
-
-@router.post("")
-def create_analysis(request: NewAnalysis) -> dict[str, Any]:
+@router.post("/claims")
+def create_claim(request: NewClaim) -> dict[str, Any]:
     try:
         analysis = Run.create(runs_dir(), request.hypothesis, request.dataset)
+        if request.config:
+            run_cfg.update(analysis, request.config)
         if request.seed_dataset and request.seed_normalized_id:
             record = plans_index.get(request.seed_dataset, request.seed_normalized_id)
             if record is None:
@@ -73,53 +61,62 @@ def create_analysis(request: NewAnalysis) -> dict[str, Any]:
         s1_study.run(analysis, request.hypothesis, request.dataset, request.description)
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(400, str(exc)) from exc
-    return {"id": analysis.run_id, "status": analysis.status()}
 
-
-@router.get("/{analysis_id}")
-def get_analysis_detail(analysis_id: str) -> dict[str, Any]:
-    analysis = get_analysis(analysis_id)
     manifest = analysis.manifest()
     return {
-        "id": analysis.run_id,
-        "claim_id": claims_core.claim_id(
-            manifest.get("hypothesis", ""), manifest.get("dataset", "")
-        ),
-        "manifest": manifest,
-        "status": analysis.status(),
-        "config": run_cfg.load(analysis).model_dump(),
-        "artifacts": {stage: artifact(analysis, stage) for stage in STAGES},
+        "run_id": analysis.run_id,
+        "claim_id": claims_core.claim_id(manifest["hypothesis"], manifest["dataset"]),
     }
 
 
-# -- configuration ---------------------------------------------------------
+@router.post("/claims/{claim_id}/attempts")
+def create_attempt(claim_id: str, request: NewAttempt | None = None) -> dict[str, Any]:
+    """Start another attempt, inheriting the last one's configuration.
+
+    Inheriting matters: a comparison is only readable if the attempts differ
+    in what you deliberately changed, rather than in every knob that happened
+    to default differently.
+    """
+    claim = claims_core.get_claim(runs_dir(), claim_id)
+    if claim is None or not claim.attempts:
+        raise HTTPException(404, f"no such claim: {claim_id}")
+
+    previous = get_analysis(claim.attempts[0].id)
+    previous_manifest = previous.manifest()
+
+    try:
+        analysis = Run.create(runs_dir(), claim.hypothesis, claim.dataset)
+        run_cfg.save(analysis, run_cfg.load(previous))
+        if request and request.config:
+            run_cfg.update(analysis, request.config)
+        if previous_manifest.get("seed"):
+            manifest = analysis.manifest()
+            manifest["seed"] = previous_manifest["seed"]
+            analysis.write_manifest(manifest)
+        s1_study.run(analysis, claim.hypothesis, claim.dataset)
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(400, str(exc)) from exc
+
+    return {"run_id": analysis.run_id, "claim_id": claim_id}
 
 
-@router.get("/{analysis_id}/config")
-def get_config(analysis_id: str) -> dict[str, Any]:
-    return run_cfg.load(get_analysis(analysis_id)).model_dump()
-
-
-@router.put("/{analysis_id}/config")
-def put_config(analysis_id: str, patch: dict[str, Any]) -> dict[str, Any]:
-    analysis = get_analysis(analysis_id)
+@router.put("/runs/{run_id}/config")
+def set_config(run_id: str, patch: dict[str, Any]) -> dict[str, Any]:
+    """Merge a partial configuration, section by section."""
+    analysis = get_analysis(run_id)
     try:
         return run_cfg.update(analysis, patch).model_dump()
     except Exception as exc:  # noqa: BLE001
         raise HTTPException(400, str(exc)) from exc
 
 
-# -- running ---------------------------------------------------------------
-
-
-@router.post("/{analysis_id}/stages/{stage}")
-def run_stage(analysis_id: str, stage: str, patch: ConfigPatch | None = None) -> dict[str, Any]:
-    """Run one stage using the analysis's saved configuration."""
+@router.post("/runs/{run_id}/stages/{stage}")
+def run_stage(run_id: str, stage: str) -> dict[str, Any]:
     if stage not in STAGES:
         raise HTTPException(404, f"unknown stage '{stage}'")
-    analysis = get_analysis(analysis_id)
+    analysis = get_analysis(run_id)
 
-    if runner.is_running(analysis_id):
+    if runner.is_running(run_id):
         raise HTTPException(409, detail={"error": "a run is already in progress"})
 
     # A disabled button is not a guard: the client can be stale, and execute
@@ -139,9 +136,6 @@ def run_stage(analysis_id: str, stage: str, patch: ConfigPatch | None = None) ->
             },
         )
 
-    if patch is not None and patch.config:
-        run_cfg.update(analysis, patch.config)
-
     try:
         runner.run_stage(analysis, stage)
     except Exception as exc:  # noqa: BLE001
@@ -154,18 +148,13 @@ def run_stage(analysis_id: str, stage: str, patch: ConfigPatch | None = None) ->
             },
         ) from exc
 
-    return {
-        "id": analysis.run_id,
-        "stage": stage,
-        "status": analysis.status(),
-        "artifact": artifact(analysis, stage),
-    }
+    return {"id": analysis.run_id, "stage": stage, "status": analysis.status()}
 
 
-@router.post("/{analysis_id}/run")
-def run_all(analysis_id: str, through: str | None = None, force: bool = False) -> dict[str, Any]:
+@router.post("/runs/{run_id}/run")
+def run_all(run_id: str, through: str | None = None, force: bool = False) -> dict[str, Any]:
     """Run every stage up to the configured target, in the background."""
-    analysis = get_analysis(analysis_id)
+    analysis = get_analysis(run_id)
     try:
         return runner.start_sequence(analysis, through=through, force=force)
     except RuntimeError as exc:
@@ -174,16 +163,9 @@ def run_all(analysis_id: str, through: str | None = None, force: bool = False) -
         raise HTTPException(400, str(exc)) from exc
 
 
-@router.get("/{analysis_id}/progress")
-def get_progress(analysis_id: str) -> dict[str, Any]:
-    get_analysis(analysis_id)
-    return runner.progress_for(analysis_id) or {"running": False, "finished": True}
-
-
-@router.post("/{analysis_id}/seed")
-def set_seed(analysis_id: str, source_path: str, normalized_id: str = "") -> dict[str, Any]:
-    """Attach an AutoDiscovery plan to seed stage 2."""
-    analysis = get_analysis(analysis_id)
+@router.post("/runs/{run_id}/seed")
+def set_seed(run_id: str, source_path: str, normalized_id: str = "") -> dict[str, Any]:
+    analysis = get_analysis(run_id)
     try:
         text = s2_plans.load_seed_plan(jsonl=source_path, normalized_id=normalized_id or None)
     except Exception as exc:  # noqa: BLE001

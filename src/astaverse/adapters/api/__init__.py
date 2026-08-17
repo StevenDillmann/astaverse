@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from ...paths import WEB_DIST
-from . import analyses, catalog, claims, files
+from . import actions, catalog, files, views
 
 app = FastAPI(title="Astaverse", version="0.1.0")
 app.add_middleware(
@@ -24,10 +24,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(catalog.router)
-app.include_router(claims.router)
-app.include_router(analyses.router)
-app.include_router(files.router)
+app.include_router(views.router)      # read models, one per screen
+app.include_router(actions.router)    # mutations
+app.include_router(catalog.router)    # datasets, hypotheses, config schema
+app.include_router(files.router)      # artifacts on disk
 
 
 if (WEB_DIST / "assets").is_dir():
