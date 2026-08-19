@@ -82,20 +82,20 @@ def test_home_needs_no_client_side_joining(client, runs_dir, tmp_path):
 
 def test_run_rows_carry_a_label_that_distinguishes_them(client, runs_dir, tmp_path):
     """Two attempts differing only in config must be tellable apart."""
-    make(runs_dir, tmp_path, "X causes Y", config={"decisions": {"mode": "schema_lint"}})
-    make(runs_dir, tmp_path, "X causes Y", config={"decisions": {"mode": "union"}})
+    make(runs_dir, tmp_path, "X causes Y", config={"decisions": {"mode": "direct"}})
+    make(runs_dir, tmp_path, "X causes Y", config={"decisions": {"mode": "audit_plan"}})
 
     labels = {r["config_label"] for r in client.get("/api/home").json()["runs"]}
-    assert labels == {"schema_lint", "union"}
+    assert labels == {"direct", "audit_plan"}
 
 
 def test_a_default_configuration_is_labelled_default(client, runs_dir, tmp_path):
-    """The label names what changed, so plan_diff — the default — reads as such.
+    """The label names what changed, so sample_plans — the default — reads as such.
 
     Restating a default tells the reader nothing and makes every row look
     configured.
     """
-    make(runs_dir, tmp_path, "X causes Y", config={"decisions": {"mode": "plan_diff"}})
+    make(runs_dir, tmp_path, "X causes Y", config={"decisions": {"mode": "sample_plans"}})
     labels = [r["config_label"] for r in client.get("/api/home").json()["runs"]]
     assert labels == ["default"]
 
@@ -105,10 +105,10 @@ def test_only_non_default_settings_appear_in_the_label(client, runs_dir, tmp_pat
         runs_dir,
         tmp_path,
         "X causes Y",
-        config={"decisions": {"mode": "union", "critique": True}, "universes": {"cap": 24}},
+        config={"decisions": {"mode": "direct", "critique": True}, "universes": {"cap": 24}},
     )
     label = client.get("/api/home").json()["runs"][0]["config_label"]
-    assert "union" in label and "+critique" in label
+    assert "direct" in label and "+critique" in label
     assert "cap" not in label, "the default cap must not clutter the label"
 
 

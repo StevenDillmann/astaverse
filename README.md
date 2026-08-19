@@ -56,7 +56,8 @@ stage re-runs alone from disk, and the CLI and the web interface call the same
 astaverse new --hypothesis "…" --dataset path/to/blade/hurricane
 astaverse ls
 astaverse run <id>                                  # through the configured target
-astaverse run <id> --decisions.mode schema_lint --universes.cap 12
+astaverse run <id> --decisions.mode direct --universes.cap 12
+astaverse stage <id> decisions --decisions.mode audit_plan
 astaverse stage <id> decisions --decisions.critique # one stage, with overrides
 astaverse config <id>                               # inspect; only flags you pass change
 astaverse schema                                    # the config schema the UI renders

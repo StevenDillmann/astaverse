@@ -116,14 +116,14 @@ def test_shared_and_unique_decisions_are_separated():
 
 
 def test_a_fork_only_one_strategy_finds_is_attributed_to_it():
-    """The motivating case: schema_lint sees an orientation fork plan_diff cannot."""
+    """The motivating case: audit_plan sees a silence fork sample_plans cannot."""
     result = comparison(
         [
-            _attempt("plan_diff_run", ["outliers"]),
-            _attempt("schema_lint_run", ["outliers", "pressure_orientation"]),
+            _attempt("sample_plans_run", ["outliers"]),
+            _attempt("audit_plan_run", ["outliers", "pressure_orientation"]),
         ]
     )
-    assert result["unique_decisions"] == {"pressure_orientation": ["schema_lint_run"]}
+    assert result["unique_decisions"] == {"pressure_orientation": ["audit_plan_run"]}
 
 
 def test_attempts_agreeing_about_fragility_are_reported_as_agreeing():

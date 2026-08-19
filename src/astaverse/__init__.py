@@ -9,7 +9,7 @@ Usable three ways, all over the same core:
 
     # as a CLI
     $ astaverse new --hypothesis "X causes Y" --dataset data/hurricane
-    $ astaverse run <id> --decisions.mode schema_lint
+    $ astaverse run <id> --decisions.mode direct
 
     # as a web app
     $ astaverse serve

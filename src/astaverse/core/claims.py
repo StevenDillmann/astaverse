@@ -12,9 +12,9 @@ runs of different claims are different science.
 
 Comparison across attempts surfaces three things a single run cannot:
 
-* **Decision coverage** — which forks each attempt found, and which only one
-  of them found. This is how you tell that `schema_lint` sees a fork
-  `plan_diff` is structurally blind to.
+* **Decision coverage** — which forks each experiment found, and which only one
+  of them found. This is how you tell that `audit_plan` sees a fork
+  `sample_plans` is structurally blind to.
 * **Robustness agreement** — whether the attempts reach the same verdict about
   fragility. Disagreement indicts the method, not the data.
 * **What it cost** — coverage of the grid, so an attempt that ran 24 of 216
@@ -30,6 +30,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from .config import normalize_extraction_mode
 from .store import STAGES, Run
 
 
@@ -221,8 +222,9 @@ def config_label(attempt: Attempt) -> str:
     defaults = RunConfig()
     bits: list[str] = []
 
-    if attempt.mode and attempt.mode != defaults.decisions.mode:
-        bits.append(attempt.mode)
+    mode = normalize_extraction_mode(attempt.mode)
+    if mode and mode != defaults.decisions.mode:
+        bits.append(mode)
     if attempt.critique != defaults.decisions.critique:
         bits.append("+critique" if attempt.critique else "-critique")
     if attempt.models:
@@ -312,7 +314,7 @@ def summarise(analysis: Run) -> Attempt:
         status=status,
         n_complete=sum(1 for v in status.values() if v == "complete"),
         running=runner.is_running(analysis.run_id),
-        mode=decisions_cfg.get("mode"),
+        mode=normalize_extraction_mode(decisions_cfg.get("mode")),
         models=list(decisions_cfg.get("models") or []),
         critique=bool(decisions_cfg.get("critique")),
         cap=(config.get("universes") or {}).get("cap"),

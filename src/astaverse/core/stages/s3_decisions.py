@@ -1,32 +1,15 @@
 """s3 — decision extraction: find the analytic forks.
 
-The novel stage, and the one with the most room to be wrong, so it is
-pluggable. Several extraction strategies are available because they have
-genuinely different blind spots:
+Three strategies, because they look at different artifacts:
 
-* `plan_diff`   K plans, extract where they disagree. Grounded in what
-                analysts actually do. Cannot see under-specification by
-                SILENCE — a step no plan describes produces no disagreement.
-* `plan_audit`  one plan, audited for what it leaves an implementer to
-                decide. Attacks the silence problem directly. No disagreement
-                signal to corroborate it.
-* `direct`      hypothesis + schema, no plans at all. One call, cheapest,
-                anchored on nothing. Tends toward textbook axes rather than
-                ones this study would really hit.
-* `schema_lint` walks the dataset's own column semantics and asks which
-                variables need orientation, scaling, or missingness choices.
-                Grounded in the data rather than in prose about it, which is
-                what it takes to catch a fork like "minimum pressure runs
-                opposite to the other severity components".
-* `union`       run several modes and merge. Motivated by the above: the
-                blind spots differ, so the union covers more than any one.
+* `sample_plans` sample K plans, extract where they disagree.
+* `audit_plan`   one plan, extract every choice an implementer still has to make.
+* `direct`      hypothesis + dataset only, no plans.
 
 `critique` composes with any of them: a second pass asking what is missing.
-
-Every mode is a function `(context, model) -> list[_DecisionResponse]`, so
-adding one is local. A `verdict_rule` decision is always injected afterwards —
-the experiments repo found the verdict rule to be an under-specification that
-never gets resolved, and it costs nothing to execute since it is post-hoc.
+A `verdict_rule` decision is always injected afterwards — it is an
+under-specification that never gets resolved in the plan, and it costs
+nothing to execute since it is post-hoc.
 """
 
 from __future__ import annotations
@@ -38,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from ...integrations.astra_io import write_astra_yaml
 from ...integrations.llm import DEFAULT_DECISION_MODEL, structured_call
+from ..config import normalize_extraction_mode
 from ..schemas import (
     Decision,
     DecisionKind,
@@ -51,18 +35,13 @@ from .s1_study import render_columns_markdown
 
 
 class ExtractionMode(str, Enum):
-    plan_diff = "plan_diff"
-    plan_audit = "plan_audit"
+    sample_plans = "sample_plans"
+    audit_plan = "audit_plan"
     direct = "direct"
-    schema_lint = "schema_lint"
-    union = "union"
 
-
-#: Modes combined by `union`, in the order their results are merged.
-UNION_MODES = [ExtractionMode.plan_diff, ExtractionMode.schema_lint, ExtractionMode.plan_audit]
 
 #: Modes that need stage 2 to have run.
-NEEDS_PLANS = {ExtractionMode.plan_diff, ExtractionMode.plan_audit}
+NEEDS_PLANS = {ExtractionMode.sample_plans, ExtractionMode.audit_plan}
 
 
 # --------------------------------------------------------------------------
@@ -229,42 +208,6 @@ are predicting where analysts would diverge.
   unless you say which models and which variables.
 """
 
-SCHEMA_LINT_PROMPT = """\
-Examine the dataset schema below and identify the **analytic decisions the
-data itself forces**, independent of any plan.
-
-## Hypothesis
-{hypothesis}
-
-## Dataset: {dataset_name} ({n_rows} rows)
-{description}
-
-{columns}
-
-Work through the columns and ask, specifically:
-
-1. **Orientation.** Does any variable run *opposite* in direction to related
-   ones — a minimum where others are maxima, a rank where lower is better, a
-   cost where others are benefits, a reverse-coded item? Combining such a
-   variable with others without aligning it silently produces a meaningless
-   composite. This is the single most commonly missed decision, because it is
-   obvious in hindsight and therefore never written down.
-2. **Scale and distribution.** Which variables are skewed, bounded, or counts,
-   such that the choice of transformation or model family is a real fork?
-3. **Missingness.** Which columns have missing values, and does dropping
-   versus imputing change who is in the sample?
-4. **Near-duplicate measures.** Where the data offers more than one
-   operationalisation of the same construct, which one is used is a decision.
-5. **Outliers and influence.** Which variables have extreme values that a
-   defensible analysis might exclude?
-
-Only raise a point where this dataset actually exhibits it — use the ranges,
-missing counts, and descriptions given. Do not invent generic advice.
-
-{output_spec}
-{rules}
-"""
-
 CRITIQUE_PROMPT = """\
 Here is a decision space that was extracted for the study below. Your job is
 to find what is MISSING.
@@ -318,16 +261,16 @@ def _run_mode(
         "rules": COMMON_RULES.format(max_decisions=ctx.max_decisions),
     }
 
-    if mode is ExtractionMode.plan_diff:
+    if mode is ExtractionMode.sample_plans:
         if not ctx.plans:
-            raise ValueError("mode 'plan_diff' needs stage 2 (plans) to have run")
+            raise ValueError("method 'sample_plans' needs the plans stage to have run")
         prompt = PLAN_DIFF_PROMPT.format(
             k=len(ctx.plans.plans), plans=ctx.rendered_plans, **common
         )
-    elif mode is ExtractionMode.plan_audit:
+    elif mode is ExtractionMode.audit_plan:
         plan = ctx.primary_plan
         if plan is None:
-            raise ValueError("mode 'plan_audit' needs stage 2 (plans) to have run")
+            raise ValueError("method 'audit_plan' needs the plans stage to have run")
         rendered = (
             f"**Objective:** {plan.objective}\n\n**Steps:**\n{plan.steps}\n\n"
             f"**Deliverables:**\n{plan.deliverables}"
@@ -335,10 +278,8 @@ def _run_mode(
         prompt = PLAN_AUDIT_PROMPT.format(plan=rendered, **common)
     elif mode is ExtractionMode.direct:
         prompt = DIRECT_PROMPT.format(**common)
-    elif mode is ExtractionMode.schema_lint:
-        prompt = SCHEMA_LINT_PROMPT.format(**common)
     else:
-        raise ValueError(f"'{mode}' is not a single-pass mode")
+        raise ValueError(f"unknown extraction mode '{mode}'")
 
     return _call(prompt, model, run_obj, f"s3_{mode.value}")
 
@@ -373,9 +314,9 @@ def _merge(
 ) -> tuple[list[_DecisionResponse], dict[str, list[str]]]:
     """Merge decisions from several passes, keyed by id.
 
-    Union the options rather than taking the first batch's, so a mode that
-    finds an extra option for a decision another mode already named still
-    contributes. Records which passes proposed each decision.
+    Union the options rather than taking the first batch's, so a second
+    model or a critique pass that finds an extra option still contributes.
+    Records which passes proposed each decision.
     """
     merged: dict[str, _DecisionResponse] = {}
     provenance: dict[str, list[str]] = {}
@@ -439,18 +380,16 @@ def run(
     run_obj: Run,
     model: str | None = None,
     max_decisions: int = 6,
-    mode: str | ExtractionMode = ExtractionMode.plan_diff,
+    mode: str | ExtractionMode = ExtractionMode.sample_plans,
     models: list[str] | None = None,
     critique: bool = False,
-    union_modes: list[str] | None = None,
 ) -> DecisionSpec:
     """Extract the decision space.
 
-    `models` with more than one entry runs the mode once per model and unions
-    the results — the same logic as `union` but across models rather than
-    strategies, and a direct answer to one model's blind spots.
+    `models` with more than one entry runs the mode once per model and merges
+    the results, covering one model's blind spots.
     """
-    mode = ExtractionMode(mode)
+    mode = ExtractionMode(normalize_extraction_mode(mode))
     model_list = models or [model or DEFAULT_DECISION_MODEL]
 
     study: StudySpec = run_obj.read_artifact("study", StudySpec)
@@ -458,30 +397,18 @@ def run(
     if run_obj.artifact_path("plans").exists():
         plans = run_obj.read_artifact("plans", PlanSet)
 
-    modes: list[ExtractionMode]
-    if mode is ExtractionMode.union:
-        modes = [ExtractionMode(m) for m in (union_modes or UNION_MODES)]
-    else:
-        modes = [mode]
-
-    # Drop plan-dependent modes when stage 2 has not run, rather than failing
-    # the whole extraction — unless that leaves nothing to do.
-    runnable = [m for m in modes if plans is not None or m not in NEEDS_PLANS]
-    for skipped in [m for m in modes if m not in runnable]:
-        run_obj.log("decisions", f"skipped mode '{skipped.value}': no plans artifact")
-    if not runnable:
+    if mode in NEEDS_PLANS and plans is None:
         raise ValueError(
             f"mode '{mode.value}' needs stage 2 (plans); run it, or use "
-            "'direct' / 'schema_lint', which do not"
+            "'direct', which does not"
         )
 
     ctx = Context(study=study, plans=plans, max_decisions=max_decisions)
 
     batches: list[tuple[str, list[_DecisionResponse]]] = []
-    for m in runnable:
-        for mdl in model_list:
-            source = m.value if len(model_list) == 1 else f"{m.value}@{mdl}"
-            batches.append((source, _run_mode(m, ctx, mdl, run_obj)))
+    for mdl in model_list:
+        source = mode.value if len(model_list) == 1 else f"{mode.value}@{mdl}"
+        batches.append((source, _run_mode(mode, ctx, mdl, run_obj)))
 
     found, provenance = _merge(batches)
 
@@ -565,7 +492,6 @@ def run(
     run_obj.record_stage(
         "decisions",
         mode=mode.value,
-        modes_run=[m.value for m in runnable],
         models=model_list,
         critique=critique,
         n_decisions=len(decisions),

@@ -90,7 +90,7 @@ def test_running_with_no_flags_preserves_a_saved_config(analysis):
         analysis,
         {
             "plans": {"k": 11, "model": "openai/custom"},
-            "decisions": {"mode": "schema_lint", "critique": True},
+            "decisions": {"mode": "direct", "critique": True},
             "universes": {"cap": 3},
         },
     )
@@ -103,7 +103,7 @@ def test_running_with_no_flags_preserves_a_saved_config(analysis):
     after = run_cfg.load(analysis)
     assert after.plans.k == 11
     assert after.plans.model == "openai/custom"
-    assert after.decisions.mode == "schema_lint"
+    assert after.decisions.mode == "direct"
     assert after.decisions.critique is True
     assert after.universes.cap == 3
 

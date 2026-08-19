@@ -128,17 +128,21 @@ def run(
     n_sampled = k
     if seed_plan:
         prompt += SEEDED_SUFFIX.format(seed=seed_plan)
-        n_sampled = max(k - 1, 1)
+        n_sampled = max(k - 1, 0)
 
-    responses = structured_call(
-        prompt,
-        _PlanResponse,
-        model,
-        system=SYSTEM,
-        temperature=temperature,
-        n=n_sampled,
-        log_dir=run_obj.root,
-        tag="s2_plans",
+    responses = (
+        structured_call(
+            prompt,
+            _PlanResponse,
+            model,
+            system=SYSTEM,
+            temperature=temperature,
+            n=n_sampled,
+            log_dir=run_obj.root,
+            tag="s2_plans",
+        )
+        if n_sampled
+        else []
     )
 
     plans: list[Plan] = []

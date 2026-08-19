@@ -18,6 +18,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from ...core import claims as claims_core
+from ...core import commands
 from ...core import config as run_cfg
 from ...core import runner
 from ...core.store import STAGES
@@ -120,7 +121,19 @@ def home() -> dict[str, Any]:
     return {"claims": claim_rows, "runs": run_rows, "datasets": dataset_rows}
 
 
+@router.get("/overview")
+def overview() -> dict[str, Any]:
+    """The interface vocabulary for the same durable claim/run model."""
+    data = home()
+    return {
+        "hypotheses": data["claims"],
+        "experiments": data["runs"],
+        "datasets": data["datasets"],
+    }
+
+
 @router.get("/claims/{claim_id}")
+@router.get("/hypotheses/{claim_id}")
 def claim_detail(claim_id: str) -> dict[str, Any]:
     claim = claims_core.get_claim(runs_dir(), claim_id)
     if claim is None:
@@ -143,9 +156,11 @@ def claim_detail(claim_id: str) -> dict[str, Any]:
 
 
 @router.get("/runs/{run_id}")
+@router.get("/experiments/{run_id}")
 def run_detail(run_id: str) -> dict[str, Any]:
     analysis = get_analysis(run_id)
     manifest = analysis.manifest()
+    config = run_cfg.load(analysis)
     return {
         "id": analysis.run_id,
         "claim_id": claims_core.claim_id(
@@ -156,7 +171,10 @@ def run_detail(run_id: str) -> dict[str, Any]:
         "seed": manifest.get("seed"),
         "status": analysis.status(),
         "stages": STAGES,
-        "config": run_cfg.load(analysis).model_dump(),
+        "config": config.model_dump(),
+        "review_before_execute": manifest.get("review_before_execute", True),
+        "decision_reviewed_at": manifest.get("decision_reviewed_at"),
+        "commands": commands.preview(config, run_id),
         "progress": runner.progress_for(run_id),
         "artifacts": {stage: artifact(analysis, stage) for stage in STAGES},
         "history": analysis.history(),
@@ -183,3 +201,13 @@ def run_progress(run_id: str) -> dict[str, Any]:
 def list_runs() -> list[dict[str, Any]]:
     """Flat list of runs — the CLI's `ls`, for anything that wants it."""
     return home()["runs"]
+
+
+@router.get("/experiments")
+def list_experiments() -> list[dict[str, Any]]:
+    return home()["runs"]
+
+
+@router.get("/hypotheses")
+def list_hypotheses() -> list[dict[str, Any]]:
+    return home()["claims"]

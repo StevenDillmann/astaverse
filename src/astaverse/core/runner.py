@@ -50,7 +50,9 @@ def run_stage(run_obj: Run, stage: str) -> None:
         )
         s2_plans.run(
             run_obj,
-            k=cfg.plans.k,
+            # audit_plan is intentionally about one plan. When a seed exists
+            # that one plan is the seed; otherwise sample exactly one.
+            k=1 if cfg.decisions.mode == "audit_plan" else cfg.plans.k,
             model=cfg.plans.model,
             temperature=cfg.plans.temperature,
             seed_plan=seed,
@@ -64,7 +66,6 @@ def run_stage(run_obj: Run, stage: str) -> None:
             models=d.models or None,
             mode=d.mode,
             critique=d.critique,
-            union_modes=d.union_modes or None,
             max_decisions=d.max_decisions,
         )
 
@@ -162,7 +163,7 @@ def run_sequence(
     """
     cfg = run_config.load(run_obj)
     target = through or cfg.through
-    planned = STAGES[: STAGES.index(target) + 1]
+    planned = cfg.stages_through(target)
     status = run_obj.status()
 
     progress = Progress(
@@ -212,7 +213,7 @@ def start_sequence(run_obj: Run, through: str | None = None, force: bool = False
 
     cfg = run_config.load(run_obj)
     target = through or cfg.through
-    planned = STAGES[: STAGES.index(target) + 1]
+    planned = cfg.stages_through(target)
     with _LOCK:
         _PROGRESS[run_obj.run_id] = Progress(
             run_id=run_obj.run_id,

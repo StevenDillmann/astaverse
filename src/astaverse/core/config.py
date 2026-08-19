@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .store import STAGES, Run
 
@@ -31,7 +31,21 @@ Stage = Literal[
     "study", "plans", "decisions", "universes", "task", "verdicts", "execute", "surprisal"
 ]
 
-ExtractionMode = Literal["plan_diff", "plan_audit", "direct", "schema_lint", "union"]
+ExtractionMode = Literal["sample_plans", "audit_plan", "direct"]
+
+EXTRACTION_MODE_ALIASES = {
+    "plan_diff": "sample_plans",
+    "plan_audit": "audit_plan",
+    # Removed prototype modes remain readable. Their closest supported public
+    # method is used if an old experiment is deliberately re-run.
+    "schema_lint": "direct",
+    "union": "sample_plans",
+}
+
+
+def normalize_extraction_mode(value: Any) -> Any:
+    """Translate pre-interface mode names without breaking saved experiments."""
+    return EXTRACTION_MODE_ALIASES.get(value, value)
 
 
 class PlansConfig(BaseModel):
@@ -59,13 +73,12 @@ class DecisionsConfig(BaseModel):
     """Stage 3 — finding the analytic forks."""
 
     mode: ExtractionMode = Field(
-        "plan_diff",
+        "sample_plans",
         description=(
-            "Extraction strategy. plan_diff: where sampled plans disagree, blind to "
-            "steps no plan mentions. plan_audit: one plan, audited for what it leaves "
-            "unsaid. direct: hypothesis and schema only. schema_lint: what the data "
-            "itself forces, such as a variable that runs opposite to its peers. "
-            "union: several merged, since their blind spots differ."
+            "How to find the analytic decisions. sample_plans: sample K plans and "
+            "extract where they disagree. audit_plan: audit one plan for every "
+            "choice an implementer still has to make. direct: hypothesis and "
+            "dataset only, no plans."
         ),
     )
     models: list[str] = Field(
@@ -76,16 +89,17 @@ class DecisionsConfig(BaseModel):
         False,
         description="Add a second pass that asks what the extraction missed.",
     )
-    union_modes: list[str] = Field(
-        default_factory=list,
-        description="With mode=union, which strategies to combine. Empty means a sensible default set.",
-    )
     max_decisions: int = Field(
         6,
         ge=1,
         le=20,
         description="Cap on extracted decisions. Each one multiplies the grid.",
     )
+
+    @field_validator("mode", mode="before")
+    @classmethod
+    def migrate_mode_name(cls, value: Any) -> Any:
+        return normalize_extraction_mode(value)
 
 
 class UniversesConfig(BaseModel):
@@ -158,10 +172,16 @@ class RunConfig(BaseModel):
         ),
     )
 
-    def stages_through(self) -> list[str]:
-        if self.through not in STAGES:
-            raise ValueError(f"unknown stage '{self.through}'")
-        return STAGES[: STAGES.index(self.through) + 1]
+    def stages_through(self, target: str | None = None) -> list[str]:
+        target = target or self.through
+        if target not in STAGES:
+            raise ValueError(f"unknown stage '{target}'")
+        stages = STAGES[: STAGES.index(target) + 1]
+        # Direct extraction deliberately has no plan-generation cost. An
+        # explicit target of "plans" still runs that stage when requested.
+        if self.decisions.mode == "direct" and target != "plans":
+            stages = [stage for stage in stages if stage != "plans"]
+        return stages
 
     def spends_money(self) -> bool:
         return "execute" in self.stages_through()
@@ -180,12 +200,15 @@ def save(analysis: Run, config: RunConfig) -> RunConfig:
 
 def update(analysis: Run, patch: dict[str, Any]) -> RunConfig:
     """Merge a partial config, section by section."""
-    current = load(analysis).model_dump()
+    manifest = analysis.manifest()
+    current = RunConfig.model_validate(manifest.get("config") or {}).model_dump()
     for section, values in patch.items():
         if isinstance(values, dict) and isinstance(current.get(section), dict):
             current[section].update(values)
         else:
             current[section] = values
+    manifest.pop("decision_reviewed_at", None)
+    analysis.write_manifest(manifest)
     return save(analysis, RunConfig.model_validate(current))
 
 

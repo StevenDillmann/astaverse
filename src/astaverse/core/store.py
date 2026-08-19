@@ -131,6 +131,8 @@ class Run:
         able to go back and compare against.
         """
         m = self.manifest()
+        if STAGES.index(stage) <= STAGES.index("decisions"):
+            m.pop("decision_reviewed_at", None)
         m.setdefault("stages", {})[stage] = {"completed_at": utcnow(), **extra}
 
         superseded = [
@@ -168,10 +170,18 @@ class Run:
         return list(reversed(self.manifest().get("history", [])))
 
     def status(self) -> dict[str, str]:
-        done = self.manifest().get("stages", {})
+        manifest = self.manifest()
+        done = manifest.get("stages", {})
+        raw_mode = ((manifest.get("config") or {}).get("decisions") or {}).get(
+            "mode", "sample_plans"
+        )
+        direct = raw_mode == "direct"
         out: dict[str, str] = {}
         blocked = False
         for stage in STAGES:
+            if stage == "plans" and direct:
+                out[stage] = "skipped"
+                continue
             if stage in done:
                 out[stage] = "complete"
             elif not blocked:

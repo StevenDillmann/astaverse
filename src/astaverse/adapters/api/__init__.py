@@ -8,7 +8,7 @@ cannot diverge in behaviour, and both read their options from the same
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -35,6 +35,13 @@ if (WEB_DIST / "assets").is_dir():
 
     @app.get("/")
     def index() -> FileResponse:
+        return FileResponse(WEB_DIST / "index.html")
+
+    @app.get("/{full_path:path}")
+    def spa_fallback(full_path: str) -> FileResponse:
+        """Client-side routes all boot the same interface bundle."""
+        if full_path.startswith("api/"):
+            raise HTTPException(404, "no such API endpoint")
         return FileResponse(WEB_DIST / "index.html")
 
 else:

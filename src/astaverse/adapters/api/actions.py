@@ -16,8 +16,9 @@ from pydantic import BaseModel
 from ...core import claims as claims_core
 from ...core import config as run_cfg
 from ...core import runner
+from ...core import settings as app_settings
 from ...core.stages import s1_study, s2_plans
-from ...core.store import STAGES, Run
+from ...core.store import STAGES, Run, utcnow
 from ...integrations import plans_index
 from .deps import get_analysis, runs_dir
 
@@ -33,20 +34,28 @@ class NewClaim(BaseModel):
     seed_dataset: str | None = None
     seed_normalized_id: str | None = None
     config: dict[str, Any] | None = None
+    review_before_execute: bool | None = None
 
 
 class NewAttempt(BaseModel):
     """Another attempt at an existing claim, under a different configuration."""
 
     config: dict[str, Any] | None = None
+    review_before_execute: bool | None = None
 
 
 @router.post("/claims")
+@router.post("/hypotheses")
 def create_claim(request: NewClaim) -> dict[str, Any]:
     try:
         analysis = Run.create(runs_dir(), request.hypothesis, request.dataset)
+        app_settings.apply_to_manifest(analysis, app_settings.load(runs_dir()))
         if request.config:
             run_cfg.update(analysis, request.config)
+        if request.review_before_execute is not None:
+            manifest = analysis.manifest()
+            manifest["review_before_execute"] = request.review_before_execute
+            analysis.write_manifest(manifest)
         if request.seed_dataset and request.seed_normalized_id:
             record = plans_index.get(request.seed_dataset, request.seed_normalized_id)
             if record is None:
@@ -70,6 +79,7 @@ def create_claim(request: NewClaim) -> dict[str, Any]:
 
 
 @router.post("/claims/{claim_id}/attempts")
+@router.post("/hypotheses/{claim_id}/experiments")
 def create_attempt(claim_id: str, request: NewAttempt | None = None) -> dict[str, Any]:
     """Start another attempt, inheriting the last one's configuration.
 
@@ -89,6 +99,10 @@ def create_attempt(claim_id: str, request: NewAttempt | None = None) -> dict[str
         run_cfg.save(analysis, run_cfg.load(previous))
         if request and request.config:
             run_cfg.update(analysis, request.config)
+        if request and request.review_before_execute is not None:
+            manifest = analysis.manifest()
+            manifest["review_before_execute"] = request.review_before_execute
+            analysis.write_manifest(manifest)
         if previous_manifest.get("seed"):
             manifest = analysis.manifest()
             manifest["seed"] = previous_manifest["seed"]
@@ -100,7 +114,16 @@ def create_attempt(claim_id: str, request: NewAttempt | None = None) -> dict[str
     return {"run_id": analysis.run_id, "claim_id": claim_id}
 
 
+@router.put("/settings")
+def set_settings(patch: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return app_settings.update(runs_dir(), patch).model_dump()
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(400, str(exc)) from exc
+
+
 @router.put("/runs/{run_id}/config")
+@router.put("/experiments/{run_id}/config")
 def set_config(run_id: str, patch: dict[str, Any]) -> dict[str, Any]:
     """Merge a partial configuration, section by section."""
     analysis = get_analysis(run_id)
@@ -111,7 +134,8 @@ def set_config(run_id: str, patch: dict[str, Any]) -> dict[str, Any]:
 
 
 @router.post("/runs/{run_id}/stages/{stage}")
-def run_stage(run_id: str, stage: str) -> dict[str, Any]:
+@router.post("/experiments/{run_id}/stages/{stage}")
+def run_stage(run_id: str, stage: str, confirm: bool = False) -> dict[str, Any]:
     if stage not in STAGES:
         raise HTTPException(404, f"unknown stage '{stage}'")
     analysis = get_analysis(run_id)
@@ -122,7 +146,9 @@ def run_stage(run_id: str, stage: str) -> dict[str, Any]:
     # A disabled button is not a guard: the client can be stale, and execute
     # spends real money.
     status = analysis.status()
-    missing = [s for s in STAGES[: STAGES.index(stage)] if status.get(s) != "complete"]
+    cfg = run_cfg.load(analysis)
+    required = cfg.stages_through(stage)
+    missing = [s for s in required[:-1] if status.get(s) != "complete"]
     if missing:
         raise HTTPException(
             409,
@@ -133,6 +159,15 @@ def run_stage(run_id: str, stage: str) -> dict[str, Any]:
                     f"{'has' if len(missing) == 1 else 'have'} not completed"
                 ),
                 "missing": missing,
+            },
+        )
+    if stage == "execute" and not cfg.execute.dry_run and not confirm:
+        raise HTTPException(
+            409,
+            detail={
+                "stage": stage,
+                "error": "execution launches billable coding agents; confirm explicitly",
+                "requires_confirmation": True,
             },
         )
 
@@ -152,15 +187,55 @@ def run_stage(run_id: str, stage: str) -> dict[str, Any]:
 
 
 @router.post("/runs/{run_id}/run")
-def run_all(run_id: str, through: str | None = None, force: bool = False) -> dict[str, Any]:
+@router.post("/experiments/{run_id}/run")
+def run_all(
+    run_id: str,
+    through: str | None = None,
+    force: bool = False,
+    confirm: bool = False,
+) -> dict[str, Any]:
     """Run every stage up to the configured target, in the background."""
     analysis = get_analysis(run_id)
     try:
-        return runner.start_sequence(analysis, through=through, force=force)
+        cfg = run_cfg.load(analysis)
+        target = through or cfg.through
+        manifest = analysis.manifest()
+        if (
+            manifest.get("review_before_execute", True)
+            and not manifest.get("decision_reviewed_at")
+            and STAGES.index(target) > STAGES.index("decisions")
+        ):
+            target = "decisions"
+        if (
+            "execute" in cfg.stages_through(target)
+            and not cfg.execute.dry_run
+            and not confirm
+        ):
+            raise HTTPException(
+                409,
+                detail={
+                    "stage": "execute",
+                    "error": "execution launches billable coding agents; confirm explicitly",
+                    "requires_confirmation": True,
+                },
+            )
+        return runner.start_sequence(analysis, through=target, force=force)
     except RuntimeError as exc:
         raise HTTPException(409, detail={"error": str(exc)}) from exc
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
+
+
+@router.post("/experiments/{run_id}/review")
+def approve_decisions(run_id: str) -> dict[str, Any]:
+    """Approve the extracted decision space before universe generation."""
+    analysis = get_analysis(run_id)
+    if analysis.status().get("decisions") != "complete":
+        raise HTTPException(409, detail={"error": "decision extraction is not complete"})
+    manifest = analysis.manifest()
+    manifest["decision_reviewed_at"] = utcnow()
+    analysis.write_manifest(manifest)
+    return {"id": run_id, "decision_reviewed_at": manifest["decision_reviewed_at"]}
 
 
 @router.post("/runs/{run_id}/seed")

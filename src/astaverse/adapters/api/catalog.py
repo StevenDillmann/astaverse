@@ -7,15 +7,26 @@ from the same definition the CLI generates its flags from.
 
 from __future__ import annotations
 
+import os
+import shutil
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, Field
 
+from ...core import commands
 from ...core import config as run_cfg
+from ...core import settings as app_settings
 from ...core.store import STAGES
 from ...integrations import datasets, plans_index
+from .deps import runs_dir
 
 router = APIRouter(prefix="/api", tags=["catalog"])
+
+
+class CommandPreviewRequest(BaseModel):
+    config: dict[str, Any] = Field(default_factory=dict)
+    experiment_id: str = "<experiment-id>"
 
 
 @router.get("/stages")
@@ -33,6 +44,25 @@ def config_schema() -> dict[str, Any]:
     return run_cfg.json_schema()
 
 
+@router.get("/settings")
+def settings() -> dict[str, Any]:
+    """Application defaults and non-secret integration readiness."""
+    saved = app_settings.load(runs_dir())
+    return {
+        **saved.model_dump(),
+        "providers": {
+            "openai": bool(os.environ.get("OPENAI_API_KEY")),
+            "gemini": bool(os.environ.get("GEMINI_API_KEY")),
+            "harbor": shutil.which("harbor") is not None,
+        },
+    }
+
+
+@router.post("/command-preview")
+def command_preview(request: CommandPreviewRequest) -> dict[str, Any]:
+    return commands.preview(request.config, request.experiment_id)
+
+
 @router.get("/datasets")
 def list_datasets() -> list[dict[str, Any]]:
     out = []
@@ -41,6 +71,16 @@ def list_datasets() -> list[dict[str, Any]]:
         entry["n_autodiscovery_hypotheses"] = plans_index.count_for_dataset(d.name)
         out.append(entry)
     return out
+
+
+@router.get("/datasets/{name}")
+def dataset_detail(name: str) -> dict[str, Any]:
+    found = next((dataset for dataset in datasets.discover() if dataset.name == name), None)
+    if found is None:
+        raise HTTPException(404, f"no such dataset: {name}")
+    entry = found.to_dict()
+    entry["n_autodiscovery_hypotheses"] = plans_index.count_for_dataset(name)
+    return entry
 
 
 @router.get("/datasets/{name}/hypotheses")
@@ -71,25 +111,17 @@ def list_extraction_modes() -> list[dict[str, Any]]:
     visible at the point of choosing.
     """
     blurbs = {
-        "plan_diff": (
-            "Where K sampled plans disagree. Grounded in what analysts do; "
-            "blind to steps no plan mentions at all."
+        "sample_plans": (
+            "Sample K plans and extract where they disagree. Grounded in what "
+            "analysts do; blind to steps no plan mentions at all."
         ),
-        "plan_audit": (
-            "One plan, audited for what it leaves an implementer to decide. "
+        "audit_plan": (
+            "One plan, extract every choice an implementer still has to make. "
             "Targets under-specification by silence; no disagreement signal."
         ),
         "direct": (
-            "Hypothesis and schema only, no plans. Cheapest; tends toward "
+            "Hypothesis and dataset only, no plans. Cheapest; tends toward "
             "textbook axes rather than ones this study would hit."
-        ),
-        "schema_lint": (
-            "What the data itself forces — orientation, scale, missingness. "
-            "Catches forks that appear in code but never in plan text."
-        ),
-        "union": (
-            "Several modes merged. The blind spots differ, so the union covers "
-            "more than any single mode; costs one call per mode."
         ),
     }
     schema = run_cfg.json_schema()
@@ -98,7 +130,7 @@ def list_extraction_modes() -> list[dict[str, Any]]:
         {
             "id": m,
             "description": blurbs.get(m, ""),
-            "needs_plans": m in {"plan_diff", "plan_audit"},
+            "needs_plans": m in {"sample_plans", "audit_plan"},
         }
         for m in modes
     ]

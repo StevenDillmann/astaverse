@@ -6,8 +6,8 @@ and the UI cannot drift: they read the same schema.
 
     astaverse new --hypothesis "..." --dataset hurricane
     astaverse ls
-    astaverse run <id> --decisions.mode schema_lint --universes.cap 12
-    astaverse stage <id> decisions --decisions.mode union
+    astaverse run <id> --decisions.mode direct --universes.cap 12
+    astaverse stage <id> decisions --decisions.mode audit_plan
     astaverse serve
 
 The verbs are hand-chosen because they are a small, stable vocabulary; the
@@ -27,6 +27,7 @@ from dotenv import load_dotenv
 from ..core import claims as claims_core
 from ..core import config as run_cfg
 from ..core import runner
+from ..core import settings as app_settings
 from ..core.config import RunConfig
 from ..core.stages import s1_study, s2_plans
 from ..core.store import STAGES, Run
@@ -138,6 +139,7 @@ def new(
         description: Overrides the dataset's own description, if it has one.
     """
     analysis = Run.create(_runs_dir(), hypothesis, dataset)
+    app_settings.apply_to_manifest(analysis, app_settings.load(_runs_dir()))
     _apply_cli_config(analysis, config)
     spec = s1_study.run(analysis, hypothesis, dataset, description)
     print(f"{GREEN}created{OFF} {analysis.run_id}")
@@ -153,17 +155,20 @@ def ls() -> None:
     for analysis in analyses:
         status = analysis.status()
         done = sum(1 for v in status.values() if v == "complete")
-        pips = "".join("*" if status[s] == "complete" else "." for s in STAGES)
+        pips = "".join(
+            "*" if status[s] == "complete" else "-" if status[s] == "skipped" else "."
+            for s in STAGES
+        )
         manifest = analysis.manifest()
         print(f"{pips} {done}/{len(STAGES)}  {analysis.run_id}")
         print(f"{DIM}          {manifest['hypothesis'][:88]}{OFF}")
 
 
-def claims() -> None:
-    """List claims — a hypothesis about a dataset — and their attempts.
+def hypotheses() -> None:
+    """List hypotheses — each coupled to a dataset — and their experiments.
 
-    A claim groups every run of the same hypothesis on the same dataset, so
-    attempts under different configurations sit together and can be compared.
+    A hypothesis groups every experiment using the same hypothesis text and
+    dataset, so different methods can be compared.
     """
     found = claims_core.all_claims(_runs_dir())
     if not found:
@@ -171,7 +176,7 @@ def claims() -> None:
         return
     for claim in found:
         print(f"{BOLD}{claim.id}{OFF}  {claim.hypothesis[:76]}")
-        print(f"{DIM}             {claim.dataset_name} · {len(claim.attempts)} attempt(s){OFF}")
+        print(f"{DIM}             {claim.dataset_name} · {len(claim.attempts)} experiment(s){OFF}")
         for a in claim.attempts:
             bits = [f"mode={a.mode or 'default'}"]
             if a.critique:
@@ -194,13 +199,13 @@ def claims() -> None:
         print()
 
 
-def again(analysis_id: str, /, config: Config = RunConfig()) -> None:
-    """Start another attempt at the same claim, under a different config.
+def experiment(analysis_id: str, /, config: Config = RunConfig()) -> None:
+    """Create another experiment for the same hypothesis and dataset.
 
-    Inherits the previous configuration, so a comparison differs only in what
+    Inherits the previous configuration, so experiments differ only in what
     you deliberately change:
 
-        astaverse again <id> --decisions.mode schema_lint
+        astaverse experiment <id> --decisions.mode direct
 
     Args:
         analysis_id: The run to repeat.
@@ -217,8 +222,8 @@ def again(analysis_id: str, /, config: Config = RunConfig()) -> None:
         fresh["seed"] = manifest["seed"]
         analysis.write_manifest(fresh)
     s1_study.run(analysis, manifest["hypothesis"], manifest["dataset"])
-    print(f"{GREEN}created{OFF} {analysis.run_id}")
-    print(f"{DIM}  another attempt at claim {claims_core.claim_id(manifest['hypothesis'], manifest['dataset'])}{OFF}")
+    print(f"{GREEN}created experiment{OFF} {analysis.run_id}")
+    print(f"{DIM}  hypothesis {claims_core.claim_id(manifest['hypothesis'], manifest['dataset'])}{OFF}")
     _echo_config(run_cfg.load(analysis))
 
 
@@ -229,7 +234,12 @@ def show(analysis_id: str, /) -> None:
     print(f"{BOLD}{analysis.run_id}{OFF}")
     print(f"  hypothesis  {manifest['hypothesis']}")
     print(f"  dataset     {manifest['dataset']}\n")
-    marks = {"complete": f"{GREEN}*{OFF}", "ready": ">", "pending": " "}
+    marks = {
+        "complete": f"{GREEN}*{OFF}",
+        "ready": ">",
+        "pending": " ",
+        "skipped": f"{DIM}-{OFF}",
+    }
     for stage, state in analysis.status().items():
         print(f"  {marks[state]} {stage}")
     print()
@@ -245,6 +255,24 @@ def configure(analysis_id: str, /, config: Config = RunConfig()) -> None:
     else:
         print(f"{DIM}nothing to change; showing current configuration{OFF}")
     _echo_config(run_cfg.load(analysis))
+
+
+def defaults(config: Config = RunConfig(), review_before_execute: bool | None = None) -> None:
+    """Set defaults copied into every new experiment."""
+    current = app_settings.load(_runs_dir())
+    patch = _explicit_patch(config)
+    payload: dict[str, Any] = {}
+    if patch:
+        payload["default_experiment"] = patch
+    if review_before_execute is not None:
+        payload["review_before_execute"] = review_before_execute
+    if payload:
+        current = app_settings.update(_runs_dir(), payload)
+        print(f"{GREEN}saved defaults{OFF}")
+    _echo_config(current.default_experiment)
+    print(
+        f"{DIM}  review     {'before execution' if current.review_before_execute else 'fully automatic'}{OFF}"
+    )
 
 
 def stage(analysis_id: str, name: str, /, config: Config = RunConfig()) -> None:
@@ -346,10 +374,15 @@ def main() -> None:
         {
             "new": new,
             "ls": ls,
-            "claims": claims,
-            "again": again,
+            "hypotheses": hypotheses,
+            "experiment": experiment,
+            # Compatibility aliases for scripts written before the interface
+            # vocabulary was introduced.
+            "claims": hypotheses,
+            "again": experiment,
             "show": show,
             "config": configure,
+            "defaults": defaults,
             "stage": stage,
             "run": run,
             "seed": seed,

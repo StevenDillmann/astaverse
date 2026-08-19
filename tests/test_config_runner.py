@@ -61,12 +61,23 @@ def test_defaults_stop_before_spending_money(run_obj):
 
 
 def test_update_merges_sections_rather_than_replacing(run_obj):
-    run_config.update(run_obj, {"decisions": {"mode": "schema_lint"}})
+    run_config.update(run_obj, {"decisions": {"mode": "direct"}})
     run_config.update(run_obj, {"decisions": {"critique": True}})
     cfg = run_config.load(run_obj)
     # The second update must not have discarded the first.
-    assert cfg.decisions.mode == "schema_lint"
+    assert cfg.decisions.mode == "direct"
     assert cfg.decisions.critique is True
+
+
+def test_old_extraction_mode_names_are_migrated(run_obj):
+    run_config.update(run_obj, {"decisions": {"mode": "plan_diff"}})
+    assert run_config.load(run_obj).decisions.mode == "sample_plans"
+    run_config.update(run_obj, {"decisions": {"mode": "plan_audit"}})
+    assert run_config.load(run_obj).decisions.mode == "audit_plan"
+    run_config.update(run_obj, {"decisions": {"mode": "schema_lint"}})
+    assert run_config.load(run_obj).decisions.mode == "direct"
+    run_config.update(run_obj, {"decisions": {"mode": "union"}})
+    assert run_config.load(run_obj).decisions.mode == "sample_plans"
 
 
 def test_config_survives_a_reload(run_obj, runs_dir):
@@ -122,6 +133,31 @@ def test_sequence_skips_completed_stages(run_obj, monkeypatch):
     assert ran == ["plans"]
     assert progress.failed is None
     assert progress.finished
+
+
+def test_direct_sequence_skips_plan_generation(run_obj, monkeypatch):
+    ran: list[str] = []
+    monkeypatch.setattr(runner, "run_stage", lambda r, s: ran.append(s))
+    run_config.update(run_obj, {"decisions": {"mode": "direct"}})
+
+    progress = runner.run_sequence(run_obj, through="universes")
+
+    assert ran == ["decisions", "universes"]
+    assert "plans" not in progress.pending
+
+
+def test_audit_plan_samples_exactly_one_plan(run_obj, monkeypatch):
+    seen = {}
+
+    def fake_plans(run, k=None, model=None, temperature=None, seed_plan=None):
+        seen["k"] = k
+
+    monkeypatch.setattr(runner.s2_plans, "run", fake_plans)
+    run_config.update(run_obj, {"decisions": {"mode": "audit_plan"}, "plans": {"k": 9}})
+
+    runner.run_stage(run_obj, "plans")
+
+    assert seen["k"] == 1
 
 
 def test_sequence_stops_at_the_first_failure(run_obj, monkeypatch):
