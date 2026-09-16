@@ -7,7 +7,7 @@ const config = {
   decisions: { mode: "sample_plans", models: [], critique: false, max_decisions: 6 },
   universes: { cap: 24, include: [], exclude: [] },
   execute: { agent: "terminus-2", models: [], dry_run: false },
-  surprisal: { model: null, n_samples: 5 },
+  conclusion: { model: null },
   through: "universes",
 };
 
@@ -33,6 +33,28 @@ beforeEach(() => {
                 description: "Atlantic hurricanes",
               },
             ]
+          : url.endsWith("/hypotheses")
+            ? [
+                {
+                  id: "a78765339d4b",
+                  hypothesis: "Feminine hurricane names cause more deaths.",
+                  dataset_name: "hurricane",
+                  n_attempts: 1,
+                  running: false,
+                  support: {
+                    verdict: null,
+                    rate_min: null,
+                    rate_max: null,
+                    n_scored: 0,
+                    n_attempts: 1,
+                    corroborated: false,
+                  },
+                  fragility_range: null,
+                  agreement: null,
+                  n_unique_decisions: 0,
+                  updated_at: "2026-08-19T00:00:00Z",
+                },
+              ]
           : url.endsWith("/extraction-modes")
             ? [
                 { id: "sample_plans", description: "Compare sampled plans.", needs_plans: true },
@@ -66,19 +88,31 @@ describe("NewExperimentPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Audit one plan/ }));
     expect(
-      screen.getByText(/AstaVerse will generate one plan/),
+      screen.getByText(/AstaVerse will generate one fresh plan/),
     ).toBeInTheDocument();
     expect(screen.queryByText("Plans to sample")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Direct extraction/ }));
     await waitFor(() =>
-      expect(screen.queryByText(/AstaVerse will generate one plan/)).not.toBeInTheDocument(),
+      expect(screen.queryByText(/AstaVerse will generate one fresh plan/)).not.toBeInTheDocument(),
     );
   });
 
   it("renders the live CLI preview returned by the API", async () => {
     render(<NewExperimentPage />);
-    await screen.findByText("CLI equivalent");
-    expect(screen.getByText(/astaverse run <experiment-id>/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        (content, element) =>
+          element?.tagName === "CODE" && content.includes("astaverse run"),
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("offers the conclusion as an automatic pipeline target", async () => {
+    render(<NewExperimentPage />);
+    const label = await screen.findByText("Run automatically until");
+    const select = label.closest("label")?.querySelector("select");
+    expect(select?.querySelector('option[value="conclusion"]')).not.toBeNull();
+    expect(select?.querySelector('option[value="surprisal"]')).toBeNull();
   });
 });

@@ -7,7 +7,8 @@ export type Stage =
   | "task"
   | "execute"
   | "verdicts"
-  | "surprisal";
+  | "conclusion"
+  | "refinement";
 
 export type StageState = "complete" | "ready" | "pending" | "skipped";
 
@@ -25,7 +26,7 @@ export interface DecisionsConfig {
 }
 
 export interface UniversesConfig {
-  cap: number;
+  cap: number | null;
   include: string[];
   exclude: string[];
 }
@@ -36,9 +37,8 @@ export interface ExecuteConfig {
   dry_run: boolean;
 }
 
-export interface SurprisalConfig {
+export interface ConclusionConfig {
   model: string | null;
-  n_samples: number;
 }
 
 export interface RunConfig {
@@ -46,7 +46,7 @@ export interface RunConfig {
   decisions: DecisionsConfig;
   universes: UniversesConfig;
   execute: ExecuteConfig;
-  surprisal: SurprisalConfig;
+  conclusion: ConclusionConfig;
   through: Stage;
 }
 
@@ -74,10 +74,15 @@ export interface HypothesisRow {
 
 export interface ExperimentRow {
   id: string;
+  /** The short id shown to people — EXP-00014. Null only for a run predating numbering. */
+  number: number | null;
   claim_id: string;
   hypothesis: string;
   dataset_name: string;
   config_label: string;
+  mode: string | null;
+  critique: boolean | null;
+  cap: number | null;
   status: Record<Stage, StageState>;
   n_complete: number;
   n_stages: number;
@@ -85,9 +90,36 @@ export interface ExperimentRow {
   n_universes: number | null;
   coverage: number | null;
   support_rate: number | null;
-  fragility: number | null;
-  joint_surprisal: number | null;
   created_at: string;
+}
+
+export interface DatasetColumn {
+  name: string;
+  dtype: string;
+  description?: string | null;
+  n_missing?: number | null;
+  min?: number | null;
+  max?: number | null;
+  samples?: unknown[];
+  std?: number | null;
+  num_unique_values?: number | null;
+}
+
+export interface DatasetPreview {
+  name: string;
+  n_rows: number | null;
+  n_columns: number;
+  description?: string | null;
+  columns: DatasetColumn[];
+  available: boolean;
+}
+
+export interface DatasetRows {
+  name: string;
+  columns: string[];
+  rows: string[][];
+  n_rows: number | null;
+  limit: number;
 }
 
 export interface DatasetRow {
@@ -98,10 +130,11 @@ export interface DatasetRow {
   n_rows: number | null;
   n_columns: number | null;
   columns?: string[];
+  fields?: DatasetColumn[];
   description?: string | null;
-  research_questions?: string[];
-  research_question?: string | null;
   n_claims?: number;
+  n_hypotheses?: number;
+  n_experiments?: number;
   n_attempts?: number;
   n_fragile?: number;
   n_available_hypotheses?: number;
@@ -116,6 +149,7 @@ export interface Overview {
 
 export interface Attempt {
   id: string;
+  number: number | null;
   created_at: string;
   status: Record<Stage, StageState>;
   n_complete: number;
@@ -131,8 +165,6 @@ export interface Attempt {
   decisions: string[];
   n_grid: number | null;
   verdicts: Record<string, number>;
-  joint_surprisal: number | null;
-  fragility: number | null;
   top_flip: string | null;
   top_flip_rate: number | null;
   coverage: number | null;
@@ -174,6 +206,7 @@ export interface Progress {
 
 export interface ExperimentDetail {
   id: string;
+  number: number | null;
   claim_id: string;
   hypothesis: string;
   dataset: string;
@@ -189,9 +222,14 @@ export interface ExperimentDetail {
   history: Array<Record<string, unknown>>;
 }
 
+export type ArchiveKind = "dataset" | "hypothesis" | "experiment";
+
 export interface AppSettings {
   default_experiment: RunConfig;
   review_before_execute: boolean;
+  archived_datasets: string[];
+  archived_hypotheses: string[];
+  archived_experiments: string[];
   providers: {
     openai: boolean;
     gemini: boolean;

@@ -4,6 +4,7 @@ import { api } from "../api";
 import { ErrorState, Loading, PageHeader } from "../components";
 import { useAsync } from "../hooks";
 import type { AppSettings, ExtractionMethod, RunConfig } from "../types";
+import { parseCap } from "../ui";
 
 export function SettingsPage() {
   const { data, error, loading, reload, setData } = useAsync(api.settings, []);
@@ -129,16 +130,17 @@ export function SettingsPage() {
                 }
               />
             </Field>
-            <Field label="Universe cap">
+            <Field label="Universe cap" hint="Leave empty to run the whole grid.">
               <input
                 type="number"
                 min={1}
                 max={512}
-                value={config.universes.cap}
+                placeholder="No cap"
+                value={config.universes.cap ?? ""}
                 onChange={(event) =>
                   updateConfig({
                     ...config,
-                    universes: { ...config.universes, cap: Number(event.target.value) },
+                    universes: { ...config.universes, cap: parseCap(event.target.value) },
                   })
                 }
               />

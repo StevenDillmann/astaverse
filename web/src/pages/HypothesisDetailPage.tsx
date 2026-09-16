@@ -1,131 +1,215 @@
-import { ArrowLeft, GitCompareArrows, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronDown,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
 import { api } from "../api";
 import {
-  Badge,
-  EmptyState,
+  ArchiveRow,
+  DatasetCard,
   ErrorState,
   Loading,
-  Metric,
   PageHeader,
-  RowLink,
 } from "../components";
-import { navigate, useAsync } from "../hooks";
-import { formatDate, formatPercent } from "../ui";
+import { isVisibleExperiment } from "../focus";
+import { navigate, useAsync, useBackTarget } from "../hooks";
+import { formatDate, formatExperimentId } from "../ui";
 
 export function HypothesisDetailPage({ id }: { id: string }) {
-  const { data, error, loading, reload } = useAsync(() => api.hypothesis(id), [id]);
+  const back = useBackTarget();
+  const [datasetOpen, setDatasetOpen] = useState(true);
+  const [experimentsOpen, setExperimentsOpen] = useState(true);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const { data: pageData, error, loading, reload } = useAsync(async () => {
+    const hypothesis = await api.hypothesis(id);
+    const dataset = await api.dataset(hypothesis.dataset_name);
+    return { hypothesis, dataset };
+  }, [id]);
   if (loading) return <Loading label="Loading hypothesis" />;
-  if (error || !data) return <ErrorState message={error || "No hypothesis returned"} retry={reload} />;
+  if (error || !pageData) {
+    return <ErrorState message={error || "No hypothesis returned"} retry={reload} />;
+  }
+  const { hypothesis: data, dataset } = pageData;
+  const attempts = data.attempts.filter((attempt) => isVisibleExperiment(attempt.id));
+  const remove = async () => {
+    if (!window.confirm("Permanently delete this hypothesis?")) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await api.deleteHypothesis(data.id);
+      navigate(`/datasets/${encodeURIComponent(data.dataset_name)}`);
+    } catch (reason) {
+      setDeleteError(reason instanceof Error ? reason.message : String(reason));
+      setDeleting(false);
+    }
+  };
 
   return (
-    <>
-      <button className="back-link" onClick={() => navigate("/hypotheses")}>
-        <ArrowLeft size={15} /> Hypotheses
+    <div className="hypothesis-detail-page">
+      <button
+        className="back-link"
+        onClick={() => back.go(`/datasets/${encodeURIComponent(data.dataset_name)}`)}
+      >
+        <ArrowLeft size={15} /> {back.label ?? data.dataset_name}
       </button>
       <PageHeader
-        eyebrow={data.dataset_name}
+        eyebrow="Hypothesis"
         title={data.hypothesis}
-        description="One hypothesis, tested through multiple multiverse experiments."
-        actions={
-          <button className="button primary" onClick={() => navigate(`/experiments/new?hypothesis=${data.id}`)}>
-            <Plus size={16} /> New experiment
-          </button>
+        description={
+          <span className="dataset-metadata">
+            <small><span>Dataset</span><strong>{data.dataset_name}</strong></small>
+            <small><span>Experiments</span><strong>{attempts.length}</strong></small>
+          </span>
         }
       />
 
-      <section className="metric-strip">
-        <Metric
-          label="Experiments"
-          value={data.attempts.length}
-          detail={`${data.support.n_scored} scored`}
-        />
-        <Metric
-          label="Support"
-          value={data.support.verdict?.replace("_", " ") || "Unscored"}
-          detail={
-            data.support.rate_min == null
-              ? "No verdicts yet"
-              : `${formatPercent(data.support.rate_min)}–${formatPercent(data.support.rate_max)}`
-          }
-        />
-        <Metric
-          label="Shared decisions"
-          value={data.shared_decisions.length}
-          detail={`${Object.keys(data.unique_decisions).length} method-specific`}
-        />
-        <Metric
-          label="Agreement"
-          value={data.agreement || "—"}
-          detail={data.support.corroborated ? "corroborated" : "needs another experiment"}
-        />
-      </section>
+      {deleteError && <div className="error-block">{deleteError}</div>}
 
-      <div className="content-grid">
-        <section className="section-block span-2">
-          <div className="section-heading">
-            <div>
-              <span className="section-label">History</span>
-              <h2>Experiments</h2>
-            </div>
+      <div className="hypothesis-content">
+        <section className="section-block">
+          <div
+            className="section-heading expandable-heading"
+            role="button"
+            tabIndex={0}
+            aria-expanded={datasetOpen}
+            onClick={() => setDatasetOpen((open) => !open)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setDatasetOpen((open) => !open);
+              }
+            }}
+          >
+            <h2>
+              Dataset
+              <ChevronDown className={datasetOpen ? "rotated" : ""} size={17} />
+            </h2>
           </div>
-          {data.attempts.length ? (
-            <div className="list-panel">
-              {data.attempts.map((attempt) => (
-                <RowLink
-                  key={attempt.id}
-                  href={`/experiments/${attempt.id}`}
-                  title={attempt.config_label}
-                  meta={`${attempt.n_complete}/8 stages · ${attempt.n_universes ?? "—"} universes · ${formatDate(attempt.created_at)}`}
-                  trailing={
-                    attempt.running ? (
-                      <Badge tone="multiverse">Running</Badge>
-                    ) : attempt.support_rate != null ? (
-                      <Badge tone={attempt.support_rate >= 0.5 ? "ok" : "warn"}>
-                        {formatPercent(attempt.support_rate)} support
-                      </Badge>
-                    ) : (
-                      <Badge>In progress</Badge>
-                    )
-                  }
-                />
-              ))}
+          {datasetOpen && (
+            <div className="section-preview">
+              <DatasetCard
+                name={dataset.name}
+                description={dataset.description}
+                nRows={dataset.n_rows}
+                nColumns={dataset.n_columns}
+                columns={dataset.fields}
+                onOpen={() =>
+                  navigate(`/datasets/${encodeURIComponent(data.dataset_name)}`)
+                }
+              />
             </div>
-          ) : (
-            <EmptyState
-              title="No experiments"
-              description="Choose an extraction method to map this hypothesis’s decision space."
-            />
           )}
         </section>
 
-        <aside className="section-block">
-          <div className="section-heading">
-            <div>
-              <span className="section-label">Method comparison</span>
-              <h2>Decision coverage</h2>
+        <section className="section-block">
+          <div
+            className="section-heading expandable-heading"
+            role="button"
+            tabIndex={0}
+            aria-expanded={experimentsOpen}
+            onClick={() => setExperimentsOpen((open) => !open)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setExperimentsOpen((open) => !open);
+              }
+            }}
+          >
+            <h2>
+              Experiments ({attempts.length})
+              <ChevronDown className={experimentsOpen ? "rotated" : ""} size={17} />
+            </h2>
+            <div
+              className="section-actions"
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
+              <button
+                className="button view small"
+                onClick={() =>
+                  navigate(`/experiments?hypothesis=${encodeURIComponent(data.id)}`)
+                }
+              >
+                View all <ArrowRight size={15} />
+              </button>
+              <button
+                className="button create small"
+                onClick={() => navigate(`/experiments/new?hypothesis=${data.id}`)}
+              >
+                <Plus size={15} /> New experiment
+              </button>
             </div>
-            <GitCompareArrows size={18} />
           </div>
-          {data.shared_decisions.length ? (
-            <>
-              <div className="decision-group">
-                <small>Found by every experiment</small>
-                {data.shared_decisions.map((decision) => (
-                  <span key={decision}>{decision.replaceAll("_", " ")}</span>
-                ))}
-              </div>
-              <div className="decision-group">
-                <small>Found by some methods</small>
-                {Object.keys(data.unique_decisions).map((decision) => (
-                  <span key={decision}>{decision.replaceAll("_", " ")}</span>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p className="muted-copy">Complete two experiments to compare extraction coverage.</p>
+          {experimentsOpen && (
+            <div className="section-preview">
+              {attempts.length ? (
+                <div className="hypothesis-table-wrap">
+                  <table className="hypothesis-table preview-table hypothesis-experiments-table">
+                    <thead>
+                      <tr>
+                        <th>EXPERIMENT</th>
+                        <th>METHOD</th>
+                        <th className="numeric-cell">UNIVERSES</th>
+                        <th>CREATED</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attempts.slice(0, 3).map((attempt) => (
+                        <tr
+                          key={attempt.id}
+                          tabIndex={0}
+                          onClick={() => navigate(`/experiments/${attempt.id}`)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              navigate(`/experiments/${attempt.id}`);
+                            }
+                          }}
+                        >
+                          <td>
+                            <strong>{attempt.config_label}</strong>
+                            <small className="table-row-id">{formatExperimentId(attempt.id, attempt.number)}</small>
+                          </td>
+                          <td>{attempt.mode?.replaceAll("_", " ") || "—"}</td>
+                          <td className="numeric-cell">{attempt.n_universes ?? "—"}</td>
+                          <td className="date-cell">{formatDate(attempt.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="muted-copy">No experiments have been run for this hypothesis.</p>
+              )}
+            </div>
           )}
-        </aside>
+        </section>
+
       </div>
-    </>
+
+      <ArchiveRow
+        kind="hypothesis"
+        id={data.id}
+        label="hypothesis"
+        note={
+          data.attempts.length
+            ? "Delete all experiments before deleting this hypothesis."
+            : "Deleting permanently removes this hypothesis from its dataset."
+        }
+      >
+        <button
+          className="button danger"
+          disabled={deleting || data.attempts.length > 0}
+          onClick={() => void remove()}
+        >
+          <Trash2 size={16} /> {deleting ? "Deleting…" : "Delete hypothesis"}
+        </button>
+      </ArchiveRow>
+    </div>
   );
 }
+
