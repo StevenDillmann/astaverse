@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from astaverse.core.schemas import Decision, DecisionKind, DecisionSpec, Option
 from astaverse.integrations.astra_io import (
     enumerate_universes,
     read_astra_yaml,
@@ -11,7 +12,6 @@ from astaverse.integrations.astra_io import (
     write_astra_yaml,
     write_universe_files,
 )
-from astaverse.core.schemas import Decision, DecisionKind, DecisionSpec, Option
 
 
 def _decisions() -> dict[str, Decision]:
@@ -172,19 +172,38 @@ def _wide_decisions() -> dict[str, Decision]:
     }
 
 
-def test_cap_samples_across_the_grid_rather_than_taking_a_prefix():
-    """A prefix would hold the leading decisions fixed and make them look inert.
-
-    itertools.product varies the LAST decision fastest, so valid[:cap] pins
-    `first` to its earliest option. Every decision must stay represented.
-    """
+def test_cap_uses_pair_balanced_sample_with_option_coverage():
+    """A capped design must support both broad curves and isolated contrasts."""
     result = enumerate_universes(_wide_decisions(), cap=9)
     assert len(result.universes) == 9
     assert result.n_dropped_cap == 18
+    assert result.selection_strategy == "pair_balanced"
 
     for decision in ("first", "second", "third"):
         seen = {u.decisions[decision] for u in result.universes}
         assert seen == {"a", "b", "c"}, f"{decision} lost options under the cap: {seen}"
+        assert result.matched_pairs_by_decision[decision] >= 3
+
+
+def test_full_grid_records_all_matched_pairs():
+    result = enumerate_universes(_wide_decisions(), cap=27)
+    assert result.selection_strategy == "full_grid"
+    # For each fixed setting of the other two decisions, three options produce
+    # three unordered contrasts: 3 * 3^2 = 27.
+    assert result.matched_pairs_by_decision == {
+        "first": 27,
+        "second": 27,
+        "third": 27,
+    }
+
+
+def test_no_cap_by_default_runs_the_whole_constrained_grid():
+    """The default is every combination the constraints allow, nothing dropped."""
+    result = enumerate_universes(_wide_decisions())
+    assert result.cap is None
+    assert result.n_dropped_cap == 0
+    assert result.selection_strategy == "full_grid"
+    assert len(result.universes) == result.n_total_grid == 27
 
 
 def test_cap_keeps_the_default_universe_first():
@@ -203,3 +222,26 @@ def test_cap_of_one_yields_just_the_default():
     result = enumerate_universes(_wide_decisions(), cap=1)
     assert len(result.universes) == 1
     assert result.universes[0].is_default
+
+
+def test_conflicting_declared_defaults_use_nearest_valid_baseline():
+    decisions = {
+        "first": Decision(
+            label="First",
+            default="a",
+            options={"a": Option(label="A"), "b": Option(label="B")},
+        ),
+        "second": Decision(
+            label="Second",
+            default="x",
+            options={
+                "x": Option(label="X", requires=["first.b"]),
+                "y": Option(label="Y"),
+            },
+        ),
+    }
+    result = enumerate_universes(decisions)
+    defaults = [universe for universe in result.universes if universe.is_default]
+    assert len(defaults) == 1
+    assert defaults[0] == result.universes[0]
+    assert defaults[0].decisions == {"first": "a", "second": "y"}

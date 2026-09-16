@@ -20,6 +20,7 @@ def runs_dir(tmp_path, monkeypatch):
     d = tmp_path / "runs"
     d.mkdir()
     monkeypatch.setenv("ASTAVERSE_RUNS", str(d))
+    monkeypatch.setenv("ASTAVERSE_HYPOTHESES", str(tmp_path / "hypotheses"))
     return d
 
 
@@ -61,6 +62,26 @@ def test_same_hypothesis_on_different_data_is_a_different_claim():
     assert claim_id("X causes Y", "/a.csv") != claim_id("X causes Y", "/b.csv")
 
 
+def test_claim_id_collapses_every_spelling_of_one_dataset():
+    """A bare name, a relative path, an absolute dir and the csv are one claim."""
+    spellings = [
+        "caschools",
+        "data/datasets/caschools",
+        "/Users/someone/astaverse/data/datasets/caschools",
+        "/Users/someone/astaverse/data/datasets/caschools/",
+        "/Users/someone/astaverse/data/datasets/caschools/data.csv",
+    ]
+    ids = {claim_id("Smaller classes raise scores.", d) for d in spellings}
+    assert len(ids) == 1
+
+
+def test_claim_id_keeps_similarly_named_datasets_apart():
+    """Same hypothesis on different data is a different claim, not a duplicate."""
+    assert claim_id("Feminine names kill.", "data/datasets/hurricane") != claim_id(
+        "Feminine names kill.", "data/datasets/hurricane-simonsohn"
+    )
+
+
 def test_different_hypotheses_on_the_same_data_are_different_claims():
     assert claim_id("X causes Y", "/a.csv") != claim_id("Y causes X", "/a.csv")
 
@@ -86,6 +107,36 @@ def test_attempts_are_newest_first(runs_dir, tmp_path):
     assert [a.id for a in claim.attempts] == sorted(
         [first.run_id, second.run_id], reverse=True
     )
+
+
+def test_stored_hypothesis_exists_before_any_experiment(runs_dir, tmp_path):
+    from astaverse.integrations import hypotheses
+
+    dataset = tmp_path / "data.csv"
+    dataset.write_text("x,y\n1,2\n")
+    hypothesis_id = claim_id("X predicts Y", str(dataset))
+    hypotheses.save(hypothesis_id, "X predicts Y", str(dataset))
+
+    found = claims_core.get_claim(runs_dir, hypothesis_id)
+
+    assert found is not None
+    assert found.hypothesis == "X predicts Y"
+    assert found.attempts == []
+
+
+def test_stored_hypothesis_merges_with_its_experiments(runs_dir, tmp_path):
+    from astaverse.integrations import hypotheses
+
+    dataset = tmp_path / "data.csv"
+    dataset.write_text("x,y\n1,2\n")
+    hypothesis_id = claim_id("X predicts Y", str(dataset))
+    hypotheses.save(hypothesis_id, "X predicts Y", str(dataset))
+    make(runs_dir, tmp_path, "X predicts Y", "data.csv")
+
+    found = claims_core.get_claim(runs_dir, hypothesis_id)
+
+    assert found is not None
+    assert len(found.attempts) == 1
 
 
 # -- comparison ------------------------------------------------------------

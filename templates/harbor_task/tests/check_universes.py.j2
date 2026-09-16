@@ -33,6 +33,9 @@ REQUIRED_FIELDS = [
     "estimate",
     "estimate_standardized",
     "std_error",
+    "std_error_standardized",
+    "ci_low_standardized",
+    "ci_high_standardized",
     "p_value",
     "n",
     "direction",
@@ -96,10 +99,29 @@ else:
                     f"{uid}: field '{field}' is not allowed — report statistics only, "
                     "verdicts are assigned downstream"
                 )
-        for field in ("estimate", "std_error", "p_value"):
+        for field in (
+            "estimate",
+            "estimate_standardized",
+            "std_error",
+            "std_error_standardized",
+            "ci_low_standardized",
+            "ci_high_standardized",
+            "p_value",
+        ):
             value = row.get(field)
             if value is not None and not isinstance(value, (int, float)):
                 fail(f"{uid}: '{field}' must be a number or null, got {type(value).__name__}")
+        ci_low = row.get("ci_low_standardized")
+        ci_high = row.get("ci_high_standardized")
+        estimate_standardized = row.get("estimate_standardized")
+        if isinstance(ci_low, (int, float)) and isinstance(ci_high, (int, float)):
+            if ci_low > ci_high:
+                fail(f"{uid}: standardized confidence interval bounds are reversed")
+            if (
+                isinstance(estimate_standardized, (int, float))
+                and not ci_low <= estimate_standardized <= ci_high
+            ):
+                fail(f"{uid}: standardized confidence interval does not contain its estimate")
         declared = row.get("decisions")
         if isinstance(declared, dict) and declared and declared != EXPECTED[uid]:
             fail(f"{uid}: reported decisions {declared} do not match the spec {EXPECTED[uid]}")

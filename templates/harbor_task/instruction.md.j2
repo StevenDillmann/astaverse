@@ -48,7 +48,12 @@ def analyze(df, selections: dict[str, str]) -> dict:
     function makes must be driven by `selections`; nothing may be branched on
     universe id or on the loop index.
 
-    Returns: {"estimate", "std_error", "p_value", "n", "direction", "converged"}
+    Returns: {
+        "estimate", "estimate_standardized",
+        "std_error", "std_error_standardized",
+        "ci_low_standardized", "ci_high_standardized",
+        "p_value", "n", "direction", "converged"
+    }
     """
 ```
 
@@ -68,7 +73,9 @@ behaviour, that behaviour must be expressed through `selections`.
 {"universe_id": "universe_000",
  "decisions": {"<decision_id>": "<option_id>", ...},
  "estimate": 0.243, "estimate_standardized": 0.181,
- "std_error": 0.101, "p_value": 0.019,
+ "std_error": 0.101, "std_error_standardized": 0.075,
+ "ci_low_standardized": 0.034, "ci_high_standardized": 0.328,
+ "p_value": 0.019,
  "n": 92, "direction": "positive", "converged": true,
  "notes": "optional, brief"}
 ```
@@ -91,6 +98,14 @@ use different outcome scales or model families, their `estimate` values will
 differ by orders of magnitude for reasons that have nothing to do with the
 hypothesis. `estimate_standardized` is what makes them comparable, so compute
 it deliberately rather than copying `estimate` into it.
+- `std_error_standardized` — the standard error on exactly the same scale as
+  `estimate_standardized`. If standardization multiplies the natural-scale
+  estimate by a factor `s`, multiply its standard error by `abs(s)` too.
+- `ci_low_standardized` and `ci_high_standardized` — the lower and upper
+  bounds of the 95% confidence interval on the standardized scale. Prefer the
+  fitted model's confidence interval transformed by the same standardization.
+  If only a standard error is available, use
+  `estimate_standardized ± 1.96 * std_error_standardized`.
 - `direction` — `"positive"`, `"negative"`, or `"none"`, relative to the
   hypothesis as stated.
 - Use `null` for a statistic that genuinely does not exist for a universe, and

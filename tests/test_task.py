@@ -15,7 +15,6 @@ from pathlib import Path
 
 import pytest
 
-from astaverse.integrations.astra_io import enumerate_universes, write_astra_yaml, write_universe_files
 from astaverse.core.schemas import (
     Column,
     Decision,
@@ -26,6 +25,11 @@ from astaverse.core.schemas import (
 )
 from astaverse.core.stages import s5_task
 from astaverse.core.store import Run
+from astaverse.integrations.astra_io import (
+    enumerate_universes,
+    write_astra_yaml,
+    write_universe_files,
+)
 
 GOOD_ANALYSIS = '''
 import json, yaml
@@ -45,7 +49,7 @@ def main():
         print(json.dumps(row))
 '''
 
-BROKEN_SPECIAL_CASE = '''
+BROKEN_SPECIAL_CASE = """
 def analyze(df, selections):
     return {"estimate": 0.2}
 
@@ -55,7 +59,7 @@ def main():
             estimate = 0.9
         else:
             estimate = 0.2
-'''
+"""
 
 
 @pytest.fixture
@@ -156,14 +160,13 @@ def _run_check(task_dir: Path, app_dir: Path) -> subprocess.CompletedProcess:
         env={"ASTAVERSE_APP_DIR": str(app_dir), "PATH": "/usr/bin:/bin"},
         capture_output=True,
         text=True,
+        check=False,
     )
 
 
 def _write_submission(app_dir: Path, universes: list[dict], analysis: str) -> None:
     app_dir.mkdir(parents=True, exist_ok=True)
-    (app_dir / "universes.jsonl").write_text(
-        "\n".join(json.dumps(u) for u in universes) + "\n"
-    )
+    (app_dir / "universes.jsonl").write_text("\n".join(json.dumps(u) for u in universes) + "\n")
     (app_dir / "analysis.py").write_text(textwrap.dedent(analysis))
 
 
@@ -178,6 +181,9 @@ def _valid_rows(prepared_run) -> list[dict]:
             "estimate": 0.2,
             "estimate_standardized": 0.18,
             "std_error": 0.1,
+            "std_error_standardized": 0.09,
+            "ci_low_standardized": 0.0036,
+            "ci_high_standardized": 0.3564,
             "p_value": 0.02,
             "n": 94,
             "direction": "positive",
@@ -250,8 +256,16 @@ def test_check_accepts_nulls_for_a_failed_universe(prepared_run, tmp_path):
     s5_task.run(prepared_run)
     app = tmp_path / "app"
     rows = _valid_rows(prepared_run)
-    rows[0].update(estimate=None, estimate_standardized=None, std_error=None,
-                   p_value=None, converged=False)
+    rows[0].update(
+        estimate=None,
+        estimate_standardized=None,
+        std_error=None,
+        std_error_standardized=None,
+        ci_low_standardized=None,
+        ci_high_standardized=None,
+        p_value=None,
+        converged=False,
+    )
     _write_submission(app, rows, GOOD_ANALYSIS)
     result = _run_check(prepared_run.task_dir, app)
     assert result.returncode == 0, result.stdout

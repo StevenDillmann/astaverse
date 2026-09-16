@@ -21,6 +21,8 @@ def runs_dir(tmp_path, monkeypatch):
     d = tmp_path / "runs"
     d.mkdir()
     monkeypatch.setenv("ASTAVERSE_RUNS", str(d))
+    # Claims also come from the stored hypotheses; keep the real ones out.
+    monkeypatch.setenv("ASTAVERSE_HYPOTHESES", str(tmp_path / "hypotheses"))
     return d
 
 
@@ -105,11 +107,17 @@ def test_only_non_default_settings_appear_in_the_label(client, runs_dir, tmp_pat
         runs_dir,
         tmp_path,
         "X causes Y",
-        config={"decisions": {"mode": "direct", "critique": True}, "universes": {"cap": 24}},
+        config={"decisions": {"mode": "direct", "critique": True}},
     )
     label = client.get("/api/home").json()["runs"][0]["config_label"]
     assert "direct" in label and "+critique" in label
-    assert "cap" not in label, "the default cap must not clutter the label"
+    assert "cap" not in label, "running the full grid is the default; it is not a label"
+
+
+def test_an_explicit_cap_appears_in_the_label(client, runs_dir, tmp_path):
+    """Capping is now a departure from the default, so it has to be visible."""
+    make(runs_dir, tmp_path, "X causes Y", config={"universes": {"cap": 24}})
+    assert "cap 24" in client.get("/api/home").json()["runs"][0]["config_label"]
 
 
 def test_identical_configs_still_get_distinct_labels(client, runs_dir, tmp_path):

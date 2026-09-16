@@ -1,4 +1,12 @@
 runs/
+data/datasets/*
+!data/datasets/.gitkeep
+!data/datasets/hurricane/
+data/plans/*
+!data/plans/.gitkeep
+!data/plans/hurricane.jsonl
+data/hypotheses/*
+!data/hypotheses/.gitkeep
 .env
 .venv/
 __pycache__/

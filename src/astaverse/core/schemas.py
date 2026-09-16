@@ -39,6 +39,8 @@ class Column(BaseModel):
     min: float | None = None
     max: float | None = None
     samples: list[Any] = Field(default_factory=list)
+    std: float | None = None
+    num_unique_values: int | None = None
 
 
 class StudySpec(BaseModel):
@@ -50,7 +52,6 @@ class StudySpec(BaseModel):
     dataset_description: str | None = None
     n_rows: int | None = None
     columns: list[Column] = Field(default_factory=list)
-    research_questions: list[str] = Field(default_factory=list)
 
 
 # --------------------------------------------------------------------------
@@ -179,6 +180,8 @@ class UniverseSet(BaseModel):
     n_dropped_constraints: int = 0
     n_dropped_cap: int = 0
     cap: int | None = None
+    selection_strategy: str = "full_grid"
+    matched_pairs_by_decision: dict[str, int] = Field(default_factory=dict)
 
     @property
     def truncated(self) -> bool:
@@ -206,6 +209,12 @@ class UniverseStats(BaseModel):
     # yields a spread made of unit changes rather than analytic disagreement.
     estimate_standardized: float | None = None
     std_error: float | None = None
+    # Uncertainty on the same comparable scale as estimate_standardized.
+    # Keeping this separate from std_error avoids plotting raw-scale
+    # uncertainty around a standardized point estimate.
+    std_error_standardized: float | None = None
+    ci_low_standardized: float | None = None
+    ci_high_standardized: float | None = None
     p_value: float | None = None
     n: int | None = None
     direction: str | None = None  # "positive" | "negative" | "none"

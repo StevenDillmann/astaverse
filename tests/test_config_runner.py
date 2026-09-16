@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from astaverse.core import config as run_config
 from astaverse.core import runner
 from astaverse.core.schemas import Column, StudySpec
-from astaverse.core.store import Run
+from astaverse.core.store import STAGES, Run
 
 
 @pytest.fixture
@@ -60,6 +60,12 @@ def test_defaults_stop_before_spending_money(run_obj):
     assert "execute" not in cfg.stages_through()
 
 
+def test_conclusion_directly_follows_verdicts():
+    assert STAGES[-2:] == ["verdicts", "conclusion"]
+    assert "surprisal" not in STAGES
+    assert "surprisal" not in run_config.RunConfig.model_json_schema()["properties"]
+
+
 def test_update_merges_sections_rather_than_replacing(run_obj):
     run_config.update(run_obj, {"decisions": {"mode": "direct"}})
     run_config.update(run_obj, {"decisions": {"critique": True}})
@@ -84,6 +90,16 @@ def test_config_survives_a_reload(run_obj, runs_dir):
     run_config.update(run_obj, {"universes": {"cap": 7}})
     reloaded = Run.load(runs_dir, run_obj.run_id)
     assert run_config.load(reloaded).universes.cap == 7
+
+
+def test_removed_surprisal_target_migrates_to_conclusion(run_obj):
+    manifest = run_obj.manifest()
+    manifest["config"] = {"through": "surprisal"}
+    run_obj.write_manifest(manifest)
+
+    cfg = run_config.load(run_obj)
+    assert cfg.through == "conclusion"
+    assert cfg.conclusion.model is None
 
 
 def test_stages_through_rejects_an_unknown_target(run_obj):
@@ -122,6 +138,20 @@ def test_run_stage_uses_the_saved_config(run_obj, monkeypatch):
     )
     runner.run_stage(run_obj, "plans")
     assert seen == {"k": 4, "model": "openai/x", "temperature": 0.3}
+
+
+def test_conclusion_stage_uses_its_saved_model(run_obj, monkeypatch):
+    seen = {}
+
+    def fake_conclusion(run, model=None):
+        seen["model"] = model
+
+    monkeypatch.setattr(runner.s9_conclusion, "run", fake_conclusion)
+    run_config.update(run_obj, {"conclusion": {"model": "openai/synthesis"}})
+
+    runner.run_stage(run_obj, "conclusion")
+
+    assert seen == {"model": "openai/synthesis"}
 
 
 def test_sequence_skips_completed_stages(run_obj, monkeypatch):
@@ -186,6 +216,25 @@ def test_failure_is_reported_not_raised(run_obj, monkeypatch):
     progress = runner.run_sequence(run_obj, through="plans")
     assert progress.failed == "plans"
     assert "ValueError" in (progress.error or "")
+
+
+def test_later_completed_stage_supersedes_stale_failure(run_obj):
+    runner._PROGRESS[run_obj.run_id] = runner.Progress(
+        run_id=run_obj.run_id,
+        target="verdicts",
+        pending=[],
+        failed="execute",
+        error="old failure",
+        finished=True,
+        started_at="2026-09-02T20:02:22+00:00",
+    )
+
+    progress = runner.progress_for(
+        run_obj.run_id,
+        {"execute": {"completed_at": "2026-09-02T20:37:59+00:00"}},
+    )
+
+    assert progress is None
 
 
 def test_force_reruns_completed_stages(run_obj, monkeypatch):

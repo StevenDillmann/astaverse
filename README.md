@@ -1,6 +1,6 @@
 # Astaverse
 
-Multiverse analysis and **robust surprisal** for agentic scientific discovery.
+Multiverse analysis and **structured scientific conclusions** for agentic discovery.
 
 ## The problem
 
@@ -27,13 +27,12 @@ which exists precisely because a single specification is not a result.
 ```
 Hypothesis + Dataset → K sampled Plans → Decision Extraction → Decision Space
                      → Decision Spec → Multiverse Instantiation → Execution
-                     → Multiple Outputs/Verdicts → Evidence → Robust Surprisal
+                     → Specification Curve/Verdicts → Structured Conclusion
 ```
 
 Sample K plans independently; where they disagree are the analytic decisions.
-Turn those into a decision space, execute every combination, and report
-surprisal as a **distribution** with a `fragility_index`: how far the
-single-universe answer sits from the multiverse median.
+Turn those into a decision space, execute every combination, build the
+specification curve, and classify and explain what it implies for the hypothesis.
 
 ## Pipeline
 
@@ -50,7 +49,7 @@ stage re-runs alone from disk, and the CLI and the web interface call the same
 | 5 | `task` | spec + universes → `harbor_task/` |
 | 6 | `execute` | task → Harbor job artifacts |
 | 7 | `verdicts` | statistics → `07_verdicts.json` |
-| 8 | `surprisal` | verdicts → `08_surprisal.json` |
+| 8 | `conclusion` | specification curve + sensitivities → `09_conclusion.json` |
 
 ```bash
 astaverse new --hypothesis "…" --dataset path/to/blade/hurricane
@@ -66,6 +65,10 @@ astaverse serve                                     # the web interface
 
 Every option is generated from `core/config.py`, so `astaverse run --help`
 documents each knob — including what each extraction mode is blind to.
+
+Stage 7 also scores every decision by how much it moves the result — matched
+pairs, option-pair shifts, variance shares, and significance and verdict
+flips. The definitions are in [`docs/decision-sensitivity.md`](docs/decision-sensitivity.md).
 
 ## Bias controls
 
@@ -120,6 +123,25 @@ uv venv && uv pip install -e '.[dev]'
 cp .env.example .env    # OpenAI + Gemini keys
 ```
 
+Bundled assets ship in `data/datasets/` (reference datasets) and
+`data/plans/` (AutoDiscovery plan seeds). User uploads land alongside them in
+`data/datasets/` but remain gitignored.
+
+### Dataset format
+
+Every imported dataset has one canonical, self-contained layout:
+
+```text
+data/datasets/<dataset-name>/
+  data.csv
+  info.json
+```
+
+`data.csv` must contain a header and at least one data row. `info.json` stores
+the dataset description plus per-column names, types, descriptions, summary
+statistics, samples, unique-value counts, and missing-value counts. Hypotheses
+are created separately and many hypotheses may use the same dataset.
+
 Harbor is needed only for stages 6+; stages 1–5 run offline.
 
 ## Layout
@@ -131,7 +153,7 @@ src/astaverse/
     schemas.py       wire format between stages (ASTRA-shaped decision models)
     store.py         analysis directories, artifacts, downstream invalidation
     runner.py        the one place a stage is run, sequentially or alone
-    stages/          s1_study … s8_surprisal
+    stages/          s1_study … s9_conclusion
   adapters/        thin surfaces over core
     cli.py           tyro CLI, generated from RunConfig
     api/             FastAPI routers (analyses, files, catalog)
@@ -142,6 +164,8 @@ src/astaverse/
     plans_index.py   AutoDiscovery's hypotheses and plans
   paths.py         where the repo's assets live
 templates/harbor_task/   jinja2 task template
+data/datasets/           bundled + uploaded AstaVerse dataset folders
+data/plans/              optional AutoDiscovery plan seeds (*.jsonl)
 web/                     Vite + React SPA
 ```
 

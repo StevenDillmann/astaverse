@@ -72,9 +72,9 @@ def test_boolean_negation_form_is_recognised():
 
 
 def test_top_level_field_is_recognised():
-    config = RunConfig.model_validate({"through": "surprisal"})
-    assert _explicit_patch(config, argv=["run", "id", "--through", "surprisal"]) == {
-        "through": "surprisal"
+    config = RunConfig.model_validate({"through": "conclusion"})
+    assert _explicit_patch(config, argv=["run", "id", "--through", "conclusion"]) == {
+        "through": "conclusion"
     }
 
 
