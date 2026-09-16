@@ -14,6 +14,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
+from ...core import claims as claims_core
 from ...core import commands
 from ...core import config as run_cfg
 from ...core import settings as app_settings
@@ -64,10 +65,22 @@ def command_preview(request: CommandPreviewRequest) -> dict[str, Any]:
 
 
 @router.get("/datasets")
-def list_datasets() -> list[dict[str, Any]]:
+def list_datasets(include_archived: bool = False) -> list[dict[str, Any]]:
+    hypothesis_counts: dict[str, int] = {}
+    experiment_counts: dict[str, int] = {}
+    for claim in claims_core.all_claims(runs_dir()):
+        hypothesis_counts[claim.dataset_name] = hypothesis_counts.get(claim.dataset_name, 0) + 1
+        experiment_counts[claim.dataset_name] = (
+            experiment_counts.get(claim.dataset_name, 0) + len(claim.attempts)
+        )
+    archive = None if include_archived else app_settings.archive(runs_dir())
     out = []
     for d in datasets.discover():
+        if archive and archive.has_dataset(d.name):
+            continue
         entry = d.to_dict()
+        entry["n_hypotheses"] = hypothesis_counts.get(d.name, 0)
+        entry["n_experiments"] = experiment_counts.get(d.name, 0)
         entry["n_autodiscovery_hypotheses"] = plans_index.count_for_dataset(d.name)
         out.append(entry)
     return out
@@ -78,9 +91,18 @@ def dataset_detail(name: str) -> dict[str, Any]:
     found = next((dataset for dataset in datasets.discover() if dataset.name == name), None)
     if found is None:
         raise HTTPException(404, f"no such dataset: {name}")
-    entry = found.to_dict()
+    entry = found.to_dict(include_fields=True)
     entry["n_autodiscovery_hypotheses"] = plans_index.count_for_dataset(name)
     return entry
+
+
+@router.get("/datasets/{name}/rows")
+def dataset_rows(name: str, limit: int = 20) -> dict[str, Any]:
+    """The first `limit` rows of a dataset, capped server-side."""
+    found = datasets.head(name, limit=limit)
+    if found is None:
+        raise HTTPException(404, f"no such dataset: {name}")
+    return found
 
 
 @router.get("/datasets/{name}/hypotheses")

@@ -33,16 +33,20 @@ app.include_router(files.router)      # artifacts on disk
 if (WEB_DIST / "assets").is_dir():
     app.mount("/assets", StaticFiles(directory=WEB_DIST / "assets"), name="assets")
 
+    # The entry HTML must never be cached: it names the hashed asset files, so a
+    # stale copy pins the browser to an old bundle after every rebuild.
+    NO_STORE = {"Cache-Control": "no-store"}
+
     @app.get("/")
     def index() -> FileResponse:
-        return FileResponse(WEB_DIST / "index.html")
+        return FileResponse(WEB_DIST / "index.html", headers=NO_STORE)
 
     @app.get("/{full_path:path}")
     def spa_fallback(full_path: str) -> FileResponse:
         """Client-side routes all boot the same interface bundle."""
         if full_path.startswith("api/"):
             raise HTTPException(404, "no such API endpoint")
-        return FileResponse(WEB_DIST / "index.html")
+        return FileResponse(WEB_DIST / "index.html", headers=NO_STORE)
 
 else:
 

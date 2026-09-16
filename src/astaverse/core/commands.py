@@ -12,7 +12,13 @@ from .store import STAGES
 def _tokens(config: RunConfig) -> list[str]:
     dumped = config.model_dump()
     tokens: list[str] = []
-    for section in ("plans", "decisions", "universes", "execute", "surprisal"):
+    for section in (
+        "plans",
+        "decisions",
+        "universes",
+        "execute",
+        "conclusion",
+    ):
         for field, value in dumped[section].items():
             flag = f"--{section}.{field.replace('_', '-')}"
             if isinstance(value, bool):

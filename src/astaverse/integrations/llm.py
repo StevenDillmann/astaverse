@@ -25,6 +25,7 @@ DEFAULT_MODEL = "openai/gpt-5.6-luna"
 DEFAULT_PLAN_MODEL = os.environ.get("ASTAVERSE_PLAN_MODEL", DEFAULT_MODEL)
 DEFAULT_DECISION_MODEL = os.environ.get("ASTAVERSE_DECISION_MODEL", DEFAULT_MODEL)
 DEFAULT_BELIEF_MODEL = os.environ.get("ASTAVERSE_BELIEF_MODEL", DEFAULT_MODEL)
+DEFAULT_CONCLUSION_MODEL = os.environ.get("ASTAVERSE_CONCLUSION_MODEL", DEFAULT_MODEL)
 
 
 class LLMError(RuntimeError):
@@ -34,6 +35,7 @@ class LLMError(RuntimeError):
 #: Sampling params safe to drop and retry without. Dropping one changes how
 #: varied the samples are, never what was asked.
 DROPPABLE = ("temperature", "top_p", "presence_penalty", "frequency_penalty")
+MAX_CHOICES_PER_CALL = 8
 
 
 def _unsupported_param(message: str) -> str | None:
@@ -97,31 +99,38 @@ def structured_call(
     def _complete(**extra):
         return litellm.completion(**{**kwargs, **extra})
 
-    try:
-        response = _complete(n=n) if n > 1 else _complete()
-    except Exception as exc:  # noqa: BLE001
-        # `drop_params` only drops what LiteLLM *knows* a model rejects, and a
-        # model newer than its map is passed through verbatim — the provider
-        # then rejects it. Sampling params are advisory here (diversity comes
-        # from drawing n samples), so drop the offender and retry rather than
-        # failing a stage over it.
-        offender = _unsupported_param(str(exc))
-        if offender is None or offender not in kwargs:
-            raise LLMError(f"{tag or 'llm'} call to {model} failed: {exc}") from exc
-        kwargs.pop(offender)
+    def _request(batch_size: int):
         try:
-            response = _complete(n=n) if n > 1 else _complete()
-        except Exception as retry_exc:  # noqa: BLE001
-            raise LLMError(
-                f"{tag or 'llm'} call to {model} failed even without "
-                f"'{offender}': {retry_exc}"
-            ) from retry_exc
+            return _complete(n=batch_size) if batch_size > 1 else _complete()
+        except Exception as exc:
+            # `drop_params` only drops what LiteLLM *knows* a model rejects,
+            # and a model newer than its map is passed through verbatim.
+            offender = _unsupported_param(str(exc))
+            if offender is None or offender not in kwargs:
+                raise LLMError(f"{tag or 'llm'} call to {model} failed: {exc}") from exc
+            kwargs.pop(offender)
+            try:
+                return _complete(n=batch_size) if batch_size > 1 else _complete()
+            except Exception as retry_exc:
+                raise LLMError(
+                    f"{tag or 'llm'} call to {model} failed even without '{offender}': {retry_exc}"
+                ) from retry_exc
 
-    contents = [choice.message.content for choice in response.choices]
-    # Providers that ignore `n` give back one choice; top up sequentially.
+    responses = []
+    contents: list[str] = []
     while len(contents) < n:
-        extra = litellm.completion(**kwargs)
-        contents.append(extra.choices[0].message.content)
+        batch_size = min(MAX_CHOICES_PER_CALL, n - len(contents))
+        response = _request(batch_size)
+        responses.append(response)
+        choices = [choice.message.content for choice in response.choices]
+        if not choices:
+            raise LLMError(f"{tag or 'llm'} call to {model} returned no choices")
+        contents.extend(choices)
+
+    usage_records = [
+        response.usage.model_dump() if getattr(response, "usage", None) else None
+        for response in responses
+    ]
 
     _log(
         log_dir,
@@ -133,9 +142,7 @@ def structured_call(
             "prompt": prompt,
             "system": system,
             "responses": contents,
-            "usage": getattr(response, "usage", None).model_dump()
-            if getattr(response, "usage", None)
-            else None,
+            "usage": usage_records[0] if len(usage_records) == 1 else usage_records,
         },
     )
 
@@ -143,7 +150,7 @@ def structured_call(
     for content in contents[:n]:
         try:
             parsed.append(schema.model_validate_json(content))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             raise LLMError(
                 f"{tag or 'llm'}: {model} returned unparseable output for "
                 f"{schema.__name__}: {exc}\n---\n{content[:2000]}"

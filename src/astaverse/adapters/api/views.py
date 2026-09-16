@@ -18,9 +18,8 @@ from typing import Any
 from fastapi import APIRouter, HTTPException
 
 from ...core import claims as claims_core
-from ...core import commands
+from ...core import commands, runner
 from ...core import config as run_cfg
-from ...core import runner
 from ...core.store import STAGES
 from ...integrations import datasets as datasets_integration
 from ...integrations import plans_index
@@ -39,10 +38,16 @@ def _run_row(
 ) -> dict[str, Any]:
     return {
         "id": attempt.id,
+        "number": attempt.number,
         "claim_id": claim.id,
         "hypothesis": claim.hypothesis,
         "dataset_name": claim.dataset_name,
         "config_label": label,
+        # Broken out as their own fields, not just folded into config_label,
+        # so the experiments table can column and sort on them.
+        "mode": attempt.mode,
+        "critique": attempt.critique,
+        "cap": attempt.cap,
         "status": attempt.status,
         "n_complete": attempt.n_complete,
         "n_stages": len(STAGES),
@@ -57,14 +62,14 @@ def _run_row(
 
 
 @router.get("/home")
-def home() -> dict[str, Any]:
+def home(include_archived: bool = False) -> dict[str, Any]:
     """Everything the home screen draws, at all three granularities.
 
     One call rather than three: the levels are views of the same underlying
     work, and fetching them separately would mean the client stitching them
     back together.
     """
-    claims = claims_core.all_claims(runs_dir())
+    claims = claims_core.all_claims(runs_dir(), include_archived=include_archived)
 
     claim_rows: list[dict[str, Any]] = []
     run_rows: list[dict[str, Any]] = []
@@ -79,13 +84,17 @@ def home() -> dict[str, Any]:
                 "id": claim.id,
                 "hypothesis": claim.hypothesis,
                 "dataset_name": claim.dataset_name,
+                "description": claim.description,
                 "n_attempts": len(claim.attempts),
                 "running": any(a.running for a in claim.attempts),
                 "support": support.to_dict(),
                 "fragility_range": summary["fragility_range"],
                 "agreement": summary["agreement"],
                 "n_unique_decisions": len(summary["unique_decisions"]),
-                "updated_at": max((a.created_at for a in claim.attempts), default=""),
+                "updated_at": max(
+                    (a.created_at for a in claim.attempts),
+                    default=claim.created_at,
+                ),
             }
         )
         for attempt in claim.attempts:
@@ -106,7 +115,6 @@ def home() -> dict[str, Any]:
                 "name": name,
                 "n_rows": info.n_rows if info else None,
                 "n_columns": info.n_columns if info else None,
-                "research_question": (info.research_questions[0] if info and info.research_questions else None),
                 "n_claims": len(on_dataset),
                 "n_attempts": sum(len(c.attempts) for c in on_dataset),
                 "n_fragile": sum(
@@ -146,6 +154,8 @@ def claim_detail(claim_id: str) -> dict[str, Any]:
         "hypothesis": claim.hypothesis,
         "dataset": claim.dataset,
         "dataset_name": claim.dataset_name,
+        "description": claim.description,
+        "created_at": claim.created_at,
         "support": claims_core.support(claim.attempts).to_dict(),
         "attempts": [
             {**a.to_dict(), "config_label": labels[a.id], "support_rate": _support_rate(a)}
@@ -163,6 +173,7 @@ def run_detail(run_id: str) -> dict[str, Any]:
     config = run_cfg.load(analysis)
     return {
         "id": analysis.run_id,
+        "number": analysis.number,
         "claim_id": claims_core.claim_id(
             manifest.get("hypothesis", ""), manifest.get("dataset", "")
         ),
@@ -175,7 +186,7 @@ def run_detail(run_id: str) -> dict[str, Any]:
         "review_before_execute": manifest.get("review_before_execute", True),
         "decision_reviewed_at": manifest.get("decision_reviewed_at"),
         "commands": commands.preview(config, run_id),
-        "progress": runner.progress_for(run_id),
+        "progress": runner.progress_for(run_id, manifest.get("stages")),
         "artifacts": {stage: artifact(analysis, stage) for stage in STAGES},
         "history": analysis.history(),
     }
@@ -193,21 +204,24 @@ def run_config(run_id: str) -> dict[str, Any]:
 
 @router.get("/runs/{run_id}/progress")
 def run_progress(run_id: str) -> dict[str, Any]:
-    get_analysis(run_id)
-    return runner.progress_for(run_id) or {"running": False, "finished": True}
+    analysis = get_analysis(run_id)
+    return runner.progress_for(run_id, analysis.manifest().get("stages")) or {
+        "running": False,
+        "finished": True,
+    }
 
 
 @router.get("/runs")
-def list_runs() -> list[dict[str, Any]]:
+def list_runs(include_archived: bool = False) -> list[dict[str, Any]]:
     """Flat list of runs — the CLI's `ls`, for anything that wants it."""
-    return home()["runs"]
+    return home(include_archived)["runs"]
 
 
 @router.get("/experiments")
-def list_experiments() -> list[dict[str, Any]]:
-    return home()["runs"]
+def list_experiments(include_archived: bool = False) -> list[dict[str, Any]]:
+    return home(include_archived)["runs"]
 
 
 @router.get("/hypotheses")
-def list_hypotheses() -> list[dict[str, Any]]:
-    return home()["claims"]
+def list_hypotheses(include_archived: bool = False) -> list[dict[str, Any]]:
+    return home(include_archived)["claims"]

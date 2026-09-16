@@ -7,10 +7,13 @@ supersede artifacts, and each of those needs a guard rather than a shape.
 
 from __future__ import annotations
 
+import json
+import shutil
 import traceback
-from typing import Any
+from pathlib import Path
+from typing import Annotated, Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from ...core import claims as claims_core
@@ -19,7 +22,7 @@ from ...core import runner
 from ...core import settings as app_settings
 from ...core.stages import s1_study, s2_plans
 from ...core.store import STAGES, Run, utcnow
-from ...integrations import plans_index
+from ...integrations import datasets, hypotheses, plans_index
 from .deps import get_analysis, runs_dir
 
 router = APIRouter(prefix="/api", tags=["actions"])
@@ -44,81 +47,222 @@ class NewAttempt(BaseModel):
     review_before_execute: bool | None = None
 
 
+def _parse_column_descriptions(raw: str | None) -> dict[str, str]:
+    if not raw or not raw.strip():
+        return {}
+    parsed = json.loads(raw)
+    if isinstance(parsed, list):
+        out: dict[str, str] = {}
+        for item in parsed:
+            if not isinstance(item, dict):
+                raise TypeError("column_descriptions entries must be objects")
+            name = str(item.get("name") or item.get("column") or "").strip()
+            if not name:
+                continue
+            out[name] = str(item.get("description") or "")
+        return out
+    if isinstance(parsed, dict):
+        return {str(key): str(value) for key, value in parsed.items()}
+    raise ValueError("column_descriptions must be a JSON object or array")
+
+
+async def _read_upload(file: UploadFile) -> bytes:
+    if not file.filename:
+        raise ValueError("a CSV file is required")
+    if not file.filename.lower().endswith(".csv"):
+        raise ValueError("only CSV files are supported")
+    content = await file.read()
+    await file.close()
+    return content
+
+
+@router.post("/datasets/preview")
+async def preview_dataset(
+    file: Annotated[UploadFile, File()],
+    name: Annotated[str, Form()] = "",
+    description: Annotated[str, Form()] = "",
+    column_descriptions: Annotated[str, Form()] = "",
+) -> dict[str, Any]:
+    try:
+        content = await _read_upload(file)
+        resolved_name = name.strip() or Path(file.filename or "dataset").stem
+        descriptions = _parse_column_descriptions(column_descriptions)
+        return datasets.preview_upload(
+            content,
+            name=resolved_name,
+            description=description.strip() or None,
+            column_descriptions=descriptions or None,
+        )
+    except Exception as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
+@router.post("/datasets")
+async def create_dataset(
+    file: Annotated[UploadFile, File()],
+    name: Annotated[str, Form()],
+    description: Annotated[str, Form()] = "",
+    column_descriptions: Annotated[str, Form()] = "",
+) -> dict[str, Any]:
+    try:
+        content = await _read_upload(file)
+        if not name.strip():
+            raise ValueError("dataset name is required")
+        descriptions = _parse_column_descriptions(column_descriptions)
+        created = datasets.import_upload(
+            content,
+            name=name.strip(),
+            description=description.strip() or None,
+            column_descriptions=descriptions or None,
+        )
+        entry = created.to_dict(include_fields=True)
+        entry["n_autodiscovery_hypotheses"] = plans_index.count_for_dataset(created.name)
+        return entry
+    except Exception as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+
 @router.post("/claims")
 @router.post("/hypotheses")
 def create_claim(request: NewClaim) -> dict[str, Any]:
     try:
-        analysis = Run.create(runs_dir(), request.hypothesis, request.dataset)
-        app_settings.apply_to_manifest(analysis, app_settings.load(runs_dir()))
-        if request.config:
-            run_cfg.update(analysis, request.config)
-        if request.review_before_execute is not None:
-            manifest = analysis.manifest()
-            manifest["review_before_execute"] = request.review_before_execute
-            analysis.write_manifest(manifest)
-        if request.seed_dataset and request.seed_normalized_id:
-            record = plans_index.get(request.seed_dataset, request.seed_normalized_id)
-            if record is None:
-                raise ValueError(f"no plan record '{request.seed_normalized_id}'")
-            manifest = analysis.manifest()
-            manifest["seed"] = {
-                "normalized_id": record.normalized_id,
-                "dataset": record.dataset,
-                "source_path": record.source_path,
-            }
-            analysis.write_manifest(manifest)
-        s1_study.run(analysis, request.hypothesis, request.dataset, request.description)
-    except Exception as exc:  # noqa: BLE001
+        selected = datasets.get(request.dataset)
+        dataset_path = selected.path if selected else str(Path(request.dataset).expanduser())
+        if not Path(dataset_path).exists():
+            raise ValueError(f"no such dataset: {request.dataset}")
+        hypothesis_id = claims_core.claim_id(request.hypothesis, dataset_path)
+        record = hypotheses.save(
+            hypothesis_id,
+            request.hypothesis,
+            dataset_path,
+            request.description,
+        )
+    except Exception as exc:
         raise HTTPException(400, str(exc)) from exc
 
-    manifest = analysis.manifest()
     return {
-        "run_id": analysis.run_id,
-        "claim_id": claims_core.claim_id(manifest["hypothesis"], manifest["dataset"]),
+        **record.to_dict(),
+        "dataset_name": Path(record.dataset).name,
+        "n_attempts": 0,
     }
 
 
 @router.post("/claims/{claim_id}/attempts")
 @router.post("/hypotheses/{claim_id}/experiments")
 def create_attempt(claim_id: str, request: NewAttempt | None = None) -> dict[str, Any]:
-    """Start another attempt, inheriting the last one's configuration.
+    """Start another attempt, inheriting configuration but generating a fresh plan.
 
     Inheriting matters: a comparison is only readable if the attempts differ
     in what you deliberately changed, rather than in every knob that happened
-    to default differently.
+    to default differently. A seed plan is not configuration: carrying it over
+    would silently reuse the previous AutoDiscovery plan.
     """
     claim = claims_core.get_claim(runs_dir(), claim_id)
-    if claim is None or not claim.attempts:
+    if claim is None:
         raise HTTPException(404, f"no such claim: {claim_id}")
-
-    previous = get_analysis(claim.attempts[0].id)
-    previous_manifest = previous.manifest()
 
     try:
         analysis = Run.create(runs_dir(), claim.hypothesis, claim.dataset)
-        run_cfg.save(analysis, run_cfg.load(previous))
+        if claim.attempts:
+            previous = get_analysis(claim.attempts[0].id)
+            run_cfg.save(analysis, run_cfg.load(previous))
+        else:
+            app_settings.apply_to_manifest(analysis, app_settings.load(runs_dir()))
         if request and request.config:
             run_cfg.update(analysis, request.config)
         if request and request.review_before_execute is not None:
             manifest = analysis.manifest()
             manifest["review_before_execute"] = request.review_before_execute
             analysis.write_manifest(manifest)
-        if previous_manifest.get("seed"):
-            manifest = analysis.manifest()
-            manifest["seed"] = previous_manifest["seed"]
-            analysis.write_manifest(manifest)
         s1_study.run(analysis, claim.hypothesis, claim.dataset)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(400, str(exc)) from exc
 
     return {"run_id": analysis.run_id, "claim_id": claim_id}
+
+
+@router.delete("/datasets/{name}")
+def delete_dataset(name: str) -> dict[str, Any]:
+    dependents = [
+        claim.id
+        for claim in claims_core.all_claims(runs_dir())
+        if claim.dataset_name == name
+    ]
+    if dependents:
+        raise HTTPException(
+            409,
+            f"delete the dataset's {len(dependents)} hypothesis"
+            f"{'es' if len(dependents) != 1 else ''} first",
+        )
+    try:
+        if not datasets.delete(name):
+            raise HTTPException(404, f"no such dataset: {name}")
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return {"deleted": name}
+
+
+@router.delete("/claims/{claim_id}")
+@router.delete("/hypotheses/{claim_id}")
+def delete_hypothesis(claim_id: str) -> dict[str, Any]:
+    claim = claims_core.get_claim(runs_dir(), claim_id)
+    if claim is None:
+        raise HTTPException(404, f"no such hypothesis: {claim_id}")
+    if claim.attempts:
+        count = len(claim.attempts)
+        raise HTTPException(
+            409,
+            f"delete the hypothesis's {count} experiment"
+            f"{'s' if count != 1 else ''} first",
+        )
+    if not hypotheses.delete(claim_id):
+        raise HTTPException(404, f"hypothesis is not independently stored: {claim_id}")
+    return {"deleted": claim_id}
+
+
+@router.delete("/runs/{run_id}")
+@router.delete("/experiments/{run_id}")
+def delete_experiment(run_id: str) -> dict[str, Any]:
+    analysis = get_analysis(run_id)
+    if runner.is_running(run_id):
+        raise HTTPException(409, "stop the running experiment before deleting it")
+    manifest = analysis.manifest()
+    hypothesis = manifest.get("hypothesis") or ""
+    dataset = manifest.get("dataset") or ""
+    hypothesis_id = claims_core.claim_id(hypothesis, dataset)
+    hypotheses.save(hypothesis_id, hypothesis, dataset)
+    shutil.rmtree(analysis.root)
+    return {"deleted": run_id, "hypothesis_id": hypothesis_id}
+
+
+@router.post("/archive")
+def set_archived(request: dict[str, Any]) -> dict[str, Any]:
+    """Archive or restore datasets, hypotheses or experiments.
+
+    Takes `id` for one or `ids` for a batch; a batch is applied under a single
+    read-modify-write so a bulk selection cannot half-apply.
+    """
+    raw = request.get("ids")
+    ids = [str(item) for item in raw] if isinstance(raw, list) else [str(request.get("id", ""))]
+    try:
+        updated = app_settings.set_archived_many(
+            runs_dir(),
+            str(request.get("kind", "")),
+            ids,
+            bool(request.get("archived", True)),
+        )
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return updated.model_dump()
 
 
 @router.put("/settings")
 def set_settings(patch: dict[str, Any]) -> dict[str, Any]:
     try:
         return app_settings.update(runs_dir(), patch).model_dump()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(400, str(exc)) from exc
 
 
@@ -129,7 +273,7 @@ def set_config(run_id: str, patch: dict[str, Any]) -> dict[str, Any]:
     analysis = get_analysis(run_id)
     try:
         return run_cfg.update(analysis, patch).model_dump()
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(400, str(exc)) from exc
 
 
@@ -173,7 +317,7 @@ def run_stage(run_id: str, stage: str, confirm: bool = False) -> dict[str, Any]:
 
     try:
         runner.run_stage(analysis, stage)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(
             500,
             detail={
@@ -243,7 +387,7 @@ def set_seed(run_id: str, source_path: str, normalized_id: str = "") -> dict[str
     analysis = get_analysis(run_id)
     try:
         text = s2_plans.load_seed_plan(jsonl=source_path, normalized_id=normalized_id or None)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise HTTPException(400, str(exc)) from exc
     if not text:
         raise HTTPException(404, f"no plan found in {source_path}")

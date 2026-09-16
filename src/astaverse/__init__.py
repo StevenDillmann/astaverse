@@ -1,4 +1,4 @@
-"""Astaverse — multiverse analysis and robust surprisal.
+"""Astaverse — multiverse analysis and structured scientific conclusions.
 
 Usable three ways, all over the same core:
 

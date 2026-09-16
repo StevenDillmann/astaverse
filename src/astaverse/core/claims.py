@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any
 
 from .config import normalize_extraction_mode
+from . import store as store_module
 from .store import STAGES, Run
 
 
@@ -39,12 +40,28 @@ def normalize_hypothesis(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").strip().lower())
 
 
+def normalize_dataset(dataset: str) -> str:
+    """A dataset is identified by its folder name, however it was spelled.
+
+    The same dataset arrives here several ways — a bare name (`caschools`), a
+    repo-relative path (`data/datasets/caschools`), an absolute directory, or
+    the csv inside it — because manifests, stored hypotheses, and the API each
+    record it differently. Every spelling has to yield one claim, or the same
+    hypothesis appears once per spelling. Safe because the canonical layout
+    gives each dataset its own uniquely named folder under `data/datasets/`.
+    """
+    path = Path(str(dataset).strip().rstrip("/"))
+    if path.name in {"data.csv", "info.json"}:
+        return path.parent.name
+    return path.name
+
+
 def claim_id(hypothesis: str, dataset: str) -> str:
     """Stable id for a hypothesis-and-dataset pair.
 
     Derived, not stored, so existing runs group correctly without migration.
     """
-    basis = f"{normalize_hypothesis(hypothesis)}||{str(dataset).strip().rstrip('/')}"
+    basis = f"{normalize_hypothesis(hypothesis)}||{normalize_dataset(dataset)}"
     return hashlib.sha1(basis.encode()).hexdigest()[:12]
 
 
@@ -57,6 +74,9 @@ class Attempt:
     status: dict[str, str]
     n_complete: int
     running: bool
+
+    # The short id this run is known by — EXP-14 — assigned once at creation.
+    number: int | None = None
 
     # What was different about this attempt.
     mode: str | None = None
@@ -191,10 +211,15 @@ class Claim:
     hypothesis: str
     dataset: str
     attempts: list[Attempt]
+    description: str | None = None
+    created_at: str = ""
 
     @property
     def dataset_name(self) -> str:
-        return Path(self.dataset).name
+        # Normalised, not the bare basename: a claim recorded against the csv
+        # inside a dataset folder must still name the dataset, or it detaches
+        # from it in the listings and shows up as "data.csv".
+        return normalize_dataset(self.dataset)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -202,10 +227,12 @@ class Claim:
             "hypothesis": self.hypothesis,
             "dataset": self.dataset,
             "dataset_name": self.dataset_name,
+            "description": self.description,
+            "created_at": self.created_at,
             "n_attempts": len(self.attempts),
             "attempts": [a.to_dict() for a in self.attempts],
             "support": support(self.attempts).to_dict(),
-            "updated_at": max((a.created_at for a in self.attempts), default=""),
+            "updated_at": max((a.created_at for a in self.attempts), default=self.created_at),
             **comparison(self.attempts),
         }
 
@@ -227,11 +254,11 @@ def config_label(attempt: Attempt) -> str:
         bits.append(mode)
     if attempt.critique != defaults.decisions.critique:
         bits.append("+critique" if attempt.critique else "-critique")
-    if attempt.models:
+    if attempt.models and attempt.models != defaults.decisions.models:
         bits.append("/".join(attempt.models))
     if attempt.cap is not None and attempt.cap != defaults.universes.cap:
         bits.append(f"cap {attempt.cap}")
-    if attempt.agent_models:
+    if attempt.agent_models and attempt.agent_models != defaults.execute.models:
         bits.append("+".join(attempt.agent_models))
     if attempt.seeded:
         bits.append("seeded")
@@ -310,6 +337,7 @@ def summarise(analysis: Run) -> Attempt:
 
     attempt = Attempt(
         id=analysis.run_id,
+        number=manifest.get("number") if isinstance(manifest.get("number"), int) else None,
         created_at=manifest.get("created_at", ""),
         status=status,
         n_complete=sum(1 for v in status.values() if v == "complete"),
@@ -401,10 +429,37 @@ def comparison(attempts: list[Attempt]) -> dict[str, Any]:
     }
 
 
-def all_claims(runs_dir: Path) -> list[Claim]:
-    """Every claim, newest attempt first, with its attempts newest first."""
-    grouped: dict[str, Claim] = {}
+def all_claims(runs_dir: Path, *, include_archived: bool = False) -> list[Claim]:
+    """Stored hypotheses plus run-derived claims, newest first.
+
+    Archived claims and experiments are omitted unless asked for, so every
+    listing — CLI and web alike — hides them from one decision here. Lookups by
+    id still see everything; see `get_claim`.
+    """
+    from ..integrations import hypotheses as hypotheses_integration
+    from . import settings as app_settings
+
+    # Runs made before numbering get theirs here, so every listing — CLI and
+    # web alike — can show a short id.
+    store_module.ensure_numbers(runs_dir)
+
+    archive = None if include_archived else app_settings.archive(runs_dir)
+
+    grouped = {
+        claim_id(record.hypothesis, record.dataset): Claim(
+            id=claim_id(record.hypothesis, record.dataset),
+            hypothesis=record.hypothesis,
+            dataset=record.dataset,
+            attempts=[],
+            description=record.description,
+            created_at=record.created_at,
+        )
+        for record in hypotheses_integration.list_all()
+    }
+    stored = set(grouped)
     for analysis in Run.list_all(runs_dir):
+        if archive and archive.has_experiment(analysis.run_id):
+            continue
         manifest = analysis.manifest()
         hypothesis = manifest.get("hypothesis") or ""
         dataset = manifest.get("dataset") or ""
@@ -415,17 +470,29 @@ def all_claims(runs_dir: Path) -> list[Claim]:
             grouped[cid] = claim
         claim.attempts.append(summarise(analysis))
 
+    if archive:
+        grouped = {
+            cid: claim
+            for cid, claim in grouped.items()
+            if not archive.has_hypothesis(cid)
+            and not archive.has_dataset(claim.dataset_name)
+            # A derived claim left with no unarchived experiments has nothing
+            # to show; a stored one is a real record and stays.
+            and (claim.attempts or cid in stored)
+        }
+
     for claim in grouped.values():
         claim.attempts.sort(key=lambda a: a.created_at, reverse=True)
     return sorted(
         grouped.values(),
-        key=lambda c: c.attempts[0].created_at if c.attempts else "",
+        key=lambda c: c.attempts[0].created_at if c.attempts else c.created_at,
         reverse=True,
     )
 
 
 def get_claim(runs_dir: Path, cid: str) -> Claim | None:
-    for claim in all_claims(runs_dir):
+    """Lookup by id, archived or not — a direct link must keep working."""
+    for claim in all_claims(runs_dir, include_archived=True):
         if claim.id == cid:
             return claim
     return None

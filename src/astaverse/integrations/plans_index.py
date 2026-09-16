@@ -20,8 +20,11 @@ from dataclasses import asdict, dataclass
 from functools import lru_cache
 from pathlib import Path
 
+from ..paths import REPO_ROOT
+
+# Optional AutoDiscovery plan seeds. Override with ASTAVERSE_PLANS (os.pathsep-separated list).
 DEFAULT_ROOTS = [
-    Path.home() / "Desktop/Asta/autodiscovery-execution-experiments/data/plans/01_normalized",
+    REPO_ROOT / "data" / "plans",
 ]
 
 
