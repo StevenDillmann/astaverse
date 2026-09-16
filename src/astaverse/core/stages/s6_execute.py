@@ -1,7 +1,7 @@
 """s6 — execution: run the Harbor task, collect the multiverse output.
 
-Mirrors `autodiscovery-execution-experiments/scripts/run.sh`, including the
-`yes |` auto-confirm for Harbor's env-var prompt.
+Mirrors `autodiscovery-execution-experiments/scripts/run.sh`, including
+non-interactive confirmation for Harbor's env-var prompt.
 
 Multiple `-m` models can be given in one call. That is not a convenience: the
 spread between models is the estimate of implementation bias, and s8 reports
@@ -41,10 +41,28 @@ def _job_name(run_id: str, agent: str, model: str | None) -> str:
     return f"{run_id}__{agent}{suffix}"
 
 
-def build_command(run_obj: Run, task_dir: Path, agent: str, model: str | None) -> list[str]:
+def _available_job_name(jobs_dir: Path, run_id: str, agent: str, model: str | None) -> str:
+    base = _job_name(run_id, agent, model)
+    if not (jobs_dir / base).exists():
+        return base
+    index = 2
+    while (jobs_dir / f"{base}-{index}").exists():
+        index += 1
+    return f"{base}-{index}"
+
+
+def build_command(
+    run_obj: Run,
+    task_dir: Path,
+    agent: str,
+    model: str | None,
+    job_name: str | None = None,
+) -> list[str]:
+    job_name = job_name or _job_name(run_obj.run_id, agent, model)
     cmd = [
         "harbor",
         "run",
+        "--yes",
         "-p",
         str(task_dir),
         "-a",
@@ -52,7 +70,7 @@ def build_command(run_obj: Run, task_dir: Path, agent: str, model: str | None) -
         "-o",
         str(run_obj.jobs_dir),
         "--job-name",
-        _job_name(run_obj.run_id, agent, model),
+        job_name,
     ]
     if model:
         cmd += ["-m", model]
@@ -77,8 +95,8 @@ def run(
 
     jobs: list[JobRecord] = []
     for model in models:
-        cmd = build_command(run_obj, task_dir, agent, model)
-        job_name = _job_name(run_obj.run_id, agent, model)
+        job_name = _available_job_name(run_obj.jobs_dir, run_obj.run_id, agent, model)
+        cmd = build_command(run_obj, task_dir, agent, model, job_name)
         record = JobRecord(job_name=job_name, agent=agent, model=model, command=cmd)
 
         if dry_run:
@@ -87,12 +105,11 @@ def run(
             continue
 
         run_obj.log("execute", "running: " + " ".join(cmd))
-        # `yes |` auto-confirms Harbor's env-var prompt, as scripts/run.sh does.
         proc = subprocess.run(
-            f"yes | {' '.join(subprocess.list2cmdline([c]) for c in cmd)}",
-            shell=True,
+            cmd,
             cwd=run_obj.root,
             env={**os.environ},
+            check=False,
         )
         record.returncode = proc.returncode
         job_dir = run_obj.jobs_dir / job_name
@@ -121,7 +138,5 @@ def run(
             "re-run one by hand to see harbor's own output."
         )
 
-    run_obj.record_stage(
-        "execute", agent=agent, models=[m for m in models], n_jobs=len(jobs)
-    )
+    run_obj.record_stage("execute", agent=agent, models=[m for m in models], n_jobs=len(jobs))
     return artifact

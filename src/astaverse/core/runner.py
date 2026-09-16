@@ -14,8 +14,9 @@ from __future__ import annotations
 
 import threading
 import traceback
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Any
 
 from . import config as run_config
 from .stages import (
@@ -26,9 +27,10 @@ from .stages import (
     s5_task,
     s6_execute,
     s7_verdicts,
-    s8_surprisal,
+    s9_conclusion,
+    s10_refinement,
 )
-from .store import STAGES, Run, utcnow
+from .store import Run, utcnow
 
 
 def run_stage(run_obj: Run, stage: str) -> None:
@@ -90,10 +92,11 @@ def run_stage(run_obj: Run, stage: str) -> None:
     elif stage == "verdicts":
         s7_verdicts.run(run_obj)
 
-    elif stage == "surprisal":
-        s8_surprisal.run(
-            run_obj, model=cfg.surprisal.model, n_samples=cfg.surprisal.n_samples
-        )
+    elif stage == "conclusion":
+        s9_conclusion.run(run_obj, model=cfg.conclusion.model)
+
+    elif stage == "refinement":
+        s10_refinement.run(run_obj, model=cfg.refinement.model)
 
     else:
         raise ValueError(f"unknown stage '{stage}'")
@@ -139,9 +142,20 @@ _PROGRESS: dict[str, Progress] = {}
 _LOCK = threading.Lock()
 
 
-def progress_for(run_id: str) -> dict | None:
+def progress_for(
+    run_id: str, completed_stages: dict[str, Any] | None = None
+) -> dict | None:
     with _LOCK:
         p = _PROGRESS.get(run_id)
+        if p and p.failed and completed_stages:
+            stage_record = completed_stages.get(p.failed) or {}
+            completed_at = stage_record.get("completed_at")
+            if completed_at and completed_at >= p.started_at:
+                # A later CLI or server run completed the stage that this
+                # in-process attempt failed on. Disk is the durable source of
+                # truth, so discard the superseded failure.
+                _PROGRESS.pop(run_id, None)
+                return None
         return p.as_dict() if p else None
 
 

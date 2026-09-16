@@ -21,14 +21,22 @@ because for the CLI and the UI it is.
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 from .store import STAGES, Run
 
 Stage = Literal[
-    "study", "plans", "decisions", "universes", "task", "verdicts", "execute", "surprisal"
+    "study",
+    "plans",
+    "decisions",
+    "universes",
+    "task",
+    "execute",
+    "verdicts",
+    "conclusion",
+    "refinement",
 ]
 
 ExtractionMode = Literal["sample_plans", "audit_plan", "direct"]
@@ -105,13 +113,13 @@ class DecisionsConfig(BaseModel):
 class UniversesConfig(BaseModel):
     """Stage 4 — enumerating the grid."""
 
-    cap: int = Field(
-        24,
-        ge=1,
-        le=512,
+    cap: Annotated[int, Field(ge=1, le=512)] | None = Field(
+        None,
         description=(
-            "Most universes to execute. Beyond this the grid is sampled by an even "
-            "stride, never truncated to a prefix, and the drop count is reported."
+            "Most universes to execute. Unset runs the whole constrained grid — every "
+            "combination the decision space allows. Setting a number switches to a "
+            "pair-balanced design that covers options and preserves matched comparisons "
+            "for sensitivity analysis, at the cost of a sample biased toward the default."
         ),
     )
     include: list[str] = Field(
@@ -129,29 +137,37 @@ class ExecuteConfig(BaseModel):
 
     agent: str = Field("terminus-2", description="Harbor agent to run the task.")
     models: list[str] = Field(
-        default_factory=list,
+        default_factory=lambda: ["openai/gpt-5.6-luna"],
         description=(
-            "Models to run the sweep with. More than one estimates implementation "
+            "Models to run the sweep with. Defaults to openai/gpt-5.6-luna, which "
+            "Terminus 2 requires explicitly. More than one estimates implementation "
             "bias: agreement between them is what licenses reading the multiverse as "
             "a statement about the analysis rather than about the agent."
         ),
     )
-    dry_run: bool = Field(
-        False, description="Print the harbor command without running anything."
-    )
+    dry_run: bool = Field(False, description="Print the harbor command without running anything.")
 
 
-class SurprisalConfig(BaseModel):
-    """Stage 8 — belief update and fragility."""
+class ConclusionConfig(BaseModel):
+    """Stage 8 — structured claim-level interpretation."""
 
     model: str | None = Field(
-        None, description="Model for belief elicitation. Defaults to ASTAVERSE_BELIEF_MODEL."
+        None,
+        description=(
+            "Model for the final evidence synthesis. Defaults to "
+            "ASTAVERSE_CONCLUSION_MODEL."
+        ),
     )
-    n_samples: int = Field(
-        5,
-        ge=1,
-        le=50,
-        description="Categorical draws per elicitation. More is steadier and costs more.",
+
+
+class RefinementConfig(BaseModel):
+    """Stage 9 — successor hypotheses, only when the parent needs splitting."""
+
+    model: str | None = Field(
+        None,
+        description=(
+            "Model for proposing successor hypotheses. Defaults to the conclusion model."
+        ),
     )
 
 
@@ -162,7 +178,8 @@ class RunConfig(BaseModel):
     decisions: DecisionsConfig = Field(default_factory=DecisionsConfig)
     universes: UniversesConfig = Field(default_factory=UniversesConfig)
     execute: ExecuteConfig = Field(default_factory=ExecuteConfig)
-    surprisal: SurprisalConfig = Field(default_factory=SurprisalConfig)
+    conclusion: ConclusionConfig = Field(default_factory=ConclusionConfig)
+    refinement: RefinementConfig = Field(default_factory=RefinementConfig)
 
     through: Stage = Field(
         "universes",
@@ -182,6 +199,12 @@ class RunConfig(BaseModel):
         if self.decisions.mode == "direct" and target != "plans":
             stages = [stage for stage in stages if stage != "plans"]
         return stages
+
+    @field_validator("through", mode="before")
+    @classmethod
+    def migrate_removed_surprisal_target(cls, value: Any) -> Any:
+        """Old runs that stopped at surprisal now continue through conclusion."""
+        return "conclusion" if value == "surprisal" else value
 
     def spends_money(self) -> bool:
         return "execute" in self.stages_through()

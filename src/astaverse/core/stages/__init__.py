@@ -13,5 +13,6 @@ from . import (  # noqa: F401
     s5_task,
     s6_execute,
     s7_verdicts,
-    s8_surprisal,
+    s9_conclusion,
+    s10_refinement,
 )

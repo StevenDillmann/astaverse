@@ -30,7 +30,9 @@ from ..core import runner
 from ..core import settings as app_settings
 from ..core.config import RunConfig
 from ..core.stages import s1_study, s2_plans
+from ..core import store
 from ..core.store import STAGES, Run
+from ..integrations import datasets
 
 load_dotenv()
 
@@ -53,8 +55,22 @@ def _runs_dir() -> Path:
 
 
 def _load(analysis_id: str) -> Run:
+    """Resolve a run by its short number (14, EXP-00014) or its full id.
+
+    The full id is the directory name and stays authoritative; the number is
+    what the interface shows and what a person can actually retype.
+    """
+    runs = _runs_dir()
+    wanted = analysis_id.strip()
+    short = wanted[4:] if wanted.upper().startswith("EXP-") else wanted
+    if short.isdigit():
+        number = int(short)
+        for analysis in Run.list_all(runs):
+            if analysis.number == number:
+                return analysis
+        sys.exit(f"{RED}no run numbered {number} in {runs}{OFF}")
     try:
-        return Run.load(_runs_dir(), analysis_id)
+        return Run.load(runs, wanted)
     except FileNotFoundError as exc:
         sys.exit(f"{RED}{exc}{OFF}")
 
@@ -110,7 +126,7 @@ def _echo_config(config: RunConfig) -> None:
         f" models={','.join(config.decisions.models) or 'default'}"
         f"{' +critique' if config.decisions.critique else ''}{OFF}"
     )
-    print(f"{DIM}  universes  cap={config.universes.cap}{OFF}")
+    print(f"{DIM}  universes  cap={config.universes.cap or 'none (full grid)'}{OFF}")
     if config.spends_money():
         print(
             f"{YELLOW}  execute    agent={config.execute.agent}"
@@ -135,23 +151,38 @@ def new(
 
     Args:
         hypothesis: The claim under test.
-        dataset: A CSV file, or a BLADE folder holding data.csv and info.json.
+        dataset: A CSV file, or an AstaVerse dataset folder holding data.csv and info.json.
         description: Overrides the dataset's own description, if it has one.
     """
-    analysis = Run.create(_runs_dir(), hypothesis, dataset)
+    catalog_entry = datasets.get(dataset)
+    resolved_dataset = catalog_entry.path if catalog_entry else dataset
+    analysis = Run.create(_runs_dir(), hypothesis, resolved_dataset)
     app_settings.apply_to_manifest(analysis, app_settings.load(_runs_dir()))
     _apply_cli_config(analysis, config)
-    spec = s1_study.run(analysis, hypothesis, dataset, description)
+    spec = s1_study.run(analysis, hypothesis, resolved_dataset, description)
     print(f"{GREEN}created{OFF} {analysis.run_id}")
     print(f"{DIM}  {spec.n_rows} rows, {len(spec.columns)} columns{OFF}")
 
 
-def ls() -> None:
-    """List analyses, newest first."""
+def ls(all: bool = False) -> None:
+    """List analyses, newest first.
+
+    Args:
+        all: Include archived analyses, which are hidden by default.
+    """
     analyses = Run.list_all(_runs_dir())
+    if not all:
+        archive = app_settings.archive(_runs_dir())
+        hidden = [a for a in analyses if archive.has_experiment(a.run_id)]
+        analyses = [a for a in analyses if not archive.has_experiment(a.run_id)]
+    else:
+        hidden = []
     if not analyses:
         print(f"{DIM}no analyses in {_runs_dir()}{OFF}")
+        if hidden:
+            print(f"{DIM}{len(hidden)} archived — `astaverse ls --all` to include{OFF}")
         return
+    store.ensure_numbers(_runs_dir())
     for analysis in analyses:
         status = analysis.status()
         done = sum(1 for v in status.values() if v == "complete")
@@ -160,17 +191,21 @@ def ls() -> None:
             for s in STAGES
         )
         manifest = analysis.manifest()
-        print(f"{pips} {done}/{len(STAGES)}  {analysis.run_id}")
+        number = analysis.number
+        short = f"EXP-{number:05d}" if number else "EXP-?"
+        print(f"{pips} {done}/{len(STAGES)}  {BOLD}{short:<8}{OFF} {DIM}{analysis.run_id}{OFF}")
         print(f"{DIM}          {manifest['hypothesis'][:88]}{OFF}")
+    if hidden:
+        print(f"{DIM}{len(hidden)} archived hidden — `astaverse ls --all` to include{OFF}")
 
 
-def hypotheses() -> None:
+def hypotheses(all: bool = False) -> None:
     """List hypotheses — each coupled to a dataset — and their experiments.
 
     A hypothesis groups every experiment using the same hypothesis text and
     dataset, so different methods can be compared.
     """
-    found = claims_core.all_claims(_runs_dir())
+    found = claims_core.all_claims(_runs_dir(), include_archived=all)
     if not found:
         print(f"{DIM}no claims in {_runs_dir()}{OFF}")
         return
@@ -202,8 +237,8 @@ def hypotheses() -> None:
 def experiment(analysis_id: str, /, config: Config = RunConfig()) -> None:
     """Create another experiment for the same hypothesis and dataset.
 
-    Inherits the previous configuration, so experiments differ only in what
-    you deliberately change:
+    Inherits the previous configuration but generates a fresh plan, so
+    experiments differ only in what you deliberately change:
 
         astaverse experiment <id> --decisions.mode direct
 
@@ -217,10 +252,6 @@ def experiment(analysis_id: str, /, config: Config = RunConfig()) -> None:
     patch = _explicit_patch(config)
     if patch:
         run_cfg.update(analysis, patch)
-    if manifest.get("seed"):
-        fresh = analysis.manifest()
-        fresh["seed"] = manifest["seed"]
-        analysis.write_manifest(fresh)
     s1_study.run(analysis, manifest["hypothesis"], manifest["dataset"])
     print(f"{GREEN}created experiment{OFF} {analysis.run_id}")
     print(f"{DIM}  hypothesis {claims_core.claim_id(manifest['hypothesis'], manifest['dataset'])}{OFF}")
@@ -281,7 +312,7 @@ def stage(analysis_id: str, name: str, /, config: Config = RunConfig()) -> None:
     Args:
         analysis_id: Which analysis.
         name: Stage to run — one of study, plans, decisions, universes, task,
-            execute, verdicts, surprisal.
+            execute, verdicts, conclusion.
     """
     if name not in STAGES:
         sys.exit(f"{RED}unknown stage '{name}' (have: {', '.join(STAGES)}){OFF}")
@@ -362,6 +393,70 @@ def schema() -> None:
     print(json.dumps(run_cfg.json_schema(), indent=2))
 
 
+def _infer_kind(identifier: str) -> str:
+    """Which kind of thing an id names, so the caller need not say.
+
+    Ids are distinctive enough to tell apart — a run id, a claim id and a
+    dataset name never collide in practice — and typing the kind is pure
+    ceremony when the id already implies it.
+    """
+    runs = _runs_dir()
+    if any(analysis.run_id == identifier for analysis in Run.list_all(runs)):
+        return "experiment"
+    if any(claim.id == identifier for claim in claims_core.all_claims(runs, include_archived=True)):
+        return "hypothesis"
+    folded = identifier.strip().lower()
+    known = {claim.dataset_name.lower() for claim in claims_core.all_claims(runs, include_archived=True)}
+    known |= {dataset.name.lower() for dataset in datasets.discover()}
+    if folded in known:
+        return "dataset"
+    sys.exit(
+        f"{RED}cannot tell what '{identifier}' names{OFF}\n"
+        f"{DIM}pass --kind dataset|hypothesis|experiment to say explicitly{OFF}"
+    )
+
+
+def archive(identifiers: list[str], /, kind: str | None = None, restore: bool = False) -> None:
+    """Archive items, hiding them from listings without deleting anything.
+
+    Args:
+        identifiers: One or more dataset names, hypothesis ids or experiment ids.
+        kind: dataset, hypothesis or experiment. Inferred from the id when omitted.
+        restore: Bring them back instead of archiving them.
+    """
+    if not identifiers:
+        sys.exit(f"{RED}nothing to archive — pass at least one id{OFF}")
+
+    by_kind: dict[str, list[str]] = {}
+    for identifier in identifiers:
+        by_kind.setdefault(kind or _infer_kind(identifier), []).append(identifier)
+
+    verb = "restored" if restore else "archived"
+    for item_kind, ids in by_kind.items():
+        try:
+            app_settings.set_archived_many(_runs_dir(), item_kind, ids, not restore)
+        except ValueError as exc:
+            sys.exit(f"{RED}{exc}{OFF}")
+        for identifier in ids:
+            print(f"{GREEN}{verb}{OFF} {item_kind} {identifier}")
+
+
+def archived() -> None:
+    """List everything currently archived."""
+    current = app_settings.load(_runs_dir())
+    groups = (
+        ("datasets", current.archived_datasets),
+        ("hypotheses", current.archived_hypotheses),
+        ("experiments", current.archived_experiments),
+    )
+    if not any(items for _, items in groups):
+        print(f"{DIM}nothing archived{OFF}")
+        return
+    for label, items in groups:
+        for item in items:
+            print(f"{DIM}{label[:-1]:<10}{OFF} {item}")
+
+
 def serve(host: str = "127.0.0.1", port: int = 8000) -> None:
     """Serve the web interface."""
     import uvicorn
@@ -387,10 +482,12 @@ def main() -> None:
             "run": run,
             "seed": seed,
             "schema": schema,
+            "archive": archive,
+            "archived": archived,
             "serve": serve,
         },
         prog="astaverse",
-        description="Multiverse analysis and robust surprisal.",
+        description="Multiverse analysis and structured scientific conclusions.",
     )
 
 

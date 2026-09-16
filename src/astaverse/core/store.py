@@ -27,7 +27,8 @@ STAGES: list[str] = [
     "task",
     "execute",
     "verdicts",
-    "surprisal",
+    "conclusion",
+    "refinement",
 ]
 
 ARTIFACTS: dict[str, str] = {
@@ -38,7 +39,11 @@ ARTIFACTS: dict[str, str] = {
     "task": "05_task.json",
     "execute": "06_execute.json",
     "verdicts": "07_verdicts.json",
+    # Legacy artifact: no longer a pipeline stage, but retained so old runs
+    # remain readable and early-stage reruns can archive stale copies.
     "surprisal": "08_surprisal.json",
+    "conclusion": "09_conclusion.json",
+    "refinement": "10_refinement.json",
 }
 
 
@@ -84,6 +89,7 @@ class Run:
         run.write_manifest(
             {
                 "run_id": run_id,
+                "number": next_number(runs_dir),
                 "created_at": utcnow(),
                 "hypothesis": hypothesis,
                 "dataset": str(dataset),
@@ -109,6 +115,16 @@ class Run:
     @property
     def run_id(self) -> str:
         return self.root.name
+
+    @property
+    def number(self) -> int | None:
+        """The short, human number this run is known by — EXP-14.
+
+        Assigned once at creation and never reused, so it survives deletion of
+        its neighbours. A run predating numbering has none until backfilled.
+        """
+        value = self.manifest().get("number")
+        return value if isinstance(value, int) else None
 
     # -- manifest ----------------------------------------------------------
 
@@ -140,6 +156,14 @@ class Run:
             for s in STAGES[STAGES.index(stage) + 1 :]
             if self.artifact_path(s).exists() or s in m["stages"]
         ]
+        if (
+            STAGES.index(stage) <= STAGES.index("verdicts")
+            and (
+                self.artifact_path("surprisal").exists()
+                or "surprisal" in m["stages"]
+            )
+        ):
+            superseded.append("surprisal")
         if superseded:
             stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
             archive = self.root / "history" / f"{stamp}__superseded-by-{stage}"
@@ -233,3 +257,44 @@ class Run:
         line = f"[{utcnow()}] {stage}: {message}\n"
         with (self.root / "run.log").open("a") as fh:
             fh.write(line)
+
+
+def _numbers(runs_dir: Path) -> dict[str, int]:
+    """The run number of every run that has one, keyed by run id."""
+    found: dict[str, int] = {}
+    for run in Run.list_all(runs_dir):
+        value = run.manifest().get("number")
+        if isinstance(value, int):
+            found[run.run_id] = value
+    return found
+
+
+def next_number(runs_dir: Path) -> int:
+    """The next unused run number.
+
+    Counting from the highest ever issued, not from how many runs exist, so
+    deleting a run never hands its number to a different one later.
+    """
+    issued = _numbers(runs_dir)
+    return max(issued.values(), default=0) + 1
+
+
+def ensure_numbers(runs_dir: Path) -> None:
+    """Give a number to any run created before numbering existed.
+
+    Backfilled oldest-first so the numbers agree with the order the runs were
+    made. Writes only the manifests that are missing one, so this is a no-op
+    on every call after the first.
+    """
+    runs = Run.list_all(runs_dir)
+    issued = _numbers(runs_dir)
+    if len(issued) == len(runs):
+        return
+    counter = max(issued.values(), default=0)
+    for run in sorted(runs, key=lambda r: r.manifest().get("created_at", "")):
+        if run.run_id in issued:
+            continue
+        counter += 1
+        manifest = run.manifest()
+        manifest["number"] = counter
+        run.write_manifest(manifest)

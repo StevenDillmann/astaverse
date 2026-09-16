@@ -25,8 +25,8 @@ from ..store import Run
 from .s1_study import render_columns_markdown
 
 SYSTEM = (
-    "You are an experienced data analyst. You design concrete, executable "
-    "analysis plans for testing a scientific hypothesis on tabular data."
+    "You are a research scientist designing a concrete, executable experiment "
+    "plan for a programmer. Explain the plan in natural language; do not write code."
 )
 
 PROMPT = """\
@@ -48,6 +48,15 @@ A plan another analyst could execute without asking you questions:
   transformations, the statistical model, and how significance is judged.
 - `deliverables`: the specific numbers this analysis must report.
 - `rationale`: why you made the analytic choices you did.
+
+Follow the AutoDiscovery planning constraints:
+
+- Strictly use only the provided dataset. Do not simulate synthetic data or
+  assume columns that cannot be derived from the available columns.
+- Keep the supplied hypothesis fixed and make the experiment self-contained.
+- Require robust statistical tests appropriate to the data and hypothesis.
+- Include any necessary exploration, cleaning, transformation, variable
+  derivation, modeling, visualization, and statistical testing in the steps.
 
 Commit to specific choices rather than listing alternatives. Where a choice is
 genuinely arbitrary, make it and say so in the rationale. Write the plan you

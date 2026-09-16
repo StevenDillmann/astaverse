@@ -20,7 +20,7 @@ from ..store import Run
 
 def run(
     run_obj: Run,
-    cap: int | None = 24,
+    cap: int | None = None,
     include: list[str] | None = None,
     exclude: list[str] | None = None,
 ) -> UniverseSet:
@@ -49,6 +49,8 @@ def run(
         n_dropped_constraints=universe_set.n_dropped_constraints,
         n_dropped_cap=universe_set.n_dropped_cap,
         n_analysed=len(universe_set.universes) * n_posthoc,
+        selection_strategy=universe_set.selection_strategy,
+        matched_pairs_by_decision=universe_set.matched_pairs_by_decision,
     )
 
     msg = (
@@ -57,7 +59,13 @@ def run(
         f"{universe_set.n_dropped_constraints} dropped by constraints)"
     )
     if universe_set.truncated:
-        msg += f"; {universe_set.n_dropped_cap} DROPPED BY CAP {universe_set.cap}"
+        msg += (
+            f"; {universe_set.n_dropped_cap} DROPPED BY CAP {universe_set.cap} "
+            f"using {universe_set.selection_strategy}"
+        )
+        if universe_set.matched_pairs_by_decision:
+            pair_range = universe_set.matched_pairs_by_decision.values()
+            msg += f" ({min(pair_range)}-{max(pair_range)} matched pairs/decision)"
     if n_posthoc > 1:
         msg += f"; x{n_posthoc} post-hoc verdict rules = {len(universe_set.universes) * n_posthoc} analysed"
     run_obj.log("universes", msg)

@@ -119,6 +119,10 @@ Rules:
   thinking about it — the one a single-universe pipeline would land on.
 - Use `requires` / `incompatible_with` (referencing "decision_id.option_id")
   only where a combination is genuinely impossible, not merely unusual.
+- `requires` is an AND list. Never list two options from the same decision as
+  alternatives. Express "any option except X" as `incompatible_with: [X]`.
+- If a whole decision only applies when another option is selected, include a
+  `not_applicable` option that is incompatible with that activating option.
 - Do NOT propose a decision about the significance threshold or how to word
   the verdict. That is handled separately.
 """
@@ -264,9 +268,7 @@ def _run_mode(
     if mode is ExtractionMode.sample_plans:
         if not ctx.plans:
             raise ValueError("method 'sample_plans' needs the plans stage to have run")
-        prompt = PLAN_DIFF_PROMPT.format(
-            k=len(ctx.plans.plans), plans=ctx.rendered_plans, **common
-        )
+        prompt = PLAN_DIFF_PROMPT.format(k=len(ctx.plans.plans), plans=ctx.rendered_plans, **common)
     elif mode is ExtractionMode.audit_plan:
         plan = ctx.primary_plan
         if plan is None:
@@ -287,11 +289,13 @@ def _run_mode(
 def _critique(
     ctx: Context, found: list[_DecisionResponse], model: str, run_obj: Run
 ) -> list[_DecisionResponse]:
-    existing = "\n".join(
-        f"- {d.id} ({d.kind}): {d.question} — options: "
-        + ", ".join(o.id for o in d.options)
-        for d in found
-    ) or "(none)"
+    existing = (
+        "\n".join(
+            f"- {d.id} ({d.kind}): {d.question} — options: " + ", ".join(o.id for o in d.options)
+            for d in found
+        )
+        or "(none)"
+    )
     prompt = CRITIQUE_PROMPT.format(
         hypothesis=ctx.study.hypothesis,
         dataset_name=ctx.study.dataset_name,
@@ -371,6 +375,77 @@ def _verdict_rule_decision() -> Decision:
     )
 
 
+def _normalize_conditional_constraints(decisions: dict[str, Decision]) -> None:
+    """Repair two common structured-output mistakes without changing meaning.
+
+    ASTRA's `requires` list is conjunctive. Models nevertheless often list
+    several options from one decision to mean "one of these". That conjunction
+    is impossible, so convert it to incompatibilities with the complement.
+
+    A decision whose every option requires the same upstream choice also needs
+    a not-applicable branch; otherwise merely including that decision forces
+    the upstream choice in every universe.
+    """
+    conditional: dict[str, tuple[str, set[str]]] = {}
+    for decision_id, decision in decisions.items():
+        shared_targets: dict[str, list[set[str]]] = {}
+        for option in decision.options.values():
+            by_target: dict[str, set[str]] = {}
+            for ref in option.requires:
+                parsed = ref.partition(".")
+                if not parsed[1]:
+                    continue
+                by_target.setdefault(parsed[0], set()).add(parsed[2])
+            for target_id, allowed in by_target.items():
+                if target_id in decisions and target_id != decision_id:
+                    shared_targets.setdefault(target_id, []).append(allowed)
+        for target_id, allowed_by_option in shared_targets.items():
+            if len(allowed_by_option) == len(decision.options):
+                conditional[decision_id] = (
+                    target_id,
+                    set().union(*allowed_by_option),
+                )
+                break
+
+    for decision in decisions.values():
+        for option in decision.options.values():
+            by_target: dict[str, list[str]] = {}
+            for ref in option.requires:
+                target_id, separator, target_option = ref.partition(".")
+                if separator:
+                    by_target.setdefault(target_id, []).append(target_option)
+            for target_id, allowed in by_target.items():
+                target = decisions.get(target_id)
+                if target is None or len(allowed) < 2:
+                    continue
+                option.requires = [
+                    ref for ref in option.requires if not ref.startswith(f"{target_id}.")
+                ]
+                for disallowed in target.options.keys() - set(allowed):
+                    ref = f"{target_id}.{disallowed}"
+                    if ref not in option.incompatible_with:
+                        option.incompatible_with.append(ref)
+
+    defaults = {decision_id: decision.default for decision_id, decision in decisions.items()}
+    for decision_id, (target_id, activating_options) in conditional.items():
+        decision = decisions[decision_id]
+        if "not_applicable" in decision.options:
+            continue
+        decision.options["not_applicable"] = Option(
+            label="Not applicable",
+            description=(
+                f"This decision does not apply unless {target_id} uses one of: "
+                + ", ".join(sorted(activating_options))
+                + "."
+            ),
+            incompatible_with=[
+                f"{target_id}.{option_id}" for option_id in sorted(activating_options)
+            ],
+        )
+        if defaults.get(target_id) not in activating_options:
+            decision.default = "not_applicable"
+
+
 # --------------------------------------------------------------------------
 # the stage
 # --------------------------------------------------------------------------
@@ -399,8 +474,7 @@ def run(
 
     if mode in NEEDS_PLANS and plans is None:
         raise ValueError(
-            f"mode '{mode.value}' needs stage 2 (plans); run it, or use "
-            "'direct', which does not"
+            f"mode '{mode.value}' needs stage 2 (plans); run it, or use 'direct', which does not"
         )
 
     ctx = Context(study=study, plans=plans, max_decisions=max_decisions)
@@ -415,9 +489,7 @@ def run(
     if critique:
         extra = _critique(ctx, found, model_list[0], run_obj)
         if extra:
-            found, provenance = _merge(
-                [("merged", found), ("critique", extra)]
-            )
+            found, provenance = _merge([("merged", found), ("critique", extra)])
             run_obj.log("decisions", f"critique added {len(extra)} candidate decisions")
 
     # Build the spec.
@@ -448,9 +520,7 @@ def run(
             for o in item.options
         }
         default = (
-            item.default_option_id
-            if item.default_option_id in options
-            else next(iter(options))
+            item.default_option_id if item.default_option_id in options else next(iter(options))
         )
         if default != item.default_option_id:
             run_obj.log(
@@ -471,6 +541,7 @@ def run(
             kind=kind,
         )
 
+    _normalize_conditional_constraints(decisions)
     decisions["verdict_rule"] = _verdict_rule_decision()
 
     spec = DecisionSpec(
