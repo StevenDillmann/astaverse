@@ -1,0 +1,14 @@
+id: universe_238
+decisions:
+- decision_id: confounding_adjustment
+  option_id: covariate_adjusted_logistic
+- decision_id: missing_search_handling
+  option_id: report_missing_as_separate_status
+- decision_id: race_variable_definition
+  option_id: subject_race_with_unknown_as_white
+- decision_id: search_outcome_definition
+  option_id: search_conducted
+- decision_id: stop_scope
+  option_id: all_dataset_rows
+- decision_id: uncertainty_dependence
+  option_id: officer_cluster_robust

@@ -1,0 +1,73 @@
+{
+  "needed": true,
+  "reason": "The broad claim depends on materially different skin-tone measurement and dichotomization rules, whose median estimates differ even though their signs do not reverse. These operationalizations should be specified rather than combined into one undifferentiated hypothesis.",
+  "parent_hypothesis": "Among player–referee dyads in the dataset, the probability of at least one sending-off (including second-yellow sendings-off) is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a dyad-level any-event logistic model.",
+  "dimensions": [
+    "Skin-tone rating combination",
+    "Binary skin-tone threshold"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "Among player–referee dyads in the dataset, using the mean of the two skin-tone ratings and defining a player as dark-skinned when the mean rating is above 0.5, the probability of at least one sending-off, including second-yellow sendings-off, is higher for dark-skinned than for light-skinned players in a dyad-level any-event logistic model.",
+      "pins": [
+        {
+          "decision_id": "sending_off_outcome",
+          "option_id": "include_second_yellows"
+        },
+        {
+          "decision_id": "skin_tone_combination",
+          "option_id": "mean_raters"
+        },
+        {
+          "decision_id": "skin_tone_threshold",
+          "option_id": "dark_above_half"
+        }
+      ],
+      "rationale": "The mean-rater and above-half operationalization is one distinct measurement rule identified in the multiverse. Its estimated effects were generally positive, but the evidence was predominantly inconclusive, so this is a directional test rather than an established finding.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player–referee dyads in the dataset, using conservative agreement between the two skin-tone raters and defining a player as dark-skinned when the agreed rating is above 0.5, the probability of at least one sending-off, including second-yellow sendings-off, is higher for dark-skinned than for light-skinned players in a dyad-level any-event logistic model.",
+      "pins": [
+        {
+          "decision_id": "sending_off_outcome",
+          "option_id": "include_second_yellows"
+        },
+        {
+          "decision_id": "skin_tone_combination",
+          "option_id": "conservative_agreement"
+        },
+        {
+          "decision_id": "skin_tone_threshold",
+          "option_id": "dark_above_half"
+        }
+      ],
+      "rationale": "Conservative agreement is a substantively different way of combining the ratings, and its estimates differed from those using the mean or either rater alone. Fixing it separately prevents those measurement rules from being combined into one claim. The multiverse evidence supports a positive direction but is predominantly inconclusive.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player–referee dyads in the dataset, using the mean of the two skin-tone ratings and defining a player as dark-skinned when the mean rating is at least 0.75, the probability of at least one sending-off, including second-yellow sendings-off, is higher for dark-skinned than for light-skinned players in a dyad-level any-event logistic model.",
+      "pins": [
+        {
+          "decision_id": "sending_off_outcome",
+          "option_id": "include_second_yellows"
+        },
+        {
+          "decision_id": "skin_tone_combination",
+          "option_id": "mean_raters"
+        },
+        {
+          "decision_id": "skin_tone_threshold",
+          "option_id": "dark_at_least_three_quarters"
+        }
+      ],
+      "rationale": "A threshold of at least 0.75 defines a distinct binary exposure from either half-point rule and must be paired with an explicitly stated rating-combination rule. The selected mean-rater pairing is answerable with the existing ratings. Estimates remained positive across the multiverse, but the evidence was predominantly inconclusive.",
+      "directional": true,
+      "answerable_with_dataset": true
+    }
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T22:31:06+00:00"
+}

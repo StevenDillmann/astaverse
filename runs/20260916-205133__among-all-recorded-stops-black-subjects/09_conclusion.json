@@ -1,0 +1,501 @@
+{
+  "evidence_status": "robustly_supported",
+  "requires_refinement": false,
+  "answer": "The hypothesis is robustly supported: all 256 reported universes show a statistically significant positive Black–White search-rate contrast, with no significant negative results. The estimated standardized contrast ranges from 0.078 to 0.463, although its magnitude is substantially larger in covariate-adjusted models than in unadjusted rate comparisons.",
+  "rationale": "Positive statistical evidence is completely consistent across the 256 available universes: all 256 are significant and positive, with no indeterminate, unavailable, or significant-negative results. Sensitivity to race definition, stop scope, search outcome definition, missing-data handling, and uncertainty calculation does not reverse the direction or inference; the main sensitivity is the estimator choice, with median effects of 0.082 for unadjusted rates versus 0.409 for covariate-adjusted logistic models.",
+  "key_evidence": [
+    "256 of 256 universes have statistically significant positive effects; 0 have significant negative effects.",
+    "The standardized effect ranges from 0.078 to 0.463, with median 0.241 and interquartile range 0.082–0.409.",
+    "Race-definition sensitivity has a 0.0 inference-flip rate and median effects of 0.239, 0.256, and 0.245 across the three definitions.",
+    "Covariate adjustment changes the median effect from 0.082 (unadjusted) to 0.409 (adjusted), but has a 0.0 inference-flip rate and 0.0 sign-reversal rate."
+  ],
+  "refinement_reason": null,
+  "refinement_dimensions": [],
+  "suggested_hypotheses": [],
+  "caveats": [
+    "The magnitude is highly sensitive to adjustment for stop composition, so the evidence supports the direction more strongly than a single effect-size estimate.",
+    "The supplied effects are standardized; they do not directly report the underlying Black and White search rates.",
+    "Statistical significance and a positive contrast do not by themselves establish why the difference occurs."
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T21:11:23+00:00",
+  "evidence_snapshot": {
+    "curve_summary": {
+      "scale": "standardized",
+      "n_universes": 256,
+      "n_estimates": 256,
+      "n_with_ci": 256,
+      "minimum": 0.07807980634284672,
+      "q25": 0.08243891454105531,
+      "median": 0.24056295986823953,
+      "q75": 0.4090980660270138,
+      "maximum": 0.4631804695211123,
+      "n_significant_positive": 256,
+      "n_significant_negative": 0,
+      "n_indeterminate": 0,
+      "n_unavailable": 0
+    },
+    "decision_sensitivity": [
+      {
+        "decision_id": "confounding_adjustment",
+        "scale": "standardized",
+        "n_pairs": 128,
+        "n_effect_pairs": 128,
+        "n_inference_pairs": 128,
+        "median_abs_effect_change": 0.3266591514859585,
+        "normalized_effect_change": 1.0,
+        "normalized_ci_low": 0.9917677928382135,
+        "normalized_ci_high": 1.0064507213292218,
+        "effect_change_p90": 0.35912068720768864,
+        "effect_change_max": 0.37622348347499057,
+        "median_abs_log10p_change": 31.87876773147385,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "unadjusted_rate_comparison": 0.08243891454105531,
+          "covariate_adjusted_logistic": 0.4090980660270138
+        },
+        "option_pairs": [
+          {
+            "option_a": "covariate_adjusted_logistic",
+            "option_b": "unadjusted_rate_comparison",
+            "n_pairs": 128,
+            "n_effect_pairs": 128,
+            "median_abs_change": 0.3266591514859585,
+            "median_shift": -0.3266591514859585,
+            "normalized_shift": -1.0,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "race_variable_definition",
+        "scale": "standardized",
+        "n_pairs": 150,
+        "n_effect_pairs": 150,
+        "n_inference_pairs": 150,
+        "median_abs_effect_change": 0.011637017142704806,
+        "normalized_effect_change": 0.0356243414267395,
+        "normalized_ci_low": 0.03523718164404797,
+        "normalized_ci_high": 0.045210224678137644,
+        "effect_change_p90": 0.032613172262869694,
+        "effect_change_max": 0.032724960588238705,
+        "median_abs_log10p_change": 5.069237625216353,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "subject_race_black_white": 0.2558735175246547,
+          "raw_race_black_white": 0.23900539325508185,
+          "subject_race_with_unknown_as_white": 0.24470492802721752
+        },
+        "option_pairs": [
+          {
+            "option_a": "raw_race_black_white",
+            "option_b": "subject_race_black_white",
+            "n_pairs": 50,
+            "n_effect_pairs": 50,
+            "median_abs_change": 0.017150911848750554,
+            "median_shift": 0.017150911848750554,
+            "normalized_shift": 0.05250399926263137,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "raw_race_black_white",
+            "option_b": "subject_race_with_unknown_as_white",
+            "n_pairs": 50,
+            "n_effect_pairs": 50,
+            "median_abs_change": 0.009792159973396074,
+            "median_shift": 0.009792159973396074,
+            "normalized_shift": 0.029976689551944154,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "subject_race_black_white",
+            "option_b": "subject_race_with_unknown_as_white",
+            "n_pairs": 50,
+            "n_effect_pairs": 50,
+            "median_abs_change": 0.009972020669648252,
+            "median_shift": -0.009972020669648252,
+            "normalized_shift": -0.03052729618712948,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "stop_scope",
+        "scale": "standardized",
+        "n_pairs": 156,
+        "n_effect_pairs": 156,
+        "n_inference_pairs": 156,
+        "median_abs_effect_change": 0.008660896019163727,
+        "normalized_effect_change": 0.026513556959190283,
+        "normalized_ci_low": 0.026336198882791165,
+        "normalized_ci_high": 0.026940209784978315,
+        "effect_change_p90": 0.05929237021580322,
+        "effect_change_max": 0.0625272436133541,
+        "median_abs_log10p_change": 0.27432110919190933,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "all_dataset_rows": 0.2407685190465318,
+          "durham_county_only": 0.23470391306487287,
+          "durham_police_only": 0.2671301490953647
+        },
+        "option_pairs": [
+          {
+            "option_a": "all_dataset_rows",
+            "option_b": "durham_county_only",
+            "n_pairs": 52,
+            "n_effect_pairs": 52,
+            "median_abs_change": 0.0002343398605799893,
+            "median_shift": -0.0002343398605799893,
+            "normalized_shift": -0.0007173834240185444,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "all_dataset_rows",
+            "option_b": "durham_police_only",
+            "n_pairs": 52,
+            "n_effect_pairs": 52,
+            "median_abs_change": 0.03238496492078761,
+            "median_shift": 0.03238496492078761,
+            "normalized_shift": 0.09913992849571117,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "durham_county_only",
+            "option_b": "durham_police_only",
+            "n_pairs": 52,
+            "n_effect_pairs": 52,
+            "median_abs_change": 0.0326277031291999,
+            "median_shift": 0.0326277031291999,
+            "normalized_shift": 0.09988302173925903,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "search_outcome_definition",
+        "scale": "standardized",
+        "n_pairs": 272,
+        "n_effect_pairs": 272,
+        "n_inference_pairs": 272,
+        "median_abs_effect_change": 0.0026822102557239325,
+        "normalized_effect_change": 0.008211036621881471,
+        "normalized_ci_low": 0.007963367984208275,
+        "normalized_ci_high": 0.008859497412836963,
+        "effect_change_p90": 0.01221924202832858,
+        "effect_change_max": 0.01849697396111699,
+        "median_abs_log10p_change": 0.8593318563978567,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "search_conducted": 0.24056295986823953,
+          "any_person_or_vehicle_search": 0.24163640219317248,
+          "person_search_only": 0.2447871874111754,
+          "vehicle_search_only": 0.2427447830564642
+        },
+        "option_pairs": [
+          {
+            "option_a": "any_person_or_vehicle_search",
+            "option_b": "person_search_only",
+            "n_pairs": 46,
+            "n_effect_pairs": 46,
+            "median_abs_change": 0.0064947967273323165,
+            "median_shift": 0.003504516827243717,
+            "normalized_shift": 0.010728359549401326,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "any_person_or_vehicle_search",
+            "option_b": "search_conducted",
+            "n_pairs": 90,
+            "n_effect_pairs": 90,
+            "median_abs_change": 0.0013729438589324197,
+            "median_shift": -0.0011679219954864178,
+            "normalized_shift": -0.003575353668108151,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "any_person_or_vehicle_search",
+            "option_b": "vehicle_search_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.003936495967589222,
+            "median_shift": -0.0007075668464707821,
+            "normalized_shift": -0.002166070790461834,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "person_search_only",
+            "option_b": "search_conducted",
+            "n_pairs": 46,
+            "n_effect_pairs": 46,
+            "median_abs_change": 0.007964671847285824,
+            "median_shift": -0.004769370083751223,
+            "normalized_shift": -0.014600448394161202,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "person_search_only",
+            "option_b": "vehicle_search_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.0029261167302632174,
+            "median_shift": -0.0016080034633430482,
+            "normalized_shift": -0.00492257282867573,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "search_conducted",
+            "option_b": "vehicle_search_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.002804383405520597,
+            "median_shift": -0.0008842077541472773,
+            "normalized_shift": -0.0027068207032469598,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "missing_search_handling",
+        "scale": "standardized",
+        "n_pairs": 202,
+        "n_effect_pairs": 202,
+        "n_inference_pairs": 202,
+        "median_abs_effect_change": 0.0,
+        "normalized_effect_change": 0.0,
+        "normalized_ci_low": 0.0,
+        "normalized_ci_high": 0.0,
+        "effect_change_p90": 0.0,
+        "effect_change_max": 0.0,
+        "median_abs_log10p_change": 0.0,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "complete_case": 0.24056295986823953,
+          "missing_as_no_search": 0.24056295986823953,
+          "report_missing_as_separate_status": 0.24056295986823953
+        },
+        "option_pairs": [
+          {
+            "option_a": "complete_case",
+            "option_b": "missing_as_no_search",
+            "n_pairs": 70,
+            "n_effect_pairs": 70,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "complete_case",
+            "option_b": "report_missing_as_separate_status",
+            "n_pairs": 66,
+            "n_effect_pairs": 66,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "missing_as_no_search",
+            "option_b": "report_missing_as_separate_status",
+            "n_pairs": 66,
+            "n_effect_pairs": 66,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "uncertainty_dependence",
+        "scale": "standardized",
+        "n_pairs": 240,
+        "n_effect_pairs": 240,
+        "n_inference_pairs": 240,
+        "median_abs_effect_change": 0.0,
+        "normalized_effect_change": 0.0,
+        "normalized_ci_low": 0.0,
+        "normalized_ci_high": 0.0,
+        "effect_change_p90": 0.0,
+        "effect_change_max": 0.0,
+        "median_abs_log10p_change": 38.25579435169594,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "iid_two_proportion": 0.24056295986823953,
+          "department_cluster_robust": 0.24056295986823953,
+          "officer_cluster_robust": 0.24056295986823953
+        },
+        "option_pairs": [
+          {
+            "option_a": "department_cluster_robust",
+            "option_b": "iid_two_proportion",
+            "n_pairs": 80,
+            "n_effect_pairs": 80,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "department_cluster_robust",
+            "option_b": "officer_cluster_robust",
+            "n_pairs": 80,
+            "n_effect_pairs": 80,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "iid_two_proportion",
+            "option_b": "officer_cluster_robust",
+            "n_pairs": 80,
+            "n_effect_pairs": 80,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      }
+    ],
+    "decisions": {
+      "race_variable_definition": {
+        "label": "Race comparison definition",
+        "kind": "variable_choice",
+        "rationale": "Which recorded race field and categories define the Black-versus-White comparison?  [found by: direct]",
+        "options": {
+          "subject_race_black_white": {
+            "label": "Use subject_race categories",
+            "description": "Retain rows with subject_race == \"black\" or subject_race == \"white\"; compare those two groups and exclude all other subject_race values."
+          },
+          "raw_race_black_white": {
+            "label": "Use raw_Race codes",
+            "description": "Retain rows with raw_Race == \"B\" or raw_Race == \"W\"; define B as Black and W as White, and exclude all other raw_Race values."
+          },
+          "subject_race_with_unknown_as_white": {
+            "label": "Use subject_race with unknowns assigned to White",
+            "description": "Use subject_race == \"black\" as Black and combine subject_race == \"white\" with subject_race == \"unknown\" or other non-Black categories as the comparison group."
+          }
+        }
+      },
+      "stop_scope": {
+        "label": "Stops included in the estimand",
+        "kind": "preprocessing",
+        "rationale": "Does “all recorded stops” mean every row in the dataset or only stops from a Durham geographic or departmental subset?  [found by: direct]",
+        "options": {
+          "all_dataset_rows": {
+            "label": "All eligible dataset rows",
+            "description": "Use stops from every county_name and department_name represented in nc-durham-stops, subject only to the selected race and outcome missingness rules."
+          },
+          "durham_county_only": {
+            "label": "Durham County stops",
+            "description": "Retain only rows with county_name == \"Durham County\"."
+          },
+          "durham_police_only": {
+            "label": "Durham Police Department stops",
+            "description": "Retain only rows with department_name == \"Durham Police Department\"."
+          }
+        }
+      },
+      "search_outcome_definition": {
+        "label": "Search-rate outcome",
+        "kind": "variable_choice",
+        "rationale": "Which column or combination of columns counts as a search?  [found by: direct]",
+        "options": {
+          "search_conducted": {
+            "label": "Any recorded search",
+            "description": "Set the binary outcome to 1 when search_conducted == 1 and to 0 when search_conducted == 0."
+          },
+          "any_person_or_vehicle_search": {
+            "label": "Person-or-vehicle search",
+            "description": "Set the binary outcome to 1 when search_person == 1 or search_vehicle == 1; otherwise set it to 0."
+          },
+          "person_search_only": {
+            "label": "Person search",
+            "description": "Set the binary outcome to 1 only when search_person == 1; set it to 0 when search_person == 0."
+          },
+          "vehicle_search_only": {
+            "label": "Vehicle search",
+            "description": "Set the binary outcome to 1 only when search_vehicle == 1; set it to 0 when search_vehicle == 0."
+          }
+        }
+      },
+      "missing_search_handling": {
+        "label": "Missing outcome handling",
+        "kind": "preprocessing",
+        "rationale": "How should stops with a missing value for the selected search outcome be handled?  [found by: direct]",
+        "options": {
+          "complete_case": {
+            "label": "Exclude missing outcome values",
+            "description": "Exclude any retained Black or White stop whose selected search outcome is missing; calculate each race-specific rate using only rows with a nonmissing outcome."
+          },
+          "missing_as_no_search": {
+            "label": "Code missing as no search",
+            "description": "For retained Black or White stops, replace a missing selected search outcome with 0 before calculating rates."
+          },
+          "report_missing_as_separate_status": {
+            "label": "Treat missing outcomes as unavailable",
+            "description": "Do not impute missing outcomes; calculate rates among nonmissing outcomes and additionally report the number and fraction of missing outcomes by race."
+          }
+        }
+      },
+      "confounding_adjustment": {
+        "label": "Adjustment for stop composition",
+        "kind": "model",
+        "rationale": "Should the Black-versus-White search-rate comparison be an unadjusted comparison across stops or adjust for recorded stop and driver characteristics?  [found by: direct]",
+        "options": {
+          "unadjusted_rate_comparison": {
+            "label": "Unadjusted stop-level rates",
+            "description": "For each race, divide the number of stops with the selected search outcome equal to 1 by the number of eligible stops, with no adjustment for age, sex, reason, date, county, department, or officer."
+          },
+          "covariate_adjusted_logistic": {
+            "label": "Covariate-adjusted logistic model",
+            "description": "Fit a logistic regression for the selected binary search outcome with Black-versus-White race as the focal predictor and subject_age, subject_sex, reason_for_stop, department_name, county_name, and calendar year extracted from date as covariates; report the race contrast from the model."
+          }
+        }
+      },
+      "uncertainty_dependence": {
+        "label": "Dependence and uncertainty calculation",
+        "kind": "inference",
+        "rationale": "How should uncertainty account for repeated stops associated with the same officer_id_hash?  [found by: direct]",
+        "options": {
+          "iid_two_proportion": {
+            "label": "Independent-stop uncertainty",
+            "description": "Use a two-sample proportion comparison or equivalent model-based standard error that treats all eligible stop rows as independent."
+          },
+          "officer_cluster_robust": {
+            "label": "Officer-clustered uncertainty",
+            "description": "Estimate uncertainty with standard errors or a bootstrap clustered by officer_id_hash, allowing stops handled by the same officer to be correlated."
+          },
+          "department_cluster_robust": {
+            "label": "Department-clustered uncertainty",
+            "description": "Estimate uncertainty with standard errors or a bootstrap clustered by department_name, allowing dependence among stops reported by the same department."
+          }
+        }
+      }
+    },
+    "reported_results": 768,
+    "expected_results": 768,
+    "missing_universe_ids": [],
+    "unexpected_universe_ids": []
+  }
+}

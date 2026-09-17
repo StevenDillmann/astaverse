@@ -1,0 +1,14 @@
+id: universe_226
+decisions:
+- decision_id: games_exposure_handling
+  option_id: unweighted_dyads
+- decision_id: logistic_model_specification
+  option_id: referee_fixed_effect_logistic
+- decision_id: sending_off_outcome
+  option_id: include_second_yellows
+- decision_id: skin_tone_combination
+  option_id: mean_raters
+- decision_id: skin_tone_threshold
+  option_id: dark_at_least_half
+- decision_id: uncertainty_estimation
+  option_id: cluster_bootstrap

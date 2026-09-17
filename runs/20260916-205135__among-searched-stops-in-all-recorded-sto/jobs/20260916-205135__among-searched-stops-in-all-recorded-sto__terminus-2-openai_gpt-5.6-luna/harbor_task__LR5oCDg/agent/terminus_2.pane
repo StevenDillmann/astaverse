@@ -1,0 +1,512 @@
+[?2004hroot@ddde5bd21ac0:/app# asciinema rec --stdin /logs/agent/recording.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent/recording.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@ddde5bd21ac0:/app# clear
+[?2004l[H[J[3J[?2004hroot@ddde5bd21ac0:/app# pwd; printf '\nFiles:\n'; ls -la; printf '\nUniverse sample:\n'; find /app/universes -maxdepth 1 -type f | sort | head -3 | xargs -r -n1 sh -c 'echo --- $0; cat "$0"'; printf '\nSchema/sample:\n'; python3 - <<'PY'
+[?2004l[?2004h> import pandas as pd
+[?2004l[?2004h> p='/app/data.csv'
+[?2004l[?2004h> df=pd.read_csv(p, nrows=5)
+[?2004l[?2004h> print(df.dtypes.to_string())
+[?2004l[?2004h> print(df.head(2).to_string())
+[?2004l[?2004h> PY
+[?2004l/app
+
+Files:
+total 76372
+drwxr-xr-x 1 root root     4096 Sep 16 21:11 .
+drwxr-xr-x 1 root root     4096 Sep 16 21:11 ..
+-rw-r--r-- 1 root root     9503 Sep 16 21:11 astra.yaml
+-rw-r--r-- 1 root root 78169850 Sep 16 19:16 data.csv
+drwxr-xr-x 2 root root    12288 Sep 16 21:11 universes
+
+Universe sample:
+--- /app/universes/universe_000.yaml
+id: universe_000
+decisions:
+- decision_id: contraband_hit_coding
+  option_id: direct_contraband_complete_case
+- decision_id: date_scope
+  option_id: all_supplied_rows
+- decision_id: dependence_and_uncertainty
+  option_id: independent_stops
+- decision_id: race_analytic_sample
+  option_id: black_white_only
+- decision_id: race_comparison_model
+  option_id: unadjusted_rate_comparison
+- decision_id: searched_stop_definition
+  option_id: search_conducted
+--- /app/universes/universe_001.yaml
+id: universe_001
+decisions:
+- decision_id: contraband_hit_coding
+  option_id: direct_contraband_missing_nonhit
+- decision_id: date_scope
+  option_id: all_supplied_rows
+- decision_id: dependence_and_uncertainty
+  option_id: independent_stops
+- decision_id: race_analytic_sample
+  option_id: black_white_only
+- decision_id: race_comparison_model
+  option_id: unadjusted_rate_comparison
+- decision_id: searched_stop_definition
+  option_id: search_conducted
+--- /app/universes/universe_002.yaml
+id: universe_002
+decisions:
+- decision_id: contraband_hit_coding
+  option_id: direct_contraband_complete_case
+- decision_id: date_scope
+  option_id: complete_date_only
+- decision_id: dependence_and_uncertainty
+  option_id: independent_stops
+- decision_id: race_analytic_sample
+  option_id: black_white_only
+- decision_id: race_comparison_model
+  option_id: unadjusted_rate_comparison
+- decision_id: searched_stop_definition
+  option_id: search_conducted
+
+Schema/sample:
+raw_row_number              int64
+date                          str
+time                          str
+location                      str
+county_name                   str
+subject_age                 int64
+subject_race                  str
+subject_sex                   str
+officer_id_hash               str
+department_name               str
+type                          str
+arrest_made                  bool
+citation_issued              bool
+warning_issued               bool
+outcome                       str
+contraband_found          float64
+contraband_drugs          float64
+contraband_weapons        float64
+frisk_performed              bool
+search_conducted             bool
+search_person                bool
+search_vehicle               bool
+search_basis              float64
+reason_for_frisk          float64
+reason_for_search         float64
+reason_for_stop               str
+raw_Ethnicity                 str
+raw_Race                      str
+raw_action_description        str
+   raw_row_number        date      time               location    county_name  subject_age subject_race subject_sex officer_id_hash           department_name       type  arrest_made  citation_issued  warning_issued   outcome  contraband_found  contraband_drugs  contraband_weapons  frisk_performed  search_conducted  search_person  search_vehicle  search_basis  reason_for_frisk  reason_for_search            reason_for_stop raw_Ethnicity raw_Race raw_action_description
+0         1219541  2001-12-28       NaN  Durham, Durham County  Durham County           22        black      female      5b9908c1a5  Durham Police Department  vehicular        False            False            True   warning               NaN               NaN                 NaN            False             False          False           False           NaN               NaN                NaN              Investigation             N        B         Verbal Warning
+1         1221117  2002-01-02  04:00:00  Durham, Durham County  Durham County           28     hispanic        male      0c140e68b5  Durham Police Department  vehicular        False             True           False  citation               NaN               NaN                 NaN            False             False          False           False           NaN               NaN                NaN  Stop Light/Sign Violation             H        W        Citation Issued
+[?2004hroot@ddde5bd21ac0:/app# cat > /app/analysis.py <<'PY'
+[?2004l[?2004h> import json, glob, os, warnings
+[?2004l[?2004h> import numpy as np
+[?2004l[?2004h> import pandas as pd
+[?2004l[?2004h> import yaml
+[?2004l[?2004h> from scipy.special import expit
+[?2004l[?2004h> from scipy.stats import norm
+[?2004l[?2004h> import statsmodels.api as sm
+[?2004lartment'[?2004h> 
+[?2004l:[?2004h> warnings.filterwarnings('ignore')
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _bool(s):
+[?2004l[?2004h>     return s.fillna(False).astype(bool)
+[?2004ll[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _se_diff(y, black, groups=None):
+[?2004l[?2004h>     """Difference in rates (Black minus comparison), with optional clustering."""
+[?2004l[?2004h>     b = black.to_numpy(dtype=bool)
+[?2004l0:
+   [?2004h>     yy = y.to_numpy(dtype=float)
+[?2004l[?2004h>     nb, nw = b.sum(), (~b).sum()
+[?2004l(d[?2004h>     if nb == 0 or nw == 0:
+[?2004l[?2004h>         return np.nan
+[?2004l)[?2004h>     pb, pw = yy[b].mean(), yy[~b].mean()
+[?2004l b,[?2004h>     infl = np.zeros(len(yy), dtype=float)
+[?2004l[?2004h>     infl[b] = (yy[b] - pb) / nb
+[?2004lult_null(len(d))
+ [?2004h>     infl[~b] = -(yy[~b] - pw) / nw
+[?2004l[?2004h>     if groups is None:
+[?2004l[?2004h>         return float(np.sqrt(np.sum(infl * infl)))
+[?2004l[?2004h>     g = pd.Series(groups).fillna('__MISSING__').astype(str).to_numpy()
+[?2004l[?2004h>     sums = pd.Series(infl).groupby(g, sort=False).sum().to_numpy()
+[?2004l[?2004h>     return float(np.sqrt(np.sum(sums * sums)))
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _result_null(n=0):
+[?2004l[?2004h>     return {'estimate': None, 'estimate_standardized': None,
+[?2004l[?2004h>             'std_error': None, 'std_error_standardized': None,
+[?2004l[?2004h>             'ci_low_standardized': None, 'ci_high_standardized': None,
+[?2004l[?2004h>             'p_value': None, 'n': int(n), 'direction': 'none',
+[?2004l    x[?2004h>             'converged': False}
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[[?2004h> def analyze(df, selections: dict[str, str]) -> dict:
+[?2004l x['c[?2004h>     """Run the analysis for ONE universe."""
+[?2004l[?2004h>     try:
+[?2004l[?2004h>         d = df.copy()
+[?2004l[?2004h>         raceopt = selections['race_analytic_sample']
+[?2004l[?2004h>         if raceopt == 'black_white_only':
+[?2004l[?2004h>             d = d[d['subject_race'].isin(['black', 'white'])].copy()
+[?2004lr[?2004h>             d['_black'] = (d['subject_race'] == 'black')
+[?2004l[?2004h>         elif raceopt == 'use_raw_race_mapping':
+[?2004l[?2004h>             # Stanford source race codes: B is Black and W is White.
+[?2004l[?2004h>             d = d[d['raw_Race'].isin(['B', 'W'])].copy()
+[?2004l[?2004h>             d['_black'] = (d['raw_Race'] == 'B')
+[?2004l[?2004h>         elif raceopt == 'include_unknown_as_nonwhite':
+[?2004l[?2004h>             d['_black'] = (d['subject_race'] == 'black')
+[?2004l')[?2004h>         else:
+[?2004l[?2004h>             return _result_null()
+[?2004l[?2004h>         if len(d) == 0:
+[?2004l[?2004h>             return _result_null()
+[?2004l[?2004h> 
+[?2004lnd[?2004h>         sopt = selections['searched_stop_definition']
+[?2004lt.index, [?2004h>         sc = _bool(d['search_conducted'])
+[?2004l[?2004h>         sp = _bool(d['search_person'])
+[?2004lM[?2004h>         sv = _bool(d['search_vehicle'])
+[?2004lrgs = {'co[?2004h>         fr = _bool(d['frisk_performed'])
+[?2004l[?2004h>         if sopt == 'search_conducted':
+[?2004l, fa[?2004h>             keep = sc
+[?2004l[?2004h>         elif sopt == 'person_or_vehicle_search':
+[?2004l[?2004h>             keep = sp | sv
+[?2004l[?2004h>         elif sopt == 'any_search_related_action':
+[?2004l[?2004h>             keep = sc | sp | sv | fr
+[?2004l[?2004h>         else:
+[?2004l.[?2004h>             return _result_null()
+[?2004l[?2004h>         d = d[keep].copy()
+[?2004l[?2004h>         if len(d) == 0:
+[?2004l[?2004h>             return _result_null()
+[?2004l[?2004h> 
+[?2004l[?2004h>         hopt = selections['contraband_hit_coding']
+[?2004l[?2004h>         cf = d['contraband_found']
+[?2004ly.mean())))
+        [?2004h>         cd = d['contraband_drugs']
+[?2004l[?2004h>         cw = d['contraband_weapons']
+[?2004l[?2004h>         if hopt == 'direct_contraband_complete_case':
+[?2004l[?2004h>             ok = cf.notna()
+[?2004l[?2004h>             d = d[ok].copy()
+[?2004l[?2004h>             d['_hit'] = (d['contraband_found'] == True).astype(float)
+[?2004l[?2004h>         elif hopt == 'direct_contraband_missing_nonhit':
+[?2004l[?2004h>             d['_hit'] = (d['contraband_found'] == True).astype(float)
+[?2004l  l[?2004h>         elif hopt == 'drug_or_weapon_union':
+[?2004l[?2004h>             ok = ~(cd.isna() & cw.isna())
+[?2004litive' i[?2004h>             d = d[ok].copy()
+[?2004l[?2004h>             d['_hit'] = ((_bool(d['contraband_drugs'])) | _bool(d['contraband_weapons'])).astype(float)
+[?2004l[?2004h>         else:
+[?2004l 'std[?2004h>             return _result_null(len(d))
+[?2004l[?2004h> 
+[?2004l[?2004h>         date = pd.to_datetime(d['date'], errors='coerce')
+[?2004l[?2004h>         dateopt = selections['date_scope']
+[?2004l             [?2004h>         if dateopt == 'stated_2002_2015_window':
+[?2004l[?2004h>             d = d[(date >= '2002-01-01') & (date <= '2015-12-31')].copy()
+[?2004l [?2004h>             date = date.loc[d.index]
+[?2004l[?2004h>         elif dateopt == 'complete_date_only':
+[?2004l[?2004h>             d = d[date.notna()].copy()
+[?2004l[?2004h>             date = date.loc[d.index]
+[?2004lion_id']: x['optio[?2004h>         elif dateopt != 'all_supplied_rows':
+[?2004l[?2004h>             return _result_null(len(d))
+[?2004l[?2004h>         if len(d) == 0 or d['_black'].nunique() < 2 or d['_hit'].nunique() < 2 and selections['race_comparison_model'] != 'unadjusted_rate_comparison':
+[?2004l[?2004h>             return _result_null(len(d))
+[?2004l[?2004h> 
+[?2004lp[?2004h>         modelopt = selections['race_comparison_model']
+[?2004l[?2004h>         dep = selections['dependence_and_uncertainty']
+[?2004l[?2004h>         groups = None
+[?2004ln rows: [?2004h>         if dep == 'cluster_officer': groups = d['officer_id_hash']
+[?2004l[?2004h>         elif dep == 'cluster_department': groups = d['department_name']
+[?2004lthon3 -m[?2004h>         elif dep != 'independent_stops': return _result_null(len(d))
+[?2004l[?2004h> 
+[?2004l[?2004h>         if modelopt == 'unadjusted_rate_comparison':
+[?2004l[?2004h>             b = d['_black'].astype(bool)
+[?2004l[?2004h>             if b.sum() == 0 or (~b).sum() == 0:
+[?2004l[?2004h>                 return _result_null(len(d))
+[?2004l[?2004h>             est = float(d.loc[b, '_hit'].mean() - d.loc[~b, '_hit'].mean())
+[?2004l[?2004h>             se = _se_diff(d['_hit'], b, groups)
+[?2004l[?2004h>             if not np.isfinite(se): return _result_null(len(d))
+[?2004l[?2004h>             # Standardize the binary focal predictor; binary outcome is standardized too.
+[?2004l[?2004h>             xs = float(np.sqrt(b.mean() * (1 - b.mean())))
+[?2004l[?2004h>             ys = float(np.sqrt(d['_hit'].mean() * (1 - d['_hit'].mean())))
+[?2004l[?2004h>             scale = xs / ys if ys > 0 else xs
+[?2004l[?2004h>             es, ses = est * scale, abs(scale) * se
+[?2004l[?2004h>             converged = True
+[?2004l[?2004h>         elif modelopt in ('race_only_logistic', 'adjusted_logistic'):
+[?2004l[?2004h>             x = pd.DataFrame({'black': d['_black'].astype(float).to_numpy()}, index=d.index)
+[?2004l[?2004h>             if modelopt == 'adjusted_logistic':
+[?2004l[?2004h>                 x['subject_age'] = pd.to_numeric(d['subject_age'], errors='coerce')
+[?2004l[?2004h>                 x['calendar_year'] = date.dt.year
+[?2004l[?2004h>                 for col in ['subject_sex', 'reason_for_stop', 'department_name']:
+[?2004l[?2004h>                     z = d[col].astype('string').fillna('__MISSING__')
+[?2004l[?2004h>                     dum = pd.get_dummies(z, prefix=col, drop_first=True, dtype=float)
+[?2004l[?2004h>                     x = pd.concat([x, dum], axis=1)
+[?2004l[?2004h>             dat = pd.concat([d[['_hit']], x], axis=1).replace([np.inf, -np.inf], np.nan).dropna()
+[?2004l[?2004h>             if len(dat) < 10 or dat['black'].nunique() < 2 or dat['_hit'].nunique() < 2:
+[?2004l[?2004h>                 return _result_null(len(dat))
+[?2004l[?2004h>             X = sm.add_constant(dat.drop(columns=['_hit']), has_constant='add').astype(float)
+[?2004l[?2004h>             y = dat['_hit'].astype(float)
+[?2004l[?2004h>             kwargs = {}
+[?2004l[?2004h>             if dep != 'independent_stops':
+[?2004l[?2004h>                 g = d.loc[dat.index, 'officer_id_hash' if dep == 'cluster_officer' else 'department_name'].fillna('__MISSING__')
+[?2004l[?2004h>                 kwargs = {'cov_type': 'cluster', 'cov_kwds': {'groups': g}}
+[?2004l[?2004h>             fit = sm.GLM(y, X, family=sm.families.Binomial()).fit(**kwargs)
+[?2004l[?2004h>             if 'black' not in fit.params or not np.isfinite(fit.params['black']):
+[?2004l[?2004h>                 return _result_null(len(dat))
+[?2004l[?2004h>             est = float(fit.params['black'])
+[?2004l[?2004h>             se = float(fit.bse['black'])
+[?2004l[?2004h>             xs = float(np.sqrt(dat['black'].mean() * (1 - dat['black'].mean())))
+[?2004l[?2004h>             ys = float(np.sqrt(y.mean() * (1 - y.mean())))
+[?2004l[?2004h>             scale = xs / ys if ys > 0 else xs
+[?2004l[?2004h>             es, ses = est * scale, abs(scale) * se
+[?2004l[?2004h>             converged = bool(fit.converged)
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             return _result_null(len(d))
+[?2004l[?2004h>         if not np.isfinite(es) or not np.isfinite(ses):
+[?2004l[?2004h>             return _result_null(len(d))
+[?2004l[?2004h>         p = float(2 * norm.sf(abs(es / ses))) if ses > 0 else (0.0 if es != 0 else 1.0)
+[?2004l[?2004h>         lo, hi = float(es - 1.96 * ses), float(es + 1.96 * ses)
+[?2004l[?2004h>         direction = 'positive' if est > 0 else ('negative' if est < 0 else 'none')
+[?2004l[?2004h>         return {'estimate': float(est), 'estimate_standardized': float(es),
+[?2004l[?2004h>                 'std_error': float(se), 'std_error_standardized': float(ses),
+[?2004l[?2004h>                 'ci_low_standardized': lo, 'ci_high_standardized': hi,
+[?2004l[?2004h>                 'p_value': p, 'n': int(len(d)), 'direction': direction,
+[?2004l[?2004h>                 'converged': converged}
+[?2004l[?2004h>     except Exception:
+[?2004l[?2004h>         return _result_null(len(df))
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _load_selection(path):
+[?2004l[?2004h>     with open(path) as f: u = yaml.safe_load(f)
+[?2004l[?2004h>     return u['id'], {x['decision_id']: x['option_id'] for x in u['decisions']}
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def main():
+[?2004l[?2004h>     df = pd.read_csv('/app/data.csv', low_memory=False)
+[?2004l[?2004h>     rows = []
+[?2004l[?2004h>     for path in sorted(glob.glob('/app/universes/*.yaml')):
+[?2004l[?2004h>         uid, selections = _load_selection(path)
+[?2004l[?2004h>         out = analyze(df, selections)
+[?2004l[?2004h>         rows.append({'universe_id': uid, 'decisions': selections, **out})
+[?2004l[?2004h>     with open('/app/universes.jsonl', 'w') as f:
+[?2004l[?2004h>         for row in rows: f.write(json.dumps(row, allow_nan=False) + '\n')
+[?2004l[?2004h>     print(f'wrote {len(rows)} universes')
+[?2004l[?2004h> 
+[?2004l[?2004h> if __name__ == '__main__': main()
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@ddde5bd21ac0:/app# python3 -m py_compile /app/analysis.py
+[?2004l[?2004hroot@ddde5bd21ac0:/app# python3 /app/analysis.pypython3 - <<'PY'
+[?2004l[?2004h> import json, collections, os
+[?2004l[?2004h> p='/app/universes.jsonl'
+[?2004l[?2004h> rows=[json.loads(x) for x in open(p)]
+[?2004l[?2004h> print('lines',len(rows),'unique_ids',len({r['universe_id'] for r in rows}))
+[?2004l[?2004h> print('converged',sum(r['converged'] for r in rows),'failed',sum(not r['converged'] for r in rows))
+[?2004l[?2004h> print('keys',sorted(rows[0]))
+[?2004l[?2004h> print('sample',json.dumps(rows[0], indent=2))
+[?2004l[?2004h> PYpython3 - <<'PY'
+[?2004l[?2004h> import json, pandas as pd, numpy as np
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> df=pd.DataFrame(rows)
+[?2004l[?2004h> ok=df[df.converged]
+[?2004l[?2004h> lines=[]
+[?2004l[?2004h> lines.append('# Multiverse analysis report\n')
+[?2004l[?2004h> lines.append(f'- Universes evaluated: **{len(df)}**; successful fits: **{len(ok)}**; failed fits: **{len(df)-len(ok)}**.')
+[?2004l[?2004h> if len(ok):
+[?2004l[?2004h>     lines.append(f'- Standardized estimate range: **{ok.estimate_standardized.min():.4f}** to **{ok.estimate_standardized.max():.4f}** (median **{ok.estimate_standardized.median():.4f}**).')
+[?2004l[?2004h>     lines.append(f'- Sample-size range: **{int(ok.n.min())}** to **{int(ok.n.max())}**.')
+[?2004l[?2004h>     lines.append(f'- Positive estimates: **{int((ok.estimate_standardized>0).sum())}**; negative estimates: **{int((ok.estimate_standardized<0).sum())}**.')
+[?2004l[?2004h> lines.append('\n## Analysis\n')
+[?2004l[?2004h> lines.append('`analyze(df, selections)` first selects the Black/White analytic population, searched-stop definition, contraband-hit coding, and date scope specified by the universe. It then estimates either the unadjusted Black-minus-comparison hit-rate difference, a race-only logistic coefficient, or an adjusted logistic coefficient including age, sex, stop reason, department, and calendar year. Independent, officer-clustered, and department-clustered uncertainty are supported. The focal binary race predictor and binary outcome are converted to comparable standardized units; confidence intervals and two-sided normal p-values are reported on that scale. Failed or non-identifiable fits are emitted with null statistics and `converged: false`.')
+[?2004l[?2004h> lines.append('\n## Decision sensitivity\n')
+[?2004l[?2004h> for col in ['race_analytic_sample','searched_stop_definition','contraband_hit_coding','date_scope','race_comparison_model','dependence_and_uncertainty']:
+[?2004l[?2004h>     vals=[]
+[?2004l[?2004h>     for opt,g in df[df.converged].groupby(df[df.converged].decisions.map(lambda x:x[col])):
+[?2004l[?2004h>         vals.append((opt, g.estimate_standardized.mean(), g.estimate_standardized.min(), g.estimate_standardized.max(), len(g)))
+[?2004l[?2004h>     lines.append(f'### {col}\n')
+[?2004l[?2004h>     for opt,mean,mi,ma,n in sorted(vals): lines.append(f'- `{opt}`: mean {mean:.4f}, range {mi:.4f} to {ma:.4f}, n={n}')
+[?2004l[?2004h>     lines.append('')
+[?2004l[?2004h> lines.append('The largest movements are identified by comparing the ranges and means above; in particular, outcome/search definitions and the choice between unadjusted and adjusted models can change both the estimand and the available sample, while clustering primarily changes uncertainty rather than the point estimate.')
+[?2004l[?2004h> open('/app/results.md','w').write('\n'.join(lines)+'\n')
+[?2004l[?2004h> print(open('/app/results.md').read())
+[?2004l[?2004h> PY
+[?2004lpython3: can't open file '/app/analysis.pypython3': [Errno 2] No such file or directory
+[?2004hroot@ddde5bd21ac0:/app# python3 /app/analysis.py
+[?2004lwrote 256 universes
+[?2004hroot@ddde5bd21ac0:/app# python3 - <<'PY'
+[?2004l[?2004h> import json
+[?2004l[?2004h> p='/app/universes.jsonl'
+[?2004l[?2004h> rows=[json.loads(x) for x in open(p)]
+[?2004l[?2004h> print('lines',len(rows),'unique_ids',len({r['universe_id'] for r in rows}))
+[?2004l[?2004h> print('converged',sum(bool(r['converged']) for r in rows),'failed',sum(not bool(r['converged']) for r in rows))
+[?2004l[?2004h> print('required fields', sorted(rows[0].keys()))
+[?2004l[?2004h> print(json.dumps(rows[0], indent=2))
+[?2004l[?2004h> PY
+[?2004llines 256 unique_ids 256
+converged 256 failed 0
+required fields ['ci_high_standardized', 'ci_low_standardized', 'converged', 'decisions', 'direction', 'estimate', 'estimate_standardized', 'n', 'p_value', 'std_error', 'std_error_standardized', 'universe_id']
+{
+  "universe_id": "universe_000",
+  "decisions": {
+    "contraband_hit_coding": "direct_contraband_complete_case",
+    "date_scope": "all_supplied_rows",
+    "dependence_and_uncertainty": "independent_stops",
+    "race_analytic_sample": "black_white_only",
+    "race_comparison_model": "unadjusted_rate_comparison",
+    "searched_stop_definition": "search_conducted"
+  },
+  "estimate": 0.001520837758773319,
+  "estimate_standardized": 0.001329237367797243,
+  "std_error": 0.008312420647781892,
+  "std_error_standardized": 0.0072651931990386194,
+  "ci_low_standardized": -0.01291054130231845,
+  "ci_high_standardized": 0.015569016037912936,
+  "p_value": 0.8548296611861215,
+  "n": 18904,
+  "direction": "positive",
+  "converged": true
+}
+[?2004hroot@ddde5bd21ac0:/app# python3 - <<'PY'
+[?2004l[?2004h> import json, pandas as pd
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> df=pd.DataFrame(rows)
+[?2004l[?2004h> ok=df[df.converged].copy()
+[?2004l[?2004h> lines=['# Multiverse analysis report','',f'- Universes evaluated: **{len(df)}**; successful fits: **{len(ok)}**; failed fits: **{len(df)-len(ok)}**.']
+[?2004l[?2004h> if len(ok):
+[?2004l[?2004h>     lines += [f'- Standardized estimate range: **{ok.estimate_standardized.min():.4f}** to **{ok.estimate_standardized.max():.4f}** (median **{ok.estimate_standardized.median():.4f}**).', f'- Sample-size range: **{int(ok.n.min())}** to **{int(ok.n.max())}**.', f'- Positive estimates: **{int((ok.estimate_standardized>0).sum())}**; negative estimates: **{int((ok.estimate_standardized<0).sum())**}.']
+[?2004l[?2004h> lines += ['', '## Analysis', '', '`analyze(df, selections)` applies every universe selection through one shared code path. It selects the race population, searched-stop definition, contraband outcome coding, and date scope. It then computes either an unadjusted Black-minus-comparison hit-rate difference, a race-only logistic model, or an adjusted logistic model with age, sex, stop reason, department, and calendar year. Uncertainty is independent, officer-clustered, or department-clustered as selected. The binary race predictor and binary outcome are standardized to make estimates comparable across model specifications; confidence intervals and p-values are reported on the standardized scale. Failed or unidentified fits are represented with null statistics and `converged: false`.', '', '## Decision sensitivity', '']
+[?2004l[?2004h> for col in ['race_analytic_sample','searched_stop_definition','contraband_hit_coding','date_scope','race_comparison_model','dependence_and_uncertainty']:
+[?2004l[?2004h>     lines += [f'### {col}', '']
+[?2004l[?2004h>     if len(ok):
+[?2004l[?2004h>         tmp=ok.copy(); tmp['_option']=tmp.decisions.map(lambda x:x[col])
+[?2004l[?2004h>         for opt,g in tmp.groupby('_option'):
+[?2004l[?2004h>             lines.append(f'- `{opt}`: mean {g.estimate_standardized.mean():.4f}, range {g.estimate_standardized.min():.4f} to {g.estimate_standardized.max():.4f}, n={len(g)}')
+[?2004l[?2004h>     lines.append('')
+[?2004l[?2004h> lines += ['The largest movements can be identified from the ranges and group means above. Outcome and searched-stop definitions alter the selected denominator and outcome coding, while the model choice can change the estimand and adjustment set. Clustering primarily changes standard errors and p-values rather than point estimates.']
+[?2004l[?2004h> open('/app/results.md','w').write('\n'.join(lines)+'\n')
+[?2004l[?2004h> print(open('/app/results.md').read())
+[?2004l[?2004h> PY
+[?2004l  File "<stdin>", line 7
+    lines += [f'- Standardized estimate range: **{ok.estimate_standardized.min():.4f}** to **{ok.estimate_standardized.max():.4f}** (median **{ok.estimate_standardized.median():.4f}**).', f'- Sample-size range: **{int(ok.n.min())}** to **{int(ok.n.max())}**.', f'- Positive estimates: **{int((ok.estimate_standardized>0).sum())}**; negative estimates: **{int((ok.estimate_standardized<0).sum())**}.']
+                                                                                                                                                                                                                                                                                                                                                                                                          ^^
+SyntaxError: f-string: expecting '=', or '!', or ':', or '}'
+[?2004hroot@ddde5bd21ac0:/app# python3 - <<'PY'
+[?2004l[?2004h> import json
+[?2004l[?2004h> import pandas as pd
+[?2004l[?2004h> rows = [json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> df = pd.DataFrame(rows)
+[?2004l[?2004h> ok = df[df['converged']].copy()
+[?2004l[?2004h> lines = []
+[?2004l[?2004h> lines.append('# Multiverse analysis report')
+[?2004l[?2004h> lines.append('')
+[?2004l[?2004h> lines.append('- Universes evaluated: **{}**; successful fits: **{}**; failed fits: **{}**.'.format(len(df), len(ok), len(df)-len(ok)))
+[?2004l[?2004h> if len(ok):
+[?2004l[?2004h>     emin = ok['estimate_standardized'].min()
+[?2004l[?2004h>     emax = ok['estimate_standardized'].max()
+[?2004l[?2004h>     emed = ok['estimate_standardized'].median()
+[?2004l[?2004h>     nmin = int(ok['n'].min())
+[?2004l[?2004h>     nmax = int(ok['n'].max())
+[?2004l[?2004h>     pos = int((ok['estimate_standardized'] > 0).sum())
+[?2004l[?2004h>     neg = int((ok['estimate_standardized'] < 0).sum())
+[?2004l[?2004h>     lines.append('- Standardized estimate range: **{:.4f}** to **{:.4f}** (median **{:.4f}**).'.format(emin, emax, emed))
+[?2004l[?2004h>     lines.append('- Sample-size range: **{}** to **{}**.'.format(nmin, nmax))
+[?2004l[?2004h>     lines.append('- Positive estimates: **{}**; negative estimates: **{}**.'.format(pos, neg))
+[?2004l[?2004h> lines.extend(['', '## What `analyze` does', '', '`analyze(df, selections)` applies every universe selection through one shared code path. It first selects the race population, searched-stop definition, contraband-hit coding, and date scope. It then computes either an unadjusted Black-minus-comparison hit-rate difference, a race-only logistic model, or an adjusted logistic model with subject age, sex, stop reason, department, and calendar year. Uncertainty is treated as independent, officer-clustered, or department-clustered according to the selected dependence option. The focal binary race predictor and binary outcome are standardized so estimates are comparable across model specifications; confidence intervals and two-sided p-values are reported on that standardized scale. Failed or unidentified fits are represented with null statistics and `converged: false`.', '', '## Decision sensitivity', ''])
+[?2004l[?2004h> 
+[?2004l[?2004h> decisions = ['race_analytic_sample', 'searched_stop_definition', 'contraband_hit_coding', 'date_scope', 'race_comparison_model', 'dependence_and_uncertainty'] M[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K]
+[?2004l[?2004h> for col in decisions:
+[?2004l[?2004h>     lines.append('### ' + col)
+[?2004l[?2004h>     lines.append('')
+[?2004l[?2004h>     tmp = ok.copy()
+[?2004l[?2004h>     tmp['_option'] = tmp['decisions'].map(lambda x: x[col])
+[?2004l[?2004h>     summaries = []
+[?2004l[?2004h>     for opt, g in tmp.groupby('_option'):
+[?2004l[?2004h>         mean = g['estimate_standardized'].mean()
+[?2004l[?2004h>         lo = g['estimate_standardized'].min()
+[?2004l[?2004h>         hi = g['estimate_standardized'].max()
+[?2004l[?2004h>         summaries.append((hi-lo, opt, mean, lo, hi, len(g)))
+[?2004l[?2004h>     for spread, opt, mean, lo, hi, count in sorted(summaries, reverse=True):
+[?2004l[?2004h>         lines.append('- `{}`: mean **{:.4f}**, range **{:.4f}** to **{:.4f}**, n={}.'.format(opt, mean, lo, hi, count))
+[?2004l[?2004h>     lines.append('')
+[?2004l[?2004h> 
+[?2004l[?2004h> if len(ok):
+[?2004l[?2004h>     movement = []
+[?2004l[?2004h>     for col in decisions:
+[?2004l[?2004h>         tmp = ok['decisions'].map(lambda x: x[col])
+[?2004l[?2004h>         means = ok.assign(_option=tmp).groupby('_option')['estimate_standardized'].mean()
+[?2004l[?2004h>         movement.append((means.max()-means.min(), col))
+[?2004l[?2004h>     movement.sort(reverse=True)
+[?2004l[?2004h>     ordered = ', '.join('{} ({:.4f})'.format(c, s) for s, c in movement)
+[?2004l[?2004h>     lines.append('Across option-group means, the largest estimate movements were: **{}**. Outcome and searched-stop definitions alter the denominator and hit coding; model choice changes the estimand and adjustment set; clustering mainly changes standard errors and p-values rather than point estimates.'.format(ordered))
+[?2004l[?2004h> 
+[?2004l[?2004h> open('/app/results.md', 'w').write('\n'.join(lines) + '\n')
+[?2004l[?2004h> print('wrote /app/results.md')
+[?2004l[?2004h> print('\n'.join(lines))
+[?2004l[?2004h> PY
+[?2004lwrote /app/results.md
+# Multiverse analysis report
+
+- Universes evaluated: **256**; successful fits: **256**; failed fits: **0**.
+- Standardized estimate range: **-0.0010** to **0.5847** (median **0.0456**).
+- Sample-size range: **18633** to **21706**.
+- Positive estimates: **241**; negative estimates: **15**.
+
+## What `analyze` does
+
+`analyze(df, selections)` applies every universe selection through one shared code path. It first selects the race population, searched-stop definition, contraband-hit coding, and date scope. It then computes either an unadjusted Black-minus-comparison hit-rate difference, a race-only logistic model, or an adjusted logistic model with subject age, sex, stop reason, department, and calendar year. Uncertainty is treated as independent, officer-clustered, or department-clustered according to the selected dependence option. The focal binary race predictor and binary outcome are standardized so estimates are comparable across model specifications; confidence intervals and two-sided p-values are reported on that standardized scale. Failed or unidentified fits are represented with null statistics and `converged: false`.
+
+## Decision sensitivity
+
+### race_analytic_sample
+
+- `include_unknown_as_nonwhite`: mean **0.2720**, range **0.0487** to **0.5847**, n=52.
+- `use_raw_race_mapping`: mean **0.2551**, range **0.0452** to **0.5634**, n=51.
+- `black_white_only`: mean **0.0341**, range **-0.0010** to **0.1739**, n=153.
+
+### searched_stop_definition
+
+- `search_conducted`: mean **0.1276**, range **0.0013** to **0.5847**, n=135.
+- `any_search_related_action`: mean **0.1460**, range **0.0013** to **0.5847**, n=75.
+- `person_or_vehicle_search`: mean **0.0912**, range **-0.0010** to **0.2833**, n=46.
+
+### contraband_hit_coding
+
+- `drug_or_weapon_union`: mean **0.2313**, range **0.0247** to **0.5847**, n=70.
+- `direct_contraband_missing_nonhit`: mean **0.0875**, range **-0.0010** to **0.2934**, n=91.
+- `direct_contraband_complete_case`: mean **0.0865**, range **-0.0010** to **0.2934**, n=95.
+
+### date_scope
+
+- `stated_2002_2015_window`: mean **0.1389**, range **-0.0010** to **0.5847**, n=66.
+- `complete_date_only`: mean **0.1346**, range **-0.0010** to **0.5847**, n=70.
+- `all_supplied_rows`: mean **0.1148**, range **-0.0010** to **0.5847**, n=120.
+
+### race_comparison_model
+
+- `race_only_logistic`: mean **0.1701**, range **0.0046** to **0.5847**, n=70.
+- `adjusted_logistic`: mean **0.1603**, range **-0.0010** to **0.5303**, n=116.
+- `unadjusted_rate_comparison`: mean **0.0267**, range **0.0009** to **0.0751**, n=70.
+
+### dependence_and_uncertainty
+
+- `cluster_department`: mean **0.1876**, range **-0.0010** to **0.5847**, n=154.
+- `independent_stops`: mean **0.0341**, range **-0.0010** to **0.1739**, n=51.
+- `cluster_officer`: mean **0.0341**, range **-0.0010** to **0.1739**, n=51.
+
+Across option-group means, the largest estimate movements were: **race_analytic_sample (0.2379), dependence_and_uncertainty (0.1535), contraband_hit_coding (0.1448), race_comparison_model (0.1434), searched_stop_definition (0.0547), date_scope (0.0241)**. Outcome and searched-stop definitions alter the denominator and hit coding; model choice changes the estimand and adjustment set; clustering mainly changes standard errors and p-values rather than point estimates.
+[?2004hroot@ddde5bd21ac0:/app# ls -lh /app/analysis.py /app/universes.jsonl /app/results.md; python3 - <<'PY'
+[?2004l[?2004h> import json, os
+[?2004l[?2004h> paths=['/app/analysis.py','/app/universes.jsonl','/app/results.md']
+[?2004l[?2004h> for p in paths:
+[?2004l[?2004h>     print(p, os.path.getsize(p), 'bytes')
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> assert len(rows)==256
+[?2004l[?2004h> assert len({r['universe_id'] for r in rows})==256
+[?2004l[?2004h> assert all('decisions' in r and 'estimate_standardized' in r and 'converged' in r for r in rows)
+[?2004l[?2004h> print('validation: PASS')
+[?2004l[?2004h> PY
+[?2004l-rw-r--r-- 1 root root 8.2K Sep 16 21:12 /app/analysis.py
+-rw-r--r-- 1 root root 3.3K Sep 16 21:14 /app/results.md
+-rw-r--r-- 1 root root 170K Sep 16 21:14 /app/universes.jsonl
+/app/analysis.py 8382 bytes
+/app/universes.jsonl 173677 bytes
+/app/results.md 3294 bytes
+validation: PASS
+[?2004hroot@ddde5bd21ac0:/app# 

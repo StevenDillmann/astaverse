@@ -1,0 +1,480 @@
+{
+  "evidence_status": "partially_supported",
+  "requires_refinement": true,
+  "answer": "The hypothesis is partially supported: among 50 estimates with confidence intervals, 37 were statistically significant and positive, while 8 were statistically significant and negative and 5 were indeterminate. The evidence is not uniform across outcomes or race-comparison definitions, so it supports racial bias for some specified contrasts rather than the broad claim without qualification.",
+  "rationale": "Positive significant results are the majority, but the 8 significant negative results and strong decision sensitivity prevent a robustly supported conclusion. Outcome choice produced a 0.52 inference-flip rate and 0.32 sign-reversal rate, while race-comparison choice produced a 0.333 inference-flip rate; the corresponding median standardized effects also differed substantially.",
+  "key_evidence": [
+    "37 of 50 estimates were statistically significant and positive; 8 were statistically significant and negative; 5 were indeterminate.",
+    "The median standardized estimate was 0.00486, with estimates ranging from -0.01455 to 0.02912.",
+    "Median effects differed by outcome: 0.000592 for contraband hit rate versus 0.02023 for the combined search-and-hit outcome.",
+    "Median effects differed by race comparison: 0.01777 for black versus white, 0.0000143 for all known races, and 0.000104 for including unknown race as a category."
+  ],
+  "refinement_reason": "The broad hypothesis combines distinct outcomes and race-comparison populations whose estimated effects and inferences differ materially.",
+  "refinement_dimensions": [
+    "Primary outcome: search rate versus contraband hit rate",
+    "Race comparison: black versus white versus all known or unknown-inclusive categories"
+  ],
+  "suggested_hypotheses": [
+    "Among the specified population of stops, police search-conducted rates differ positively between black and white subjects.",
+    "Among searched stops, contraband hit rates differ positively between black and white subjects under a prespecified hit definition.",
+    "Racial differences in stops or searches vary by the selected race-comparison set, and should be tested separately rather than pooled into one broad claim."
+  ],
+  "caveats": [
+    "The evidence is on standardized associations or differences and does not by itself establish a causal mechanism.",
+    "There were 206 unavailable universes out of 256, although 768 results were reported and 50 estimates had confidence intervals.",
+    "The outcome-model and inference choices could not be compared in paired sensitivity analyses: all such comparisons had zero effect pairs.",
+    "Non-significant results are not evidence of no racial difference."
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T20:39:24+00:00",
+  "evidence_snapshot": {
+    "curve_summary": {
+      "scale": "standardized",
+      "n_universes": 256,
+      "n_estimates": 50,
+      "n_with_ci": 50,
+      "minimum": -0.01454520060749447,
+      "q25": 0.0009635120050917787,
+      "median": 0.004856943700774861,
+      "q75": 0.020226406655790972,
+      "maximum": 0.029118402421328734,
+      "n_significant_positive": 37,
+      "n_significant_negative": 8,
+      "n_indeterminate": 5,
+      "n_unavailable": 206
+    },
+    "decision_sensitivity": [
+      {
+        "decision_id": "bias_outcome",
+        "scale": "standardized",
+        "n_pairs": 127,
+        "n_effect_pairs": 25,
+        "n_inference_pairs": 25,
+        "median_abs_effect_change": 0.01593068170921855,
+        "normalized_effect_change": 0.8270139040936044,
+        "normalized_ci_low": 0.7830125586029434,
+        "normalized_ci_high": 0.8463764515866352,
+        "effect_change_p90": 0.020644199996819882,
+        "effect_change_max": 0.022259332307187112,
+        "median_abs_log10p_change": 71.53534750865988,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.52,
+        "sign_reversal_rate": 0.32,
+        "option_medians": {
+          "search_and_hit_rates": 0.020226406655790972,
+          "contraband_hit_rate": 0.0005921636495270943
+        },
+        "option_pairs": [
+          {
+            "option_a": "contraband_hit_rate",
+            "option_b": "search_and_hit_rates",
+            "n_pairs": 127,
+            "n_effect_pairs": 25,
+            "median_abs_change": 0.01593068170921855,
+            "median_shift": 0.01593068170921855,
+            "normalized_shift": 0.8270139040936044,
+            "inference_flip_rate": 0.52
+          }
+        ]
+      },
+      {
+        "decision_id": "race_comparison_set",
+        "scale": "standardized",
+        "n_pairs": 208,
+        "n_effect_pairs": 30,
+        "n_inference_pairs": 30,
+        "median_abs_effect_change": 0.01509703979712385,
+        "normalized_effect_change": 0.7837368199787078,
+        "normalized_ci_low": 0.4130046589651455,
+        "normalized_ci_high": 0.9831705416333553,
+        "effect_change_p90": 0.020747756079722682,
+        "effect_change_max": 0.026285386885509587,
+        "median_abs_log10p_change": 15.791607223421476,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.3333333333333333,
+        "sign_reversal_rate": 0.06666666666666667,
+        "option_medians": {
+          "black_vs_white": 0.01776894292185013,
+          "all_known_races": 0.000014338642077654307,
+          "include_unknown_as_category": 0.00010428122333494072
+        },
+        "option_pairs": [
+          {
+            "option_a": "all_known_races",
+            "option_b": "black_vs_white",
+            "n_pairs": 67,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.018934525313360828,
+            "median_shift": 0.018934525313360828,
+            "normalized_shift": 0.982953271390785,
+            "inference_flip_rate": 0.5
+          },
+          {
+            "option_a": "all_known_races",
+            "option_b": "include_unknown_as_category",
+            "n_pairs": 74,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.0016826875253374831,
+            "median_shift": -0.0007531713025135211,
+            "normalized_shift": -0.039099591010128006,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "black_vs_white",
+            "option_b": "include_unknown_as_category",
+            "n_pairs": 67,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.020051171265235344,
+            "median_shift": -0.020051171265235344,
+            "normalized_shift": -1.0409220228231657,
+            "inference_flip_rate": 0.5
+          }
+        ]
+      },
+      {
+        "decision_id": "time_of_day_adjustment",
+        "scale": "standardized",
+        "n_pairs": 211,
+        "n_effect_pairs": 30,
+        "n_inference_pairs": 30,
+        "median_abs_effect_change": 0.0036748800132141747,
+        "normalized_effect_change": 0.19077506677226133,
+        "normalized_ci_low": 0.018039871946492547,
+        "normalized_ci_high": 0.3277330244172059,
+        "effect_change_p90": 0.011556558347311523,
+        "effect_change_max": 0.012595557062583088,
+        "median_abs_log10p_change": 4.308106845982308,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.2,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "no_time_adjustment": 0.004560434849600531,
+          "veil_of_darkness": 0.010961612841144986,
+          "clock_time_controls": 0.0038965921072408455
+        },
+        "option_pairs": [
+          {
+            "option_a": "clock_time_controls",
+            "option_b": "no_time_adjustment",
+            "n_pairs": 70,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "clock_time_controls",
+            "option_b": "veil_of_darkness",
+            "n_pairs": 70,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.006313086722903665,
+            "median_shift": 0.006313086722903665,
+            "normalized_shift": 0.3277330244172059,
+            "inference_flip_rate": 0.3
+          },
+          {
+            "option_a": "no_time_adjustment",
+            "option_b": "veil_of_darkness",
+            "n_pairs": 71,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.006313086722903665,
+            "median_shift": 0.006313086722903665,
+            "normalized_shift": 0.3277330244172059,
+            "inference_flip_rate": 0.3
+          }
+        ]
+      },
+      {
+        "decision_id": "hit_definition",
+        "scale": "standardized",
+        "n_pairs": 208,
+        "n_effect_pairs": 30,
+        "n_inference_pairs": 30,
+        "median_abs_effect_change": 0.0034050127410027563,
+        "normalized_effect_change": 0.17676537211810806,
+        "normalized_ci_low": 0.13119532548374133,
+        "normalized_ci_high": 0.20239134842831136,
+        "effect_change_p90": 0.007067699408582887,
+        "effect_change_max": 0.00942558955120756,
+        "median_abs_log10p_change": 13.761328230486233,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.2,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "any_contraband": 0.0021380152301843664,
+          "drugs_only": 0.019004646839243133,
+          "weapons_only": 0.014472012743822593
+        },
+        "option_pairs": [
+          {
+            "option_a": "any_contraband",
+            "option_b": "drugs_only",
+            "n_pairs": 67,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.001148396988842738,
+            "median_shift": 0.001043695693162372,
+            "normalized_shift": 0.054181664390948035,
+            "inference_flip_rate": 0.3
+          },
+          {
+            "option_a": "any_contraband",
+            "option_b": "weapons_only",
+            "n_pairs": 67,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.0034050127410027563,
+            "median_shift": -0.0025288214130917037,
+            "normalized_shift": -0.13127940836243496,
+            "inference_flip_rate": 0.3
+          },
+          {
+            "option_a": "drugs_only",
+            "option_b": "weapons_only",
+            "n_pairs": 74,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.0036637136574406413,
+            "median_shift": -0.0036637136574406413,
+            "normalized_shift": -0.1901953846436915,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "geographic_scope",
+        "scale": "standardized",
+        "n_pairs": 211,
+        "n_effect_pairs": 30,
+        "n_inference_pairs": 30,
+        "median_abs_effect_change": 0.0017284341012059029,
+        "normalized_effect_change": 0.08972867954418082,
+        "normalized_ci_low": 0.03924297279010984,
+        "normalized_ci_high": 0.1359315007624472,
+        "effect_change_p90": 0.0069204170465789515,
+        "effect_change_max": 0.008570427392504661,
+        "median_abs_log10p_change": 11.57521600769935,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.06666666666666667,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "all_records": 0.00426899031013417,
+          "durham_county": 0.003874039984540555,
+          "durham_police_department": 0.007366369570200458
+        },
+        "option_pairs": [
+          {
+            "option_a": "all_records",
+            "option_b": "durham_county",
+            "n_pairs": 71,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.00004493757740829966,
+            "median_shift": -0.000025231742624702526,
+            "normalized_shift": -0.0013098624626380687,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "all_records",
+            "option_b": "durham_police_department",
+            "n_pairs": 70,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.0026082713728208216,
+            "median_shift": 0.0026082713728208216,
+            "normalized_shift": 0.13540391618796233,
+            "inference_flip_rate": 0.1
+          },
+          {
+            "option_a": "durham_county",
+            "option_b": "durham_police_department",
+            "n_pairs": 70,
+            "n_effect_pairs": 10,
+            "median_abs_change": 0.002628957423314128,
+            "median_shift": 0.002628957423314128,
+            "normalized_shift": 0.13647779687248113,
+            "inference_flip_rate": 0.1
+          }
+        ]
+      },
+      {
+        "decision_id": "outcome_model_and_inference",
+        "scale": "standardized",
+        "n_pairs": 150,
+        "n_effect_pairs": 0,
+        "n_inference_pairs": 0,
+        "median_abs_effect_change": null,
+        "normalized_effect_change": null,
+        "normalized_ci_low": null,
+        "normalized_ci_high": null,
+        "effect_change_p90": null,
+        "effect_change_max": null,
+        "median_abs_log10p_change": null,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": null,
+        "sign_reversal_rate": null,
+        "option_medians": {
+          "unadjusted_proportions_iid": 0.004856943700774861
+        },
+        "option_pairs": [
+          {
+            "option_a": "adjusted_logistic_officer_clustered",
+            "option_b": "department_and_officer_controls",
+            "n_pairs": 50,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          },
+          {
+            "option_a": "adjusted_logistic_officer_clustered",
+            "option_b": "unadjusted_proportions_iid",
+            "n_pairs": 50,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          },
+          {
+            "option_a": "department_and_officer_controls",
+            "option_b": "unadjusted_proportions_iid",
+            "n_pairs": 50,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          }
+        ]
+      }
+    ],
+    "decisions": {
+      "geographic_scope": {
+        "label": "Geographic scope of stops",
+        "kind": "preprocessing",
+        "rationale": "Which records should represent the population of police stops being tested for racial bias?  [found by: direct]",
+        "options": {
+          "all_records": {
+            "label": "All records in the dataset",
+            "description": "Include every row with a usable subject_race value, regardless of county_name, location, or department_name."
+          },
+          "durham_county": {
+            "label": "Durham County stops",
+            "description": "Keep only rows where county_name equals \"Durham County\"; retain stops from all departments in that county."
+          },
+          "durham_police_department": {
+            "label": "Durham Police Department stops",
+            "description": "Keep only rows where department_name equals \"Durham Police Department\", regardless of county_name."
+          }
+        }
+      },
+      "race_comparison_set": {
+        "label": "Race comparison and coding",
+        "kind": "variable_choice",
+        "rationale": "Which recorded driver-race groups should be compared?  [found by: direct]",
+        "options": {
+          "black_vs_white": {
+            "label": "Black versus white comparison",
+            "description": "Keep only rows with subject_race equal to \"black\" or \"white\"; model or report the black-minus-white difference, with white as the reference group."
+          },
+          "all_known_races": {
+            "label": "All known race categories",
+            "description": "Keep all rows whose subject_race is not \"unknown\" and estimate separate associations for black, white, hispanic, asian/pacific islander, and other, using white as the reference group."
+          },
+          "include_unknown_as_category": {
+            "label": "Include unknown race as a category",
+            "description": "Retain all rows, including subject_race equal to \"unknown\", and treat \"unknown\" as an additional categorical race level rather than missing data."
+          }
+        }
+      },
+      "bias_outcome": {
+        "label": "Primary observable outcome",
+        "kind": "variable_choice",
+        "rationale": "Which observable consequence of a stop should be treated as the test outcome for racial bias?  [found by: direct]",
+        "options": {
+          "search_rate": {
+            "label": "Search-conducted rate",
+            "description": "Use search_conducted as a binary outcome for every included stop; estimate the racial difference in the probability of a search."
+          },
+          "contraband_hit_rate": {
+            "label": "Contraband hit rate among searches",
+            "description": "Restrict to stops with search_conducted equal to 1 and use contraband_found as the binary outcome; estimate racial differences in the probability that a search recovered contraband."
+          },
+          "search_and_hit_rates": {
+            "label": "Both search rate and hit rate",
+            "description": "Report a search_conducted outcome for all included stops and a separate contraband_found outcome among searched stops, treating both as primary racial-bias tests."
+          }
+        }
+      },
+      "hit_definition": {
+        "label": "Definition of a contraband hit",
+        "kind": "variable_choice",
+        "rationale": "When a hit-rate analysis is conducted, what should count as recovered contraband?  [found by: direct]",
+        "options": {
+          "any_contraband": {
+            "label": "Any contraband",
+            "description": "Among rows with search_conducted equal to 1, code a hit as contraband_found equal to TRUE and a non-hit as contraband_found equal to FALSE; exclude missing contraband_found values."
+          },
+          "drugs_only": {
+            "label": "Drugs only",
+            "description": "Among rows with search_conducted equal to 1, use contraband_drugs as the binary hit outcome; exclude rows where contraband_drugs is missing."
+          },
+          "weapons_only": {
+            "label": "Weapons only",
+            "description": "Among rows with search_conducted equal to 1, use contraband_weapons as the binary hit outcome; exclude rows where contraband_weapons is missing."
+          },
+          "not_applicable": {
+            "label": "Not applicable",
+            "description": "Do not define a hit outcome because the analysis uses only search_conducted."
+          }
+        }
+      },
+      "time_of_day_adjustment": {
+        "label": "Treatment of stop time",
+        "kind": "model",
+        "rationale": "How should date and time be used when comparing racial search or hit outcomes?  [found by: direct]",
+        "options": {
+          "no_time_adjustment": {
+            "label": "No time adjustment",
+            "description": "Use date and time only for parsing or descriptive summaries; estimate racial differences without conditioning on date, hour, or daylight status."
+          },
+          "clock_time_controls": {
+            "label": "Clock-time and calendar controls",
+            "description": "Include hour-of-day indicators derived from time, plus calendar-year and month indicators derived from date, as adjustment variables in the outcome model."
+          },
+          "veil_of_darkness": {
+            "label": "Veil-of-darkness comparison",
+            "description": "Construct daylight status from date, time, and a specified sunset calculation for the stop location; compare stops near the daylight-to-dark transition while controlling for date or season, rather than using all hours equally."
+          }
+        }
+      },
+      "outcome_model_and_inference": {
+        "label": "Outcome model and uncertainty calculation",
+        "kind": "model",
+        "rationale": "How should racial differences be estimated and how should repeated stops or officers affect uncertainty?  [found by: direct]",
+        "options": {
+          "unadjusted_proportions_iid": {
+            "label": "Unadjusted proportions with independent-stop uncertainty",
+            "description": "Estimate group-specific outcome proportions and their differences directly, using a two-sample proportion test or equivalent model with observations treated as independent; do not adjust for subject_age, subject_sex, reason_for_stop, officer_id_hash, or department_name."
+          },
+          "adjusted_logistic_officer_clustered": {
+            "label": "Covariate-adjusted logistic regression clustered by officer",
+            "description": "Fit a logistic regression for the selected binary outcome with race, subject_age, subject_sex, and reason_for_stop as predictors; include calendar or time variables only if selected separately, and use officer_id_hash-clustered standard errors."
+          },
+          "department_and_officer_controls": {
+            "label": "Officer and department controls",
+            "description": "Fit a logistic regression including race, subject_age, subject_sex, reason_for_stop, department_name indicators, and officer_id_hash fixed effects, with uncertainty clustered by officer_id_hash; observations from officers with no within-officer race variation cannot identify the race coefficient."
+          }
+        }
+      }
+    },
+    "reported_results": 768,
+    "expected_results": 768,
+    "missing_universe_ids": [],
+    "unexpected_universe_ids": []
+  }
+}

@@ -1,0 +1,1248 @@
+{
+  "universes": [
+    {
+      "id": "universe_000",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": true
+    },
+    {
+      "id": "universe_001",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_002",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_003",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_004",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_005",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_006",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_007",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_008",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_009",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_010",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_011",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_012",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_013",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_014",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_015",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_016",
+      "decisions": {
+        "analysis_unit": "player_aggregate",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_017",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_018",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_019",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_020",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_021",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_022",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_023",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_024",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_025",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_026",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_027",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_028",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_029",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_030",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_031",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_032",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_033",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_034",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_035",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_036",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_037",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_038",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_039",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_040",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "exposure_only",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_041",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_042",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_043",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_044",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_045",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_046",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_047",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_048",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_049",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_050",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_051",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_052",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_053",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_054",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_055",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_056",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_057",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_058",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_059",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_060",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_061",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_062",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_063",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_and_league_adjusted",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_064",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_065",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_066",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_067",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_068",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_069",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_070",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_071",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_072",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_073",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_074",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_075",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_076",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_077",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_078",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_079",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_080",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_081",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_082",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_083",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_084",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_085",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_086",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_087",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "player_referee_random_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_088",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_089",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_090",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_091",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_092",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_093",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_094",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_095",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_096",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_097",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_098",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_099",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_and_second_yellow",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_100",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_101",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_102",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "both_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_103",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_104",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_105",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "either_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_106",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_107",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_108",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_050",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_109",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "model_based"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_110",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "player_cluster_robust"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_111",
+      "decisions": {
+        "analysis_unit": "player_referee_dyad",
+        "poisson_mean_structure": "referee_fixed_effects",
+        "sending_off_definition": "straight_reds_only",
+        "skin_tone_binary_rule": "mean_at_least_075",
+        "standard_error_method": "two_way_cluster_robust"
+      },
+      "is_default": false
+    }
+  ],
+  "n_total_grid": 192,
+  "n_dropped_constraints": 80,
+  "n_dropped_cap": 0,
+  "cap": 256,
+  "selection_strategy": "full_grid",
+  "matched_pairs_by_decision": {
+    "analysis_unit": 16,
+    "poisson_mean_structure": 152,
+    "skin_tone_binary_rule": 168,
+    "standard_error_method": 96,
+    "sending_off_definition": 56
+  }
+}

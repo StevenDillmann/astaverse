@@ -1,0 +1,110 @@
+{
+  "run_id": "20260916-205133__among-all-recorded-stops-black-subjects",
+  "number": 38,
+  "created_at": "2026-09-16T20:51:33+00:00",
+  "hypothesis": "Among all recorded stops, Black subjects have a higher search rate than White subjects.",
+  "dataset": "data/datasets/nc-durham-stops",
+  "stages": {
+    "study": {
+      "completed_at": "2026-09-16T20:51:34+00:00",
+      "dataset": "/Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv",
+      "n_rows": 326024,
+      "n_columns": 29
+    },
+    "decisions": {
+      "completed_at": "2026-09-16T20:53:48+00:00",
+      "mode": "direct",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "critique": false,
+      "n_decisions": 7,
+      "n_execution_decisions": 6
+    },
+    "universes": {
+      "completed_at": "2026-09-16T20:53:48+00:00",
+      "n_universes": 256,
+      "n_total_grid": 648,
+      "n_dropped_constraints": 0,
+      "n_dropped_cap": 392,
+      "n_analysed": 768,
+      "selection_strategy": "pair_balanced",
+      "matched_pairs_by_decision": {
+        "confounding_adjustment": 128,
+        "missing_search_handling": 202,
+        "race_variable_definition": 150,
+        "uncertainty_dependence": 240,
+        "search_outcome_definition": 272,
+        "stop_scope": 156
+      }
+    },
+    "task": {
+      "completed_at": "2026-09-16T20:53:48+00:00",
+      "task_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205133__among-all-recorded-stops-black-subjects/harbor_task",
+      "n_files": 266
+    },
+    "execute": {
+      "completed_at": "2026-09-16T21:11:16+00:00",
+      "agent": "terminus-2",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "n_jobs": 1
+    },
+    "verdicts": {
+      "completed_at": "2026-09-16T21:11:16+00:00",
+      "n_results": 768,
+      "rules": [
+        "alpha_05_two_sided",
+        "alpha_01_two_sided",
+        "alpha_05_directional"
+      ],
+      "complete": true,
+      "missing": []
+    },
+    "conclusion": {
+      "completed_at": "2026-09-16T21:11:23+00:00",
+      "model": "openai/gpt-5.6-luna",
+      "evidence_status": "robustly_supported",
+      "requires_refinement": false
+    },
+    "refinement": {
+      "completed_at": "2026-09-16T21:11:23+00:00",
+      "needed": false,
+      "n_hypotheses": 0
+    }
+  },
+  "config": {
+    "plans": {
+      "k": 5,
+      "model": null,
+      "temperature": 0.9
+    },
+    "decisions": {
+      "mode": "direct",
+      "models": [],
+      "critique": false,
+      "max_decisions": 6
+    },
+    "universes": {
+      "cap": 256,
+      "include": [],
+      "exclude": []
+    },
+    "execute": {
+      "agent": "terminus-2",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "dry_run": false
+    },
+    "conclusion": {
+      "model": null
+    },
+    "refinement": {
+      "model": null
+    },
+    "through": "refinement"
+  },
+  "review_before_execute": true
+}

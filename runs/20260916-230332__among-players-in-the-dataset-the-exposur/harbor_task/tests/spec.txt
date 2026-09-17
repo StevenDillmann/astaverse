@@ -1,0 +1,39 @@
+Hypothesis: Among players in the dataset, the exposure-adjusted rate of all sendings-off is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a Poisson exposure model.
+
+Decisions:
+
+- sending_off_definition: Definition of all sendings-off
+  Should the outcome count only straight red cards, or both straight reds and second-yellow sendings-off?  [found by: direct]
+    * straight_reds_only: Straight red cards only — For each player-referee row, use `redCards` as the Poisson count and exclude `yellowReds`.
+    * straight_and_second_yellow [default]: Straight reds plus second yellows — For each player-referee row, use `redCards + yellowReds` as the Poisson count.
+
+- skin_tone_binary_rule: Binary skin-tone classification
+  How should `rater1` and `rater2` be combined and thresholded to define dark-skinned players?  [found by: direct]
+    * mean_at_least_050 [default]: Mean rating at least 0.50 — Compute (`rater1` + `rater2`) / 2 for each player and classify the player as dark-skinned when this mean is greater than or equal to 0.50; otherwise classify as light-skinned.
+    * mean_at_least_075: Mean rating at least 0.75 — Compute (`rater1` + `rater2`) / 2 for each player and classify the player as dark-skinned when this mean is greater than or equal to 0.75; otherwise classify as light-skinned.
+    * both_at_least_050: Both raters at least 0.50 — Classify a player as dark-skinned only when both `rater1` and `rater2` are greater than or equal to 0.50; otherwise classify as light-skinned.
+    * either_at_least_050: Either rater at least 0.50 — Classify a player as dark-skinned when either `rater1` or `rater2` is greater than or equal to 0.50; classify as light-skinned only when both are below 0.50.
+
+- analysis_unit: Poisson analysis unit
+  Should the Poisson count and exposure be modeled for each player-referee dyad or after aggregating over players?  [found by: direct]
+    * player_referee_dyad [default]: Player-referee dyads — Retain one observation per row, using the row-level sending-off count and `log(games)` as the offset; repeated observations for the same `playerShort` and `refNum` structure remain in the data.
+    * player_aggregate: Player-level aggregation — Group rows by `playerShort`, sum the sending-off count and `games`, retain one skin-tone classification per player, and use `log(sum(games))` as the offset; do not retain referee-specific row variables in the outcome model.
+
+- poisson_mean_structure: Poisson mean-model specification
+  Which predictors and heterogeneity structure should enter the Poisson exposure model?  [found by: direct]
+    * exposure_only: Exposure-only model — Fit a Poisson regression with the binary skin-tone indicator as the sole predictor and `log(games)` as an offset; include no `leagueCountry`, `position`, `height`, `weight`, or referee variables.
+    * player_and_league_adjusted [default]: Player and league adjustment — Fit a Poisson regression with the binary skin-tone indicator, categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight`, with `log(games)` as an offset; include no referee random or fixed effects.
+    * player_referee_random_effects: Player and referee random intercepts — At the dyad level, fit a Poisson mixed model with the binary skin-tone indicator, categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight` as fixed effects, `log(games)` as an offset, and random intercepts for `playerShort` and `refNum`.
+    * referee_fixed_effects: Referee fixed effects — At the dyad level, fit a Poisson regression with the binary skin-tone indicator, categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight`, a separate indicator for each `refNum` except the reference referee, and `log(games)` as an offset.
+
+- standard_error_method: Inference and dependence adjustment
+  How should uncertainty in the Poisson rate-ratio estimate be calculated given repeated players and referees?  [found by: direct]
+    * model_based [default]: Model-based standard errors — Use the standard errors implied by the fitted Poisson regression or Poisson mixed model, without a sandwich correction; report the skin-tone rate ratio and its model-based confidence interval.
+    * player_cluster_robust: Player-clustered robust standard errors — Use a sandwich variance estimator clustered by `playerShort`; for dyad-level data, allow arbitrary dependence among rows for the same player.
+    * two_way_cluster_robust: Player-and-referee two-way clustered errors — For dyad-level data, use a two-way cluster-robust sandwich variance estimator with clustering dimensions `playerShort` and `refNum`, accounting for dependence shared by either players or referees.
+
+- verdict_rule: Verdict decision rule (applied downstream, not executed)
+  How the reported statistics become a supported / not-supported verdict. Left implicit by every plan, and consequential on its own.
+    * alpha_05_two_sided [default]: p < 0.05, two-sided — Conventional two-sided test at the 5% level.
+    * alpha_01_two_sided: p < 0.01, two-sided — Stricter two-sided threshold at the 1% level.
+    * alpha_05_directional: p < 0.05 and direction matches — Significant at 5% AND the estimate points the way the hypothesis predicts; a significant effect the other way counts as not supported.

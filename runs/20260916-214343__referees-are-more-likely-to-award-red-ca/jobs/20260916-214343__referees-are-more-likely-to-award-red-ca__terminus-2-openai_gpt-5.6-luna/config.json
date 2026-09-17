@@ -1,0 +1,20 @@
+{
+    "job_name": "20260916-214343__referees-are-more-likely-to-award-red-ca__terminus-2-openai_gpt-5.6-luna",
+    "jobs_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-214343__referees-are-more-likely-to-award-red-ca/jobs",
+    "agents": [
+        {
+            "name": "terminus-2",
+            "model_name": "openai/gpt-5.6-luna"
+        }
+    ],
+    "tasks": [
+        {
+            "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-214343__referees-are-more-likely-to-award-red-ca/harbor_task"
+        }
+    ],
+    "artifacts": [
+        "/app/universes.jsonl",
+        "/app/results.md",
+        "/app/analysis.py"
+    ]
+}

@@ -1,0 +1,14 @@
+id: universe_050
+decisions:
+- decision_id: confounding_adjustment
+  option_id: unadjusted_rate_comparison
+- decision_id: missing_search_handling
+  option_id: complete_case
+- decision_id: race_variable_definition
+  option_id: subject_race_with_unknown_as_white
+- decision_id: search_outcome_definition
+  option_id: vehicle_search_only
+- decision_id: stop_scope
+  option_id: all_dataset_rows
+- decision_id: uncertainty_dependence
+  option_id: department_cluster_robust

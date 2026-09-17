@@ -1,0 +1,215 @@
+id: nc-durham-stops_multiverse
+name: 'nc-durham-stops: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - analysis_universe
+  - contrast_structure
+  - dependence_handling
+  - race_adjustment_model
+  - race_definition
+  - search_outcome
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  analysis_universe:
+    label: Analysis universe
+    rationale: 'Which recorded stops should be included in the comparison?  [found by: direct]'
+    default: all_recorded_rows
+    options:
+      all_recorded_rows:
+        label: All recorded rows
+        description: Include every row in the dataset, regardless of date or county_name, provided subject_race
+          and the selected search outcome are usable.
+      period_all_counties:
+        label: "2002\u20132015 stops in all counties"
+        description: Keep rows with date from 2002-01-01 through 2015-12-31 inclusive, regardless of county_name.
+      period_durham_county:
+        label: "2002\u20132015 Durham County stops"
+        description: Keep rows with date from 2002-01-01 through 2015-12-31 inclusive and county_name
+          equal to Durham County.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        all_recorded_rows: []
+        period_all_counties: []
+        period_durham_county: []
+  race_definition:
+    label: Race-category definition and unknown handling
+    rationale: 'Which column and category set should define the known race groups?  [found by: direct]'
+    default: subject_race_known_only
+    options:
+      subject_race_known_only:
+        label: Recorded subject_race, known categories only
+        description: Use subject_race and retain only black, white, hispanic, asian/pacific islander,
+          and other; exclude rows coded unknown or missing.
+      subject_race_with_unknown:
+        label: Recorded subject_race including unknown
+        description: Use subject_race with black, white, hispanic, asian/pacific islander, other, and
+          unknown as separate comparison categories; exclude only missing values.
+      raw_race_ethnicity_recode:
+        label: Reconstructed race from raw fields
+        description: Use raw_Race and raw_Ethnicity, applying the source release coding scheme to reconstruct
+          mutually exclusive black, white, hispanic, asian/pacific islander, other, and unknown categories
+          before analysis.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        subject_race_known_only: []
+        subject_race_with_unknown: []
+        raw_race_ethnicity_recode: []
+  search_outcome:
+    label: Search outcome definition
+    rationale: 'Which recorded action should count as a search for the search rate?  [found by: direct]'
+    default: search_conducted
+    options:
+      search_conducted:
+        label: Any recorded search
+        description: Define the binary outcome as search_conducted = 1 versus search_conducted = 0; exclude
+          rows with missing search_conducted.
+      person_search:
+        label: Person search
+        description: Define the binary outcome as search_person = 1 versus search_person = 0; exclude
+          rows with missing search_person.
+      vehicle_search:
+        label: Vehicle search
+        description: Define the binary outcome as search_vehicle = 1 versus search_vehicle = 0; exclude
+          rows with missing search_vehicle.
+      search_or_frisk:
+        label: Search or frisk
+        description: Define the binary outcome as 1 when search_conducted = 1 or frisk_performed = 1,
+          and 0 otherwise; exclude rows missing both component indicators.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        search_conducted: []
+        person_search: []
+        vehicle_search: []
+        search_or_frisk: []
+  race_adjustment_model:
+    label: Adjustment and rate-comparison model
+    rationale: 'Should race-group search rates be compared without adjustment or conditional on recorded
+      stop characteristics?  [found by: direct]'
+    default: crude_rate_comparison
+    options:
+      crude_rate_comparison:
+        label: Unadjusted group-rate comparison
+        description: For each race category, report searches divided by stops and compare the categories
+          using a single omnibus comparison of the unadjusted rates; do not include covariates.
+      unadjusted_logistic:
+        label: Unadjusted logistic regression
+        description: Fit a binary logistic regression of the selected search outcome on race category
+          alone, reporting race-group predicted probabilities or odds ratios.
+      adjusted_logistic:
+        label: Adjusted logistic regression
+        description: Fit a binary logistic regression of the selected search outcome on race category,
+          subject_age, subject_sex, reason_for_stop, county_name, department_name, and calendar date;
+          report race-group adjusted predicted probabilities.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        crude_rate_comparison: []
+        unadjusted_logistic: []
+        adjusted_logistic: []
+  contrast_structure:
+    label: Race contrasts
+    rationale: 'What race comparison should constitute the primary test?  [found by: direct]'
+    default: global_omnibus
+    options:
+      global_omnibus:
+        label: Global omnibus comparison
+        description: Test the null that all included race categories have the same search probability,
+          using one joint race comparison; do not make a specific race the reference for the primary claim.
+      white_reference:
+        label: Each category versus white
+        description: Use white as the reference category and report separate contrasts of black, hispanic,
+          asian/pacific islander, and other versus white; omit unknown unless it is included by the race-definition
+          decision.
+      all_pairwise:
+        label: All pairwise race comparisons
+        description: Report a separate comparison for every pair of included race categories, rather than
+          one global comparison or only comparisons with white.
+    x_astaverse:
+      kind: inference
+      post_hoc: false
+      option_support:
+        global_omnibus: []
+        white_reference: []
+        all_pairwise: []
+  dependence_handling:
+    label: Dependence and uncertainty calculation
+    rationale: 'How should repeated stops associated with the same officer or department affect uncertainty
+      estimates?  [found by: direct]'
+    default: iid
+    options:
+      iid:
+        label: Independent-stop standard errors
+        description: Treat rows as independent when computing standard errors, confidence intervals, and
+          test statistics.
+      cluster_officer:
+        label: Cluster by officer
+        description: Compute heteroskedasticity-robust standard errors clustered by officer_id_hash, allowing
+          arbitrary dependence among stops handled by the same officer.
+      cluster_department:
+        label: Cluster by department
+        description: Compute heteroskedasticity-robust standard errors clustered by department_name, allowing
+          dependence within reporting departments.
+      two_way_cluster:
+        label: Two-way officer and department clustering
+        description: Compute two-way cluster-robust standard errors using officer_id_hash and department_name
+          as the two clustering dimensions.
+    x_astaverse:
+      kind: inference
+      post_hoc: false
+      option_support:
+        iid: []
+        cluster_officer: []
+        cluster_department: []
+        two_way_cluster: []
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: How the reported statistics become a supported / not-supported verdict. Left implicit by
+      every plan, and consequential on its own.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+        description: Conventional two-sided test at the 5% level.
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+        description: Stricter two-sided threshold at the 1% level.
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+        description: Significant at 5% AND the estimate points the way the hypothesis predicts; a significant
+          effect the other way counts as not supported.
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+      option_support:
+        alpha_05_two_sided: []
+        alpha_01_two_sided: []
+        alpha_05_directional: []
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: Among all recorded stops, search rates differ across the known race categories.
+x_astaverse:
+  astra_schema_shape: 0.0.13
+  note: ASTRA-shaped, emitted by astaverse without astra-tools. Run `astra validate` to check conformance.

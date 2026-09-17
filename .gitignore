@@ -1,4 +1,20 @@
-runs/
+runs/*
+
+# Runs are regenerable and mostly dataset copies, so they stay out — except the
+# ones written up: the policing hypothesis and its refinement tree, and the
+# Silberzahn red-card reproduction and its tree. Everything but the duplicated
+# data.csv each Harbor task carries, so the curves can be rebuilt from the
+# artifacts without re-running an agent.
+!runs/20260916-195644__police-stops-and-searches-are-racially-b/
+!runs/20260916-205133__among-all-recorded-stops-black-subjects/
+!runs/20260916-205135__among-searched-stops-in-all-recorded-sto/
+!runs/20260916-205136__among-all-recorded-stops-search-rates-di/
+!runs/20260916-214343__referees-are-more-likely-to-award-red-ca/
+!runs/20260916-220356__among-player-referee-dyads-in-the-datase/
+!runs/20260916-223108__among-player-referee-dyads-in-the-datase/
+!runs/20260916-230332__among-players-in-the-dataset-the-exposur/
+
+runs/**/data.csv
 data/datasets/*
 !data/datasets/.gitkeep
 !data/datasets/hurricane/

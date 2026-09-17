@@ -1,0 +1,209 @@
+id: silberzahn-red-cards_multiverse
+name: 'silberzahn-red-cards: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/silberzahn-red-cards/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - games_exposure_handling
+  - logistic_model_specification
+  - sending_off_outcome
+  - skin_tone_combination
+  - skin_tone_threshold
+  - uncertainty_estimation
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  sending_off_outcome:
+    label: Sending-off outcome definition
+    rationale: 'Which columns define the dyad-level indicator for at least one sending-off?  [found by:
+      direct]'
+    default: include_second_yellows
+    options:
+      include_second_yellows:
+        label: Include straight and second-yellow sendings-off
+        description: Set outcome = 1 when redCards > 0 or yellowReds > 0; otherwise set outcome = 0.
+      straight_red_only:
+        label: Straight red cards only
+        description: Set outcome = 1 when redCards > 0 and ignore yellowReds, even when yellowReds > 0.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        include_second_yellows: []
+        straight_red_only: []
+  skin_tone_combination:
+    label: Combining the two skin-tone ratings
+    rationale: 'How should rater1 and rater2 be combined into the player skin-tone score before dichotomization?  [found
+      by: direct]'
+    default: mean_raters
+    options:
+      mean_raters:
+        label: Mean of both raters
+        description: For every row, define skin_score = (rater1 + rater2) / 2.
+      rater1_only:
+        label: Use rater 1 only
+        description: Define skin_score = rater1 for every row and ignore rater2.
+      rater2_only:
+        label: Use rater 2 only
+        description: Define skin_score = rater2 for every row and ignore rater1.
+      conservative_agreement:
+        label: Use only exact rater agreement
+        description: Retain rows only when rater1 = rater2, and define skin_score as that common value.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        mean_raters: []
+        rater1_only: []
+        rater2_only: []
+        conservative_agreement: []
+  skin_tone_threshold:
+    label: Binary skin-tone threshold
+    rationale: 'Which prespecified rule converts the combined skin-tone score into the dark-skinned exposure?  [found
+      by: direct]'
+    default: dark_at_least_half
+    options:
+      dark_at_least_half:
+        label: Dark at score at least 0.5
+        description: Define dark_skin = 1 when skin_score >= 0.5 and dark_skin = 0 otherwise; scores 0.5,
+          0.75, and 1 are dark.
+      dark_above_half:
+        label: Dark above 0.5
+        description: Define dark_skin = 1 when skin_score > 0.5 and dark_skin = 0 otherwise; only scores
+          above 0.5 are dark.
+      dark_at_least_three_quarters:
+        label: Dark at score at least 0.75
+        description: Define dark_skin = 1 when skin_score >= 0.75 and dark_skin = 0 otherwise.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        dark_at_least_half: []
+        dark_above_half: []
+        dark_at_least_three_quarters: []
+  games_exposure_handling:
+    label: Handling games as exposure
+    rationale: 'How should the games column enter the dyad-level any-event logistic analysis?  [found
+      by: direct]'
+    default: unweighted_dyads
+    options:
+      unweighted_dyads:
+        label: One equally weighted observation per dyad
+        description: Fit the binary logistic model to the 146,028 dyad rows without weights; games is
+          not used as a weight or offset.
+      games_frequency_weights:
+        label: Weight dyads by games
+        description: Fit the binary logistic model with games as a frequency weight, so a dyad with games
+          = k contributes k times the likelihood contribution of a dyad with games = 1.
+      games_as_predictor:
+        label: Adjust for games as a covariate
+        description: Fit the unweighted binary logistic model and include the numeric games column as
+          a linear predictor; do not use it as a weight.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        unweighted_dyads: []
+        games_frequency_weights: []
+        games_as_predictor: []
+  logistic_model_specification:
+    label: Covariate and referee-effect specification
+    rationale: 'Which predictor structure should be used for the dyad-level logistic model estimating
+      the dark_skin odds ratio?  [found by: direct]'
+    default: crude_logistic
+    options:
+      crude_logistic:
+        label: Crude logistic model
+        description: Fit outcome ~ dark_skin using a standard logistic link, with no additional columns
+          and no referee effects.
+      adjusted_player_league_logistic:
+        label: Adjust for league and player characteristics
+        description: Fit outcome ~ dark_skin + leagueCountry + position + height + weight using a standard
+          logistic link; do not include referee effects.
+      referee_fixed_effect_logistic:
+        label: Add referee fixed effects
+        description: Fit outcome ~ dark_skin + leagueCountry + position + height + weight + factor(refNum)
+          using a standard logistic link; omit any player fixed effect because dark_skin is constant within
+          player.
+      crossed_random_intercepts:
+        label: Crossed player and referee random intercepts
+        description: Fit a logistic mixed model with fixed effect dark_skin and random intercepts (1 |
+          playerShort) and (1 | refNum); include no other fixed covariates.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        crude_logistic: []
+        adjusted_player_league_logistic: []
+        referee_fixed_effect_logistic: []
+        crossed_random_intercepts: []
+  uncertainty_estimation:
+    label: Uncertainty estimation for repeated dyads
+    rationale: 'How should standard errors and intervals for the dark_skin odds ratio account for repeated
+      players and referees?  [found by: direct]'
+    default: model_based_standard_errors
+    options:
+      model_based_standard_errors:
+        label: Model-based standard errors
+        description: Use the fitted logistic model's default model-based variance and report its Wald
+          standard error and confidence interval.
+      two_way_cluster_robust:
+        label: Two-way cluster-robust standard errors
+        description: Estimate a sandwich variance clustered simultaneously by playerShort and refNum,
+          and use it for the dark_skin odds ratio interval.
+      cluster_bootstrap:
+        label: Cluster bootstrap
+        description: Resample playerShort clusters and refNum clusters using a two-way cluster bootstrap
+          procedure, refit the selected model for each successful replicate, and use the bootstrap distribution
+          for the interval.
+    x_astaverse:
+      kind: inference
+      post_hoc: false
+      option_support:
+        model_based_standard_errors: []
+        two_way_cluster_robust: []
+        cluster_bootstrap: []
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: How the reported statistics become a supported / not-supported verdict. Left implicit by
+      every plan, and consequential on its own.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+        description: Conventional two-sided test at the 5% level.
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+        description: Stricter two-sided threshold at the 1% level.
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+        description: Significant at 5% AND the estimate points the way the hypothesis predicts; a significant
+          effect the other way counts as not supported.
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+      option_support:
+        alpha_05_two_sided: []
+        alpha_01_two_sided: []
+        alpha_05_directional: []
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: "Among player\u2013referee dyads in the dataset, the probability of at least one sending-off\
+      \ (including second-yellow sendings-off) is higher for dark-skinned than for light-skinned players,\
+      \ using a prespecified binary skin-tone threshold and a dyad-level any-event logistic model."
+x_astaverse:
+  astra_schema_shape: 0.0.13
+  note: ASTRA-shaped, emitted by astaverse without astra-tools. Run `astra validate` to check conformance.

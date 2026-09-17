@@ -1,0 +1,509 @@
+{
+  "evidence_status": "partially_supported",
+  "requires_refinement": true,
+  "answer": "The evidence partially supports a higher straight-red-card probability for dark-skinned than light-skinned players: 28 of 93 estimable specifications were significantly positive, compared with 2 significantly negative, and the median standardized estimate was 0.0286. However, 63 of 93 estimates were indeterminate, 163 of 256 universes were unavailable, and inference changed in 41.9% of exposure-handling comparisons, so the broad hypothesis is not robustly established.",
+  "rationale": "Positive, statistically supported effects are more common than statistically supported negative effects, but a substantial share of estimable specifications is non-significant or indeterminate and key modeling decisions produce frequent inference changes. The evidence therefore supports the direction in some specifications without demonstrating consistent support for the full hypothesis.",
+  "key_evidence": [
+    "Among 93 estimates with confidence intervals, 28 were significantly positive and 2 were significantly negative.",
+    "The standardized effect median was 0.0286, with a 25th–75th percentile range of 0.0118 to 0.0439; the minimum was -0.0258.",
+    "Sixty-three of 93 estimates were indeterminate, and 163 of 256 universes were unavailable.",
+    "Inference flipped in 41.9% of games-exposure comparisons and 41.7% of straight-red-only versus any-sending-off comparisons."
+  ],
+  "refinement_reason": "The multiverse combines substantively distinct claims about the outcome definition, games-exposure handling, and operationalization of skin tone. These choices materially affect effect estimates or inference, so the broad claim should be separated into narrower claims.",
+  "refinement_dimensions": [
+    "Red-card outcome definition",
+    "Games-exposure handling",
+    "Binary skin-tone threshold",
+    "Skin-tone rater combination"
+  ],
+  "suggested_hypotheses": [
+    "Among player–referee dyads, dark-skinned players have a higher probability of at least one straight red card than light-skinned players when straight reds are used exclusively and games exposure is handled by a prespecified method.",
+    "Among player–referee dyads, the dark-versus-light skin-tone association with at least one straight red card is positive under each prespecified binary skin-tone threshold.",
+    "Among player–referee dyads, the dark-versus-light skin-tone association with at least one straight red card is positive under a prespecified rule for combining the two skin-tone raters."
+  ],
+  "caveats": [
+    "The supplied effects are on a standardized scale; they do not directly provide an absolute probability difference or odds ratio.",
+    "Non-significance and indeterminate results do not establish that the effect is absent.",
+    "The evidence includes missing or unavailable universes, and the supplied summaries do not identify which specific universes generated each significant result."
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T23:03:01+00:00",
+  "evidence_snapshot": {
+    "curve_summary": {
+      "scale": "standardized",
+      "n_universes": 256,
+      "n_estimates": 93,
+      "n_with_ci": 93,
+      "minimum": -0.025786191768667893,
+      "q25": 0.01179440250151212,
+      "median": 0.028569627910297983,
+      "q75": 0.04387564764935291,
+      "maximum": 0.06449776585049381,
+      "n_significant_positive": 28,
+      "n_significant_negative": 2,
+      "n_indeterminate": 63,
+      "n_unavailable": 163
+    },
+    "decision_sensitivity": [
+      {
+        "decision_id": "games_exposure_handling",
+        "scale": "standardized",
+        "n_pairs": 184,
+        "n_effect_pairs": 62,
+        "n_inference_pairs": 62,
+        "median_abs_effect_change": 0.02366084550828894,
+        "normalized_effect_change": 0.7375289019878151,
+        "normalized_ci_low": 0.6723135449847473,
+        "normalized_ci_high": 0.9391119693351565,
+        "effect_change_p90": 0.04269095823415489,
+        "effect_change_max": 0.060611251254992324,
+        "median_abs_log10p_change": 0.6570485644984209,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.41935483870967744,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "unweighted_dyads": 0.025540725525224014,
+          "games_frequency_weight": 0.006171145114934372,
+          "adjust_for_log_games": 0.0587979873677723
+        },
+        "option_pairs": [
+          {
+            "option_a": "adjust_for_log_games",
+            "option_b": "games_frequency_weight",
+            "n_pairs": 60,
+            "n_effect_pairs": 18,
+            "median_abs_change": 0.035625151235138305,
+            "median_shift": -0.035625151235138305,
+            "normalized_shift": -1.1104666003755792,
+            "inference_flip_rate": 0.6111111111111112
+          },
+          {
+            "option_a": "adjust_for_log_games",
+            "option_b": "unweighted_dyads",
+            "n_pairs": 60,
+            "n_effect_pairs": 18,
+            "median_abs_change": 0.01196198659338421,
+            "median_shift": -0.01196198659338421,
+            "normalized_shift": -0.37286540900328197,
+            "inference_flip_rate": 0.6111111111111112
+          },
+          {
+            "option_a": "games_frequency_weight",
+            "option_b": "unweighted_dyads",
+            "n_pairs": 64,
+            "n_effect_pairs": 26,
+            "median_abs_change": 0.02295118483145976,
+            "median_shift": 0.02295118483145976,
+            "normalized_shift": 0.7154081684078425,
+            "inference_flip_rate": 0.15384615384615385
+          }
+        ]
+      },
+      {
+        "decision_id": "red_card_outcome_definition",
+        "scale": "standardized",
+        "n_pairs": 128,
+        "n_effect_pairs": 36,
+        "n_inference_pairs": 36,
+        "median_abs_effect_change": 0.01833057797643102,
+        "normalized_effect_change": 0.5713798791773127,
+        "normalized_ci_low": 0.5706661439296326,
+        "normalized_ci_high": 0.6366675255648627,
+        "effect_change_p90": 0.026154816020989114,
+        "effect_change_max": 0.02924745884135195,
+        "median_abs_log10p_change": 0.4502357872894809,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.4166666666666667,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "straight_red_only": 0.03764673258522124,
+          "any_sending_off": 0.017956708427045415
+        },
+        "option_pairs": [
+          {
+            "option_a": "any_sending_off",
+            "option_b": "straight_red_only",
+            "n_pairs": 128,
+            "n_effect_pairs": 36,
+            "median_abs_change": 0.01833057797643102,
+            "median_shift": 0.01833057797643102,
+            "normalized_shift": 0.5713798791773127,
+            "inference_flip_rate": 0.4166666666666667
+          }
+        ]
+      },
+      {
+        "decision_id": "covariate_adjustment",
+        "scale": "standardized",
+        "n_pairs": 202,
+        "n_effect_pairs": 21,
+        "n_inference_pairs": 21,
+        "median_abs_effect_change": 0.013979850144374764,
+        "normalized_effect_change": 0.43576395117929734,
+        "normalized_ci_low": 0.22548671034337364,
+        "normalized_ci_high": 0.6613411595635645,
+        "effect_change_p90": 0.021674611122101735,
+        "effect_change_max": 0.021674611122101735,
+        "median_abs_log10p_change": 0.4875767974568914,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.14285714285714285,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "skin_tone_only": 0.03482505948632443,
+          "player_and_league_covariates": 0.016430084718905235
+        },
+        "option_pairs": [
+          {
+            "option_a": "player_and_league_covariates",
+            "option_b": "player_league_referee_country_covariates",
+            "n_pairs": 70,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          },
+          {
+            "option_a": "player_and_league_covariates",
+            "option_b": "skin_tone_only",
+            "n_pairs": 66,
+            "n_effect_pairs": 21,
+            "median_abs_change": 0.013979850144374764,
+            "median_shift": 0.013979850144374764,
+            "normalized_shift": 0.43576395117929734,
+            "inference_flip_rate": 0.14285714285714285
+          },
+          {
+            "option_a": "player_league_referee_country_covariates",
+            "option_b": "skin_tone_only",
+            "n_pairs": 66,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          }
+        ]
+      },
+      {
+        "decision_id": "skin_tone_threshold",
+        "scale": "standardized",
+        "n_pairs": 216,
+        "n_effect_pairs": 63,
+        "n_inference_pairs": 63,
+        "median_abs_effect_change": 0.009050588163028478,
+        "normalized_effect_change": 0.28211461622890355,
+        "normalized_ci_low": 0.11300963996404365,
+        "normalized_ci_high": 0.39267510937075784,
+        "effect_change_p90": 0.025214316306846098,
+        "effect_change_max": 0.034036688182882496,
+        "median_abs_log10p_change": 0.31295611604444806,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.31746031746031744,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "at_least_050": 0.016430084718905235,
+          "above_050": 0.030188596234190464,
+          "at_least_075": 0.028675583379530155
+        },
+        "option_pairs": [
+          {
+            "option_a": "above_050",
+            "option_b": "at_least_050",
+            "n_pairs": 72,
+            "n_effect_pairs": 20,
+            "median_abs_change": 0.010742214561437275,
+            "median_shift": -0.006338039063392094,
+            "normalized_shift": -0.19756212809647358,
+            "inference_flip_rate": 0.35
+          },
+          {
+            "option_a": "above_050",
+            "option_b": "at_least_075",
+            "n_pairs": 72,
+            "n_effect_pairs": 23,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.17391304347826086
+          },
+          {
+            "option_a": "at_least_050",
+            "option_b": "at_least_075",
+            "n_pairs": 72,
+            "n_effect_pairs": 20,
+            "median_abs_change": 0.012368524819285612,
+            "median_shift": 0.012368524819285612,
+            "normalized_shift": 0.38553755511319576,
+            "inference_flip_rate": 0.45
+          }
+        ]
+      },
+      {
+        "decision_id": "skin_tone_rater_combination",
+        "scale": "standardized",
+        "n_pairs": 216,
+        "n_effect_pairs": 64,
+        "n_inference_pairs": 64,
+        "median_abs_effect_change": 0.0029119460816389928,
+        "normalized_effect_change": 0.09076786353583846,
+        "normalized_ci_low": 0.020942978345614597,
+        "normalized_ci_high": 0.11095572874679867,
+        "effect_change_p90": 0.02146876563128459,
+        "effect_change_max": 0.03129558771247693,
+        "median_abs_log10p_change": 0.13263355713725458,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.21875,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "mean_raters": 0.016430084718905235,
+          "both_raters_thresholded": 0.03193655857142018,
+          "rater1_only": 0.042501295256623
+        },
+        "option_pairs": [
+          {
+            "option_a": "both_raters_thresholded",
+            "option_b": "mean_raters",
+            "n_pairs": 72,
+            "n_effect_pairs": 24,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.16666666666666666
+          },
+          {
+            "option_a": "both_raters_thresholded",
+            "option_b": "rater1_only",
+            "n_pairs": 72,
+            "n_effect_pairs": 20,
+            "median_abs_change": 0.0029119460816389928,
+            "median_shift": -0.0004295343419034349,
+            "normalized_shift": -0.013388954821547644,
+            "inference_flip_rate": 0.2
+          },
+          {
+            "option_a": "mean_raters",
+            "option_b": "rater1_only",
+            "n_pairs": 72,
+            "n_effect_pairs": 20,
+            "median_abs_change": 0.006516915300892011,
+            "median_shift": 0.006516915300892011,
+            "normalized_shift": 0.20313785424661512,
+            "inference_flip_rate": 0.3
+          }
+        ]
+      },
+      {
+        "decision_id": "dependence_inference",
+        "scale": "standardized",
+        "n_pairs": 186,
+        "n_effect_pairs": 42,
+        "n_inference_pairs": 42,
+        "median_abs_effect_change": 0.0,
+        "normalized_effect_change": 0.0,
+        "normalized_ci_low": 0.0,
+        "normalized_ci_high": 0.0,
+        "effect_change_p90": 0.0,
+        "effect_change_max": 0.0,
+        "median_abs_log10p_change": 0.04789564082434962,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.14285714285714285,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "model_based_iid": 0.028569627910297983,
+          "player_clustered": 0.03764673258522124,
+          "random_intercepts": 0.03764673258522124,
+          "two_way_clustered": 0.03764673258522124
+        },
+        "option_pairs": [
+          {
+            "option_a": "model_based_iid",
+            "option_b": "player_clustered",
+            "n_pairs": 32,
+            "n_effect_pairs": 7,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.2857142857142857
+          },
+          {
+            "option_a": "model_based_iid",
+            "option_b": "random_intercepts",
+            "n_pairs": 32,
+            "n_effect_pairs": 7,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.14285714285714285
+          },
+          {
+            "option_a": "model_based_iid",
+            "option_b": "two_way_clustered",
+            "n_pairs": 30,
+            "n_effect_pairs": 7,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.14285714285714285
+          },
+          {
+            "option_a": "player_clustered",
+            "option_b": "random_intercepts",
+            "n_pairs": 32,
+            "n_effect_pairs": 7,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.14285714285714285
+          },
+          {
+            "option_a": "player_clustered",
+            "option_b": "two_way_clustered",
+            "n_pairs": 30,
+            "n_effect_pairs": 7,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.14285714285714285
+          },
+          {
+            "option_a": "random_intercepts",
+            "option_b": "two_way_clustered",
+            "n_pairs": 30,
+            "n_effect_pairs": 7,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      }
+    ],
+    "decisions": {
+      "skin_tone_rater_combination": {
+        "label": "Skin-tone score construction",
+        "kind": "variable_choice",
+        "rationale": "How should `rater1` and `rater2` be combined into the player skin-tone score before dichotomization?  [found by: direct]",
+        "options": {
+          "mean_raters": {
+            "label": "Mean of both raters",
+            "description": "For each dyad, define skin_score = (`rater1` + `rater2`) / 2."
+          },
+          "rater1_only": {
+            "label": "Use first rater only",
+            "description": "Define skin_score = `rater1`, ignoring `rater2`."
+          },
+          "both_raters_thresholded": {
+            "label": "Require both raters to classify as dark",
+            "description": "Retain the two separate scores for dichotomization; a player is dark only if both `rater1` and `rater2` meet the selected dark-skin threshold, and light otherwise."
+          }
+        }
+      },
+      "skin_tone_threshold": {
+        "label": "Binary skin-tone threshold",
+        "kind": "variable_choice",
+        "rationale": "Which prespecified threshold should convert the combined skin-tone score into dark versus light skin?  [found by: direct]",
+        "options": {
+          "at_least_050": {
+            "label": "Dark if score ≥ 0.50",
+            "description": "Set dark_skin = 1 when the score constructed from the selected rater rule is at least 0.50; otherwise set dark_skin = 0."
+          },
+          "at_least_075": {
+            "label": "Dark if score ≥ 0.75",
+            "description": "Set dark_skin = 1 when the score constructed from the selected rater rule is at least 0.75; otherwise set dark_skin = 0."
+          },
+          "above_050": {
+            "label": "Dark if score > 0.50",
+            "description": "Set dark_skin = 1 when the score constructed from the selected rater rule is strictly greater than 0.50; otherwise set dark_skin = 0."
+          }
+        }
+      },
+      "red_card_outcome_definition": {
+        "label": "Any-event outcome definition",
+        "kind": "preprocessing",
+        "rationale": "Should the dyad outcome count only straight red cards, or also second-yellow sendings-off?  [found by: direct]",
+        "options": {
+          "straight_red_only": {
+            "label": "At least one straight red card",
+            "description": "Set outcome = 1 when `redCards` ≥ 1 and outcome = 0 when `redCards` = 0; ignore `yellowReds`."
+          },
+          "any_sending_off": {
+            "label": "At least one sending-off of either type",
+            "description": "Set outcome = 1 when `redCards` + `yellowReds` ≥ 1 and outcome = 0 otherwise."
+          }
+        }
+      },
+      "games_exposure_handling": {
+        "label": "Handling variation in games per dyad",
+        "kind": "model",
+        "rationale": "How should the `games` exposure difference across player–referee dyads enter the logistic analysis?  [found by: direct]",
+        "options": {
+          "unweighted_dyads": {
+            "label": "Unweighted dyad-level logistic regression",
+            "description": "Fit the binary logistic model with one equal-weight observation per row, without using `games` as a weight, offset, or predictor."
+          },
+          "games_frequency_weight": {
+            "label": "Weight dyads by games",
+            "description": "Fit the binary logistic model using `games` as a frequency or analytic weight, so a dyad with 20 games contributes 20 times as much as a dyad with 1 game."
+          },
+          "adjust_for_log_games": {
+            "label": "Adjust for log games",
+            "description": "Fit the binary logistic model with `log(games)` included as a continuous covariate; do not use `games` as a frequency weight."
+          }
+        }
+      },
+      "covariate_adjustment": {
+        "label": "Adjustment set for the skin-tone association",
+        "kind": "model",
+        "rationale": "Which variables, if any, should be included alongside the binary skin-tone predictor in the dyad-level logistic model?  [found by: direct]",
+        "options": {
+          "skin_tone_only": {
+            "label": "Unadjusted skin-tone model",
+            "description": "Use only the binary skin-tone indicator as a predictor of the selected dyad outcome, with an intercept."
+          },
+          "player_and_league_covariates": {
+            "label": "Adjust for player and league characteristics",
+            "description": "Include binary skin tone plus `leagueCountry`, `position`, `height`, and `weight` as predictors; do not include referee-country variables."
+          },
+          "player_league_referee_country_covariates": {
+            "label": "Also adjust for referee-country characteristics",
+            "description": "Include binary skin tone, `leagueCountry`, `position`, `height`, `weight`, `refCountry`, `meanIAT`, and `meanExp` as predictors. Treat `refCountry` as categorical and the two bias measures as continuous."
+          }
+        }
+      },
+      "dependence_inference": {
+        "label": "Inference for repeated players and referees",
+        "kind": "inference",
+        "rationale": "How should uncertainty account for the fact that rows repeatedly involve the same `playerShort` and `refNum`?  [found by: direct]",
+        "options": {
+          "model_based_iid": {
+            "label": "Model-based iid standard errors",
+            "description": "Use the ordinary logistic-regression covariance matrix, treating the 146028 rows as independent for standard-error and confidence-interval calculation."
+          },
+          "player_clustered": {
+            "label": "Cluster by player",
+            "description": "Use a sandwich covariance estimator clustered on `playerShort`, allowing arbitrary dependence among dyads involving the same player."
+          },
+          "two_way_clustered": {
+            "label": "Two-way cluster by player and referee",
+            "description": "Use a multiway sandwich covariance estimator with clustering on both `playerShort` and `refNum`, allowing dependence within either repeated-player or repeated-referee groups."
+          },
+          "random_intercepts": {
+            "label": "Random intercepts for player and referee",
+            "description": "Fit a mixed-effects logistic model with random intercepts for `playerShort` and `refNum`, and report the fixed-effect odds ratio for binary skin tone using model-based mixed-model uncertainty."
+          }
+        }
+      }
+    },
+    "reported_results": 768,
+    "expected_results": 768,
+    "missing_universe_ids": [],
+    "unexpected_universe_ids": []
+  }
+}

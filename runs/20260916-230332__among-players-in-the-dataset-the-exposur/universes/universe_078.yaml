@@ -1,0 +1,12 @@
+id: universe_078
+decisions:
+- decision_id: analysis_unit
+  option_id: player_referee_dyad
+- decision_id: poisson_mean_structure
+  option_id: player_referee_random_effects
+- decision_id: sending_off_definition
+  option_id: straight_reds_only
+- decision_id: skin_tone_binary_rule
+  option_id: both_at_least_050
+- decision_id: standard_error_method
+  option_id: two_way_cluster_robust

@@ -1,0 +1,109 @@
+{
+  "needed": true,
+  "reason": "The broad claim combines materially different comparison populations and outcome definitions. These choices change the estimated effect and, for contraband coding, change inference in 36.4% of paired specifications.",
+  "parent_hypothesis": "Among searched stops in all recorded stops, Black subjects have a higher rate of any contraband hit than White subjects.",
+  "dimensions": [
+    "Race comparison population and classification",
+    "Any-contraband outcome definition"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "Among recorded stops in the stated 2002–2015 window where a search was conducted, and where subjects are classified strictly as Black or White, the Black-subject rate of direct-field contraband hits among complete cases is higher than the White-subject rate, using an unadjusted rate comparison with independent-stop uncertainty.",
+      "pins": [
+        {
+          "decision_id": "race_analytic_sample",
+          "option_id": "black_white_only"
+        },
+        {
+          "decision_id": "searched_stop_definition",
+          "option_id": "search_conducted"
+        },
+        {
+          "decision_id": "contraband_hit_coding",
+          "option_id": "direct_contraband_complete_case"
+        },
+        {
+          "decision_id": "date_scope",
+          "option_id": "stated_2002_2015_window"
+        },
+        {
+          "decision_id": "race_comparison_model",
+          "option_id": "unadjusted_rate_comparison"
+        },
+        {
+          "decision_id": "dependence_and_uncertainty",
+          "option_id": "independent_stops"
+        }
+      ],
+      "rationale": "This isolates the strict Black-versus-White comparison and the direct complete-case outcome. The multiverse shows that race-group inclusion changes the estimated effect and inference, while direct-field coding and union coding change inference in 36.4% of paired specifications. Fixing the remaining analytic choices makes the claim testable without adding data.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among recorded stops in the stated 2002–2015 window where a search was conducted, and where subjects are classified strictly as Black or White, the Black-subject rate of a drug-or-weapon contraband hit is higher than the White-subject rate, using an unadjusted rate comparison with independent-stop uncertainty.",
+      "pins": [
+        {
+          "decision_id": "race_analytic_sample",
+          "option_id": "black_white_only"
+        },
+        {
+          "decision_id": "searched_stop_definition",
+          "option_id": "search_conducted"
+        },
+        {
+          "decision_id": "contraband_hit_coding",
+          "option_id": "drug_or_weapon_union"
+        },
+        {
+          "decision_id": "date_scope",
+          "option_id": "stated_2002_2015_window"
+        },
+        {
+          "decision_id": "race_comparison_model",
+          "option_id": "unadjusted_rate_comparison"
+        },
+        {
+          "decision_id": "dependence_and_uncertainty",
+          "option_id": "independent_stops"
+        }
+      ],
+      "rationale": "This treats the union outcome as a separate estimand rather than combining it with direct-field contraband coding. The union specification has a materially different effect distribution from the direct-field specifications and changes inference in 60% of the reported pairwise comparisons with them, so it warrants its own directional hypothesis.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among recorded stops in the stated 2002–2015 window where a search was conducted, and where Black and White subjects are classified using the raw race mapping, the Black-subject rate of direct-field contraband hits among complete cases is higher than the White-subject rate, using an unadjusted rate comparison with independent-stop uncertainty.",
+      "pins": [
+        {
+          "decision_id": "race_analytic_sample",
+          "option_id": "use_raw_race_mapping"
+        },
+        {
+          "decision_id": "searched_stop_definition",
+          "option_id": "search_conducted"
+        },
+        {
+          "decision_id": "contraband_hit_coding",
+          "option_id": "direct_contraband_complete_case"
+        },
+        {
+          "decision_id": "date_scope",
+          "option_id": "stated_2002_2015_window"
+        },
+        {
+          "decision_id": "race_comparison_model",
+          "option_id": "unadjusted_rate_comparison"
+        },
+        {
+          "decision_id": "dependence_and_uncertainty",
+          "option_id": "independent_stops"
+        }
+      ],
+      "rationale": "This separates the raw-race classification question from the strict Black-versus-White analytic-sample question. The race-classification choice produces a large change relative to the strict Black/White option and changes inference in some paired specifications, while the dataset contains the fields needed to test this raw-mapping version.",
+      "directional": true,
+      "answerable_with_dataset": true
+    }
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T21:15:37+00:00"
+}

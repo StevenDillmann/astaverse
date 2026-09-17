@@ -1,0 +1,555 @@
+{
+  "evidence_status": "inconclusive",
+  "requires_refinement": true,
+  "answer": "The estimates are generally positive, but the evidence does not support a defensible conclusion that dark-skinned players have a higher sending-off probability. Across 181 estimates with confidence intervals, the median standardized effect was 0.0241, yet only 3 were statistically significant and positive, while 178 results were indeterminate and 64 universes were unavailable.",
+  "rationale": "Positive point estimates are common, but statistical support is sparse and the multiverse has substantial indeterminacy and missingness. The evidence therefore cannot distinguish a supported positive effect from low-precision estimates that are compatible with no meaningful effect.",
+  "key_evidence": [
+    "The median standardized estimate was 0.0241, with a first quartile of 0.0115 and third quartile of 0.0405.",
+    "Only 3 of 181 estimates with confidence intervals were statistically significant and positive; none were statistically significant and negative.",
+    "There were 178 indeterminate results and 64 unavailable universes among 245 universes; 735 of 768 expected results were reported.",
+    "Skin-tone combination medians ranged from 0.0225 to 0.0366, and threshold-specific medians ranged from 0.0211 to 0.0388."
+  ],
+  "refinement_reason": "The broad claim depends on materially different skin-tone measurement and dichotomization rules, whose median estimates differ even though their signs do not reverse. These operationalizations should be specified rather than combined into one undifferentiated hypothesis.",
+  "refinement_dimensions": [
+    "Skin-tone rating combination",
+    "Binary skin-tone threshold"
+  ],
+  "suggested_hypotheses": [
+    "Using the mean of both skin-tone raters and defining dark skin as a score above 0.5, dark-skinned players have a higher dyad-level probability of at least one sending-off than light-skinned players.",
+    "Using exact agreement between raters and defining dark skin as a score above 0.5, dark-skinned players have a higher dyad-level probability of at least one sending-off than light-skinned players.",
+    "Using a threshold of at least 0.75 for dark skin, dark-skinned players have a higher dyad-level probability of at least one sending-off than light-skinned players."
+  ],
+  "caveats": [
+    "The supplied summary does not identify which specific multiverse specification was the prespecified primary analysis.",
+    "The standardized effect scale is not translated into an odds ratio or probability difference in the supplied evidence.",
+    "Non-significance does not establish that the effect is absent; the large number of indeterminate results indicates limited precision or unavailable inference.",
+    "The alternative model and exposure-handling choices also shift effect magnitudes, although their signs do not reverse."
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T22:30:52+00:00",
+  "evidence_snapshot": {
+    "curve_summary": {
+      "scale": "standardized",
+      "n_universes": 245,
+      "n_estimates": 181,
+      "n_with_ci": 181,
+      "minimum": -0.03767441659658761,
+      "q25": 0.011489265018303397,
+      "median": 0.02409049853135469,
+      "q75": 0.040478187143290316,
+      "maximum": 0.07554111004004062,
+      "n_significant_positive": 3,
+      "n_significant_negative": 0,
+      "n_indeterminate": 178,
+      "n_unavailable": 64
+    },
+    "decision_sensitivity": [
+      {
+        "decision_id": "games_exposure_handling",
+        "scale": "standardized",
+        "n_pairs": 203,
+        "n_effect_pairs": 140,
+        "n_inference_pairs": 140,
+        "median_abs_effect_change": 0.025836410542171916,
+        "normalized_effect_change": 0.8912511624536152,
+        "normalized_ci_low": 0.7680565527074094,
+        "normalized_ci_high": 0.9385622479398462,
+        "effect_change_p90": 0.04967491123040039,
+        "effect_change_max": 0.08228652849678422,
+        "median_abs_log10p_change": 0.02827197593597082,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.04285714285714286,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "unweighted_dyads": 0.022532340679752676,
+          "games_as_predictor": 0.040478187143290316,
+          "games_frequency_weights": 0.00393532183680558
+        },
+        "option_pairs": [
+          {
+            "option_a": "games_as_predictor",
+            "option_b": "games_frequency_weights",
+            "n_pairs": 66,
+            "n_effect_pairs": 46,
+            "median_abs_change": 0.03858702041722184,
+            "median_shift": -0.03858702041722184,
+            "normalized_shift": -1.3310953836383543,
+            "inference_flip_rate": 0.06521739130434782
+          },
+          {
+            "option_a": "games_as_predictor",
+            "option_b": "unweighted_dyads",
+            "n_pairs": 66,
+            "n_effect_pairs": 46,
+            "median_abs_change": 0.026208231186799946,
+            "median_shift": -0.026208231186799946,
+            "normalized_shift": -0.9040774635842648,
+            "inference_flip_rate": 0.06521739130434782
+          },
+          {
+            "option_a": "games_frequency_weights",
+            "option_b": "unweighted_dyads",
+            "n_pairs": 71,
+            "n_effect_pairs": 48,
+            "median_abs_change": 0.015878111795190254,
+            "median_shift": 0.015878111795190254,
+            "normalized_shift": 0.5477303270101292,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "sending_off_outcome",
+        "scale": "standardized",
+        "n_pairs": 122,
+        "n_effect_pairs": 89,
+        "n_inference_pairs": 89,
+        "median_abs_effect_change": 0.012448231053917213,
+        "normalized_effect_change": 0.42941338074752,
+        "normalized_ci_low": 0.35418196643049155,
+        "normalized_ci_high": 0.4895498710522405,
+        "effect_change_p90": 0.026567297059057568,
+        "effect_change_max": 0.03393052974692496,
+        "median_abs_log10p_change": 0.010866661131410455,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.033707865168539325,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "include_second_yellows": 0.026200453430826578,
+          "straight_red_only": 0.02409049853135469
+        },
+        "option_pairs": [
+          {
+            "option_a": "include_second_yellows",
+            "option_b": "straight_red_only",
+            "n_pairs": 122,
+            "n_effect_pairs": 89,
+            "median_abs_change": 0.012448231053917213,
+            "median_shift": 0.012448231053917213,
+            "normalized_shift": 0.42941338074752,
+            "inference_flip_rate": 0.033707865168539325
+          }
+        ]
+      },
+      {
+        "decision_id": "skin_tone_combination",
+        "scale": "standardized",
+        "n_pairs": 198,
+        "n_effect_pairs": 186,
+        "n_inference_pairs": 186,
+        "median_abs_effect_change": 0.011043788173193356,
+        "normalized_effect_change": 0.3809658091314197,
+        "normalized_ci_low": 0.3368723902077885,
+        "normalized_ci_high": 0.427935453801581,
+        "effect_change_p90": 0.02564975006337885,
+        "effect_change_max": 0.03778024954029983,
+        "median_abs_log10p_change": 0.008877967133905415,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.005376344086021506,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "mean_raters": 0.026653777819024803,
+          "conservative_agreement": 0.022532340679752676,
+          "rater1_only": 0.03664124741560486,
+          "rater2_only": 0.02409049853135469
+        },
+        "option_pairs": [
+          {
+            "option_a": "conservative_agreement",
+            "option_b": "mean_raters",
+            "n_pairs": 48,
+            "n_effect_pairs": 36,
+            "median_abs_change": 0.013327476015218671,
+            "median_shift": -0.006072970020947307,
+            "normalized_shift": -0.2094927846838682,
+            "inference_flip_rate": 0.027777777777777776
+          },
+          {
+            "option_a": "conservative_agreement",
+            "option_b": "rater1_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.01053493283186022,
+            "median_shift": -0.005233667284083358,
+            "normalized_shift": -0.1805402512559173,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "conservative_agreement",
+            "option_b": "rater2_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.017491388691712156,
+            "median_shift": -0.015455542891960982,
+            "normalized_shift": -0.5331534172027431,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "mean_raters",
+            "option_b": "rater1_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.0040813642145968825,
+            "median_shift": 0.0040813642145968825,
+            "normalized_shift": 0.14079047841102593,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "mean_raters",
+            "option_b": "rater2_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.004066471071514461,
+            "median_shift": -0.004066471071514461,
+            "normalized_shift": -0.14027672550161424,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "rater1_only",
+            "option_b": "rater2_only",
+            "n_pairs": 30,
+            "n_effect_pairs": 30,
+            "median_abs_change": 0.012257721407628798,
+            "median_shift": -0.012257721407628798,
+            "normalized_shift": -0.4228415721971011,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "logistic_model_specification",
+        "scale": "standardized",
+        "n_pairs": 201,
+        "n_effect_pairs": 40,
+        "n_inference_pairs": 40,
+        "median_abs_effect_change": 0.010255197028862783,
+        "normalized_effect_change": 0.3537626195498778,
+        "normalized_ci_low": 0.31920759368979573,
+        "normalized_ci_high": 0.5602118858973231,
+        "effect_change_p90": 0.023014725845312646,
+        "effect_change_max": 0.026726941376261262,
+        "median_abs_log10p_change": 0.14853151109688123,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.075,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "crude_logistic": 0.02679484071366203,
+          "adjusted_player_league_logistic": 0.02364353741922804,
+          "crossed_random_intercepts": 0.0473585397219323
+        },
+        "option_pairs": [
+          {
+            "option_a": "adjusted_player_league_logistic",
+            "option_b": "crossed_random_intercepts",
+            "n_pairs": 34,
+            "n_effect_pairs": 3,
+            "median_abs_change": 0.02482619904217962,
+            "median_shift": 0.02482619904217962,
+            "normalized_shift": 0.8564029712847016,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "adjusted_player_league_logistic",
+            "option_b": "crude_logistic",
+            "n_pairs": 34,
+            "n_effect_pairs": 34,
+            "median_abs_change": 0.010255197028862783,
+            "median_shift": 0.010255197028862783,
+            "normalized_shift": 0.3537626195498778,
+            "inference_flip_rate": 0.08823529411764706
+          },
+          {
+            "option_a": "adjusted_player_league_logistic",
+            "option_b": "referee_fixed_effect_logistic",
+            "n_pairs": 33,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          },
+          {
+            "option_a": "crossed_random_intercepts",
+            "option_b": "crude_logistic",
+            "n_pairs": 34,
+            "n_effect_pairs": 3,
+            "median_abs_change": 0.008586260308410067,
+            "median_shift": -0.008586260308410067,
+            "normalized_shift": -0.29619108538737854,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "crossed_random_intercepts",
+            "option_b": "referee_fixed_effect_logistic",
+            "n_pairs": 33,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          },
+          {
+            "option_a": "crude_logistic",
+            "option_b": "referee_fixed_effect_logistic",
+            "n_pairs": 33,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          }
+        ]
+      },
+      {
+        "decision_id": "skin_tone_threshold",
+        "scale": "standardized",
+        "n_pairs": 162,
+        "n_effect_pairs": 129,
+        "n_inference_pairs": 129,
+        "median_abs_effect_change": 0.0039756983695971235,
+        "normalized_effect_change": 0.13714543619303052,
+        "normalized_ci_low": 0.08805087186100713,
+        "normalized_ci_high": 0.2408770920920942,
+        "effect_change_p90": 0.019600516197258624,
+        "effect_change_max": 0.033711359793560894,
+        "median_abs_log10p_change": 0.00273232024194546,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.031007751937984496,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "dark_at_least_half": 0.02110546022842498,
+          "dark_above_half": 0.028064008709122398,
+          "dark_at_least_three_quarters": 0.03877227941352223
+        },
+        "option_pairs": [
+          {
+            "option_a": "dark_above_half",
+            "option_b": "dark_at_least_half",
+            "n_pairs": 54,
+            "n_effect_pairs": 43,
+            "median_abs_change": 0.006982767264351021,
+            "median_shift": 0.0008172380864827911,
+            "normalized_shift": 0.02819139266231548,
+            "inference_flip_rate": 0.046511627906976744
+          },
+          {
+            "option_a": "dark_above_half",
+            "option_b": "dark_at_least_three_quarters",
+            "n_pairs": 54,
+            "n_effect_pairs": 43,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "dark_at_least_half",
+            "option_b": "dark_at_least_three_quarters",
+            "n_pairs": 54,
+            "n_effect_pairs": 43,
+            "median_abs_change": 0.006982767264351021,
+            "median_shift": 0.0019237986963075021,
+            "normalized_shift": 0.06636323654991261,
+            "inference_flip_rate": 0.046511627906976744
+          }
+        ]
+      },
+      {
+        "decision_id": "uncertainty_estimation",
+        "scale": "standardized",
+        "n_pairs": 184,
+        "n_effect_pairs": 158,
+        "n_inference_pairs": 158,
+        "median_abs_effect_change": 0.0,
+        "normalized_effect_change": 0.0,
+        "normalized_ci_low": 0.0,
+        "normalized_ci_high": 0.0,
+        "effect_change_p90": 0.0,
+        "effect_change_max": 0.0,
+        "median_abs_log10p_change": 0.12026436068862946,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "model_based_standard_errors": 0.02409049853135469,
+          "cluster_bootstrap": 0.02679484071366203,
+          "two_way_cluster_robust": 0.024013997301787653
+        },
+        "option_pairs": [
+          {
+            "option_a": "cluster_bootstrap",
+            "option_b": "model_based_standard_errors",
+            "n_pairs": 66,
+            "n_effect_pairs": 54,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "cluster_bootstrap",
+            "option_b": "two_way_cluster_robust",
+            "n_pairs": 59,
+            "n_effect_pairs": 52,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "model_based_standard_errors",
+            "option_b": "two_way_cluster_robust",
+            "n_pairs": 59,
+            "n_effect_pairs": 52,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      }
+    ],
+    "decisions": {
+      "sending_off_outcome": {
+        "label": "Sending-off outcome definition",
+        "kind": "variable_choice",
+        "rationale": "Which columns define the dyad-level indicator for at least one sending-off?  [found by: direct]",
+        "options": {
+          "include_second_yellows": {
+            "label": "Include straight and second-yellow sendings-off",
+            "description": "Set outcome = 1 when redCards > 0 or yellowReds > 0; otherwise set outcome = 0."
+          },
+          "straight_red_only": {
+            "label": "Straight red cards only",
+            "description": "Set outcome = 1 when redCards > 0 and ignore yellowReds, even when yellowReds > 0."
+          }
+        }
+      },
+      "skin_tone_combination": {
+        "label": "Combining the two skin-tone ratings",
+        "kind": "preprocessing",
+        "rationale": "How should rater1 and rater2 be combined into the player skin-tone score before dichotomization?  [found by: direct]",
+        "options": {
+          "mean_raters": {
+            "label": "Mean of both raters",
+            "description": "For every row, define skin_score = (rater1 + rater2) / 2."
+          },
+          "rater1_only": {
+            "label": "Use rater 1 only",
+            "description": "Define skin_score = rater1 for every row and ignore rater2."
+          },
+          "rater2_only": {
+            "label": "Use rater 2 only",
+            "description": "Define skin_score = rater2 for every row and ignore rater1."
+          },
+          "conservative_agreement": {
+            "label": "Use only exact rater agreement",
+            "description": "Retain rows only when rater1 = rater2, and define skin_score as that common value."
+          }
+        }
+      },
+      "skin_tone_threshold": {
+        "label": "Binary skin-tone threshold",
+        "kind": "variable_choice",
+        "rationale": "Which prespecified rule converts the combined skin-tone score into the dark-skinned exposure?  [found by: direct]",
+        "options": {
+          "dark_at_least_half": {
+            "label": "Dark at score at least 0.5",
+            "description": "Define dark_skin = 1 when skin_score >= 0.5 and dark_skin = 0 otherwise; scores 0.5, 0.75, and 1 are dark."
+          },
+          "dark_above_half": {
+            "label": "Dark above 0.5",
+            "description": "Define dark_skin = 1 when skin_score > 0.5 and dark_skin = 0 otherwise; only scores above 0.5 are dark."
+          },
+          "dark_at_least_three_quarters": {
+            "label": "Dark at score at least 0.75",
+            "description": "Define dark_skin = 1 when skin_score >= 0.75 and dark_skin = 0 otherwise."
+          }
+        }
+      },
+      "games_exposure_handling": {
+        "label": "Handling games as exposure",
+        "kind": "model",
+        "rationale": "How should the games column enter the dyad-level any-event logistic analysis?  [found by: direct]",
+        "options": {
+          "unweighted_dyads": {
+            "label": "One equally weighted observation per dyad",
+            "description": "Fit the binary logistic model to the 146,028 dyad rows without weights; games is not used as a weight or offset."
+          },
+          "games_frequency_weights": {
+            "label": "Weight dyads by games",
+            "description": "Fit the binary logistic model with games as a frequency weight, so a dyad with games = k contributes k times the likelihood contribution of a dyad with games = 1."
+          },
+          "games_as_predictor": {
+            "label": "Adjust for games as a covariate",
+            "description": "Fit the unweighted binary logistic model and include the numeric games column as a linear predictor; do not use it as a weight."
+          }
+        }
+      },
+      "logistic_model_specification": {
+        "label": "Covariate and referee-effect specification",
+        "kind": "model",
+        "rationale": "Which predictor structure should be used for the dyad-level logistic model estimating the dark_skin odds ratio?  [found by: direct]",
+        "options": {
+          "crude_logistic": {
+            "label": "Crude logistic model",
+            "description": "Fit outcome ~ dark_skin using a standard logistic link, with no additional columns and no referee effects."
+          },
+          "adjusted_player_league_logistic": {
+            "label": "Adjust for league and player characteristics",
+            "description": "Fit outcome ~ dark_skin + leagueCountry + position + height + weight using a standard logistic link; do not include referee effects."
+          },
+          "referee_fixed_effect_logistic": {
+            "label": "Add referee fixed effects",
+            "description": "Fit outcome ~ dark_skin + leagueCountry + position + height + weight + factor(refNum) using a standard logistic link; omit any player fixed effect because dark_skin is constant within player."
+          },
+          "crossed_random_intercepts": {
+            "label": "Crossed player and referee random intercepts",
+            "description": "Fit a logistic mixed model with fixed effect dark_skin and random intercepts (1 | playerShort) and (1 | refNum); include no other fixed covariates."
+          }
+        }
+      },
+      "uncertainty_estimation": {
+        "label": "Uncertainty estimation for repeated dyads",
+        "kind": "inference",
+        "rationale": "How should standard errors and intervals for the dark_skin odds ratio account for repeated players and referees?  [found by: direct]",
+        "options": {
+          "model_based_standard_errors": {
+            "label": "Model-based standard errors",
+            "description": "Use the fitted logistic model's default model-based variance and report its Wald standard error and confidence interval."
+          },
+          "two_way_cluster_robust": {
+            "label": "Two-way cluster-robust standard errors",
+            "description": "Estimate a sandwich variance clustered simultaneously by playerShort and refNum, and use it for the dark_skin odds ratio interval."
+          },
+          "cluster_bootstrap": {
+            "label": "Cluster bootstrap",
+            "description": "Resample playerShort clusters and refNum clusters using a two-way cluster bootstrap procedure, refit the selected model for each successful replicate, and use the bootstrap distribution for the interval."
+          }
+        }
+      }
+    },
+    "reported_results": 735,
+    "expected_results": 768,
+    "missing_universe_ids": [
+      "universe_245",
+      "universe_246",
+      "universe_247",
+      "universe_248",
+      "universe_249",
+      "universe_250",
+      "universe_251",
+      "universe_252",
+      "universe_253",
+      "universe_254",
+      "universe_255"
+    ],
+    "unexpected_universe_ids": []
+  }
+}

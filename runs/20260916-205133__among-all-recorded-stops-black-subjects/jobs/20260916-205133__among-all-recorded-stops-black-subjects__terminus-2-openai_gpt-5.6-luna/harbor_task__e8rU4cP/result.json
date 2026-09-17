@@ -1,0 +1,154 @@
+{
+    "id": "849ef568-cf3f-45dc-904f-4a49588aa3c5",
+    "task_name": "astaverse/multiverse__nc-durham-stops_multiverse",
+    "trial_name": "harbor_task__e8rU4cP",
+    "trial_uri": "file:///Users/stevend/Desktop/Asta/astaverse/runs/20260916-205133__among-all-recorded-stops-black-subjects/jobs/20260916-205133__among-all-recorded-stops-black-subjects__terminus-2-openai_gpt-5.6-luna/harbor_task__e8rU4cP",
+    "task_id": {
+        "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205133__among-all-recorded-stops-black-subjects/harbor_task"
+    },
+    "source": null,
+    "task_checksum": "eeefeb31073f85c36911c8b5a25772ddcc6e32919f842879f008f7464bce0e37",
+    "config": {
+        "task": {
+            "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205133__among-all-recorded-stops-black-subjects/harbor_task",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "harbor_task__e8rU4cP",
+        "trials_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205133__among-all-recorded-stops-black-subjects/jobs/20260916-205133__among-all-recorded-stops-black-subjects__terminus-2-openai_gpt-5.6-luna",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "terminus-2",
+            "import_path": null,
+            "model_name": "openai/gpt-5.6-luna",
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {},
+            "mcp_servers": []
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [
+            "/app/universes.jsonl",
+            "/app/results.md",
+            "/app/analysis.py"
+        ],
+        "extra_instruction_paths": [],
+        "job_id": "31e282e6-d776-4be1-b34c-955e087fa50d",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "terminus-2",
+        "version": "2.0.0",
+        "model_info": {
+            "name": "gpt-5.6-luna",
+            "provider": "openai"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 705005,
+        "n_cache_tokens": 666250,
+        "n_output_tokens": 20230,
+        "cost_usd": 0.04728525000000002,
+        "rollout_details": [],
+        "metadata": {
+            "n_episodes": 30,
+            "api_request_times_msec": [
+                5024.3799686431885,
+                32475.922107696533,
+                3570.9869861602783,
+                2422.177791595459,
+                3463.701009750366,
+                3829.9219608306885,
+                27414.23273086548,
+                10378.416061401367,
+                3585.157871246338,
+                2510.1308822631836,
+                3646.245002746582,
+                4438.529014587402,
+                3066.1940574645996,
+                12273.323774337769,
+                3631.6120624542236,
+                2616.250991821289,
+                4088.9499187469482,
+                3575.172185897827,
+                8577.991247177124,
+                2549.2570400238037,
+                2499.109983444214,
+                3270.113945007324,
+                25729.294061660767,
+                6737.923860549927,
+                5778.799772262573,
+                2182.1110248565674,
+                18893.87083053589,
+                2242.967128753662,
+                2584.6142768859863,
+                3634.3321800231934
+            ],
+            "summarization_count": 0
+        }
+    },
+    "verifier_result": {
+        "rewards": {
+            "rubric": 0.75
+        }
+    },
+    "verifier_environment_mode": "shared",
+    "exception_info": null,
+    "started_at": "2026-09-16T20:53:51.611034Z",
+    "finished_at": "2026-09-16T21:11:16.165558Z",
+    "environment_setup": {
+        "started_at": "2026-09-16T20:53:51.710110Z",
+        "finished_at": "2026-09-16T20:53:57.571520Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-09-16T20:53:57.571615Z",
+        "finished_at": "2026-09-16T20:54:05.245958Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-09-16T20:54:05.246242Z",
+        "finished_at": "2026-09-16T21:10:22.258797Z"
+    },
+    "verifier": {
+        "started_at": "2026-09-16T21:10:23.467493Z",
+        "finished_at": "2026-09-16T21:11:04.922665Z"
+    },
+    "step_results": null
+}

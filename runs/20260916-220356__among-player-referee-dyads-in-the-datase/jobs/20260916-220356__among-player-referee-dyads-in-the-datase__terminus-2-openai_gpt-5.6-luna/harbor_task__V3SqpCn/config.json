@@ -1,0 +1,17 @@
+{
+    "task": {
+        "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-220356__among-player-referee-dyads-in-the-datase/harbor_task"
+    },
+    "trial_name": "harbor_task__V3SqpCn",
+    "trials_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-220356__among-player-referee-dyads-in-the-datase/jobs/20260916-220356__among-player-referee-dyads-in-the-datase__terminus-2-openai_gpt-5.6-luna",
+    "agent": {
+        "name": "terminus-2",
+        "model_name": "openai/gpt-5.6-luna"
+    },
+    "artifacts": [
+        "/app/universes.jsonl",
+        "/app/results.md",
+        "/app/analysis.py"
+    ],
+    "job_id": "704fa51e-f713-452d-97e0-417f40b7813d"
+}

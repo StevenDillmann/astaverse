@@ -1,0 +1,14 @@
+id: universe_214
+decisions:
+- decision_id: exposure_and_event_model
+  option_id: poisson_exposure_model
+- decision_id: fixed_covariate_adjustment
+  option_id: unadjusted
+- decision_id: repeated_player_referee_structure
+  option_id: no_random_effects
+- decision_id: sendoff_outcome_definition
+  option_id: all_sendings_off
+- decision_id: skin_tone_measurement_and_encoding
+  option_id: mean_binary_threshold
+- decision_id: uncertainty_accounting
+  option_id: cluster_bootstrap_uncertainty

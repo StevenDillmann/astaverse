@@ -1,0 +1,143 @@
+{
+  "needed": true,
+  "reason": "The multiverse combines substantively distinct claims about the outcome definition, games-exposure handling, and operationalization of skin tone. These choices materially affect effect estimates or inference, so the broad claim should be separated into narrower claims.",
+  "parent_hypothesis": "Among player–referee dyads in the dataset, the probability of at least one straight red card is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a dyad-level any-event logistic model.",
+  "dimensions": [
+    "Red-card outcome definition",
+    "Games-exposure handling",
+    "Binary skin-tone threshold",
+    "Skin-tone rater combination"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "Among player–referee dyads, the probability of at least one straight red card is higher for players classified as dark-skinned than for players classified as light-skinned, using unweighted dyads, the at_least_050 binary skin-tone threshold, and mean_raters skin-tone scores.",
+      "pins": [
+        {
+          "decision_id": "red_card_outcome_definition",
+          "option_id": "straight_red_only"
+        },
+        {
+          "decision_id": "games_exposure_handling",
+          "option_id": "unweighted_dyads"
+        },
+        {
+          "decision_id": "skin_tone_threshold",
+          "option_id": "at_least_050"
+        },
+        {
+          "decision_id": "skin_tone_rater_combination",
+          "option_id": "mean_raters"
+        },
+        {
+          "decision_id": "covariate_adjustment",
+          "option_id": "skin_tone_only"
+        },
+        {
+          "decision_id": "dependence_inference",
+          "option_id": "two_way_clustered"
+        }
+      ],
+      "rationale": "This preserves the parent’s substantive outcome and directional prediction while fixing the exposure, skin-tone construction, adjustment, and dependence-inference forks. Games-exposure handling materially changed effect estimates and inference, and the threshold and outcome definitions also produced substantial inference changes, so they cannot remain implicit. The selected options define one explicit estimand; the multiverse evidence does not establish that this specification is superior to the alternatives.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player–referee dyads, the probability of at least one straight red card is higher for players classified as dark-skinned than for players classified as light-skinned, using games-frequency weighting, the at_least_050 binary skin-tone threshold, and mean_raters skin-tone scores.",
+      "pins": [
+        {
+          "decision_id": "red_card_outcome_definition",
+          "option_id": "straight_red_only"
+        },
+        {
+          "decision_id": "games_exposure_handling",
+          "option_id": "games_frequency_weight"
+        },
+        {
+          "decision_id": "skin_tone_threshold",
+          "option_id": "at_least_050"
+        },
+        {
+          "decision_id": "skin_tone_rater_combination",
+          "option_id": "mean_raters"
+        },
+        {
+          "decision_id": "covariate_adjustment",
+          "option_id": "skin_tone_only"
+        },
+        {
+          "decision_id": "dependence_inference",
+          "option_id": "two_way_clustered"
+        }
+      ],
+      "rationale": "This is a separate exposure-weighted estimand rather than a hedged combination with the unweighted dyad estimand. The evidence shows materially different effects and inference when games-frequency weighting is used, while the direction is not reversed across the reported comparisons. All other forks are pinned so the claim has one answerable interpretation.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player–referee dyads, the probability of at least one straight red card is higher for players classified as dark-skinned than for players classified as light-skinned, adjusting for log games per dyad, the at_least_050 binary skin-tone threshold, and mean_raters skin-tone scores.",
+      "pins": [
+        {
+          "decision_id": "red_card_outcome_definition",
+          "option_id": "straight_red_only"
+        },
+        {
+          "decision_id": "games_exposure_handling",
+          "option_id": "adjust_for_log_games"
+        },
+        {
+          "decision_id": "skin_tone_threshold",
+          "option_id": "at_least_050"
+        },
+        {
+          "decision_id": "skin_tone_rater_combination",
+          "option_id": "mean_raters"
+        },
+        {
+          "decision_id": "covariate_adjustment",
+          "option_id": "skin_tone_only"
+        },
+        {
+          "decision_id": "dependence_inference",
+          "option_id": "two_way_clustered"
+        }
+      ],
+      "rationale": "Adjustment for log games produced the largest reported option-level effect median and differed materially from both unweighted and frequency-weighted analyses, with frequent inference changes. It therefore represents a distinct successor question rather than an analytic detail within the same claim. The remaining decisions are fixed explicitly.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player–referee dyads, the probability of at least one sending-off event is higher for players classified as dark-skinned than for players classified as light-skinned, using games-frequency weighting, the at_least_050 binary skin-tone threshold, and mean_raters skin-tone scores.",
+      "pins": [
+        {
+          "decision_id": "red_card_outcome_definition",
+          "option_id": "any_sending_off"
+        },
+        {
+          "decision_id": "games_exposure_handling",
+          "option_id": "games_frequency_weight"
+        },
+        {
+          "decision_id": "skin_tone_threshold",
+          "option_id": "at_least_050"
+        },
+        {
+          "decision_id": "skin_tone_rater_combination",
+          "option_id": "mean_raters"
+        },
+        {
+          "decision_id": "covariate_adjustment",
+          "option_id": "skin_tone_only"
+        },
+        {
+          "decision_id": "dependence_inference",
+          "option_id": "two_way_clustered"
+        }
+      ],
+      "rationale": "Any sending off is a substantively different outcome from a straight red card, and changing this definition materially changed effect estimates and inference. This successor therefore asks about the broader event outcome separately rather than treating it as interchangeable with straight reds. The direction follows the parent’s implied comparison; the multiverse summary supports a generally positive but often indeterminate association rather than universal statistical significance.",
+      "directional": true,
+      "answerable_with_dataset": true
+    }
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T23:03:31+00:00"
+}

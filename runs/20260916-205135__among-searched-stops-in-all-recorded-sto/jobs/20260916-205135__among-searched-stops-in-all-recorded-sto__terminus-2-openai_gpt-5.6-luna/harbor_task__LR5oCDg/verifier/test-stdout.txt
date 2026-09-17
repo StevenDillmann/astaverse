@@ -1,0 +1,3 @@
+=== structural check ===
+STRUCTURAL CHECK FAILED
+  - estimate_standardized spans 632x across universes (0.0009252 to 0.5847). It is meant to be on one comparable scale — standardize the focal predictor (and divide by the modelled outcome's SD) rather than reporting the raw coefficient.

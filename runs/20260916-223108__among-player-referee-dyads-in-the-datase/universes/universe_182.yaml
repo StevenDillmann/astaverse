@@ -1,0 +1,14 @@
+id: universe_182
+decisions:
+- decision_id: covariate_adjustment
+  option_id: skin_tone_only
+- decision_id: dependence_inference
+  option_id: model_based_iid
+- decision_id: games_exposure_handling
+  option_id: games_frequency_weight
+- decision_id: red_card_outcome_definition
+  option_id: any_sending_off
+- decision_id: skin_tone_rater_combination
+  option_id: both_raters_thresholded
+- decision_id: skin_tone_threshold
+  option_id: at_least_075

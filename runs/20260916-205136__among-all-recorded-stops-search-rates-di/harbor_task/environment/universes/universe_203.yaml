@@ -1,0 +1,14 @@
+id: universe_203
+decisions:
+- decision_id: analysis_universe
+  option_id: period_all_counties
+- decision_id: contrast_structure
+  option_id: white_reference
+- decision_id: dependence_handling
+  option_id: cluster_department
+- decision_id: race_adjustment_model
+  option_id: crude_rate_comparison
+- decision_id: race_definition
+  option_id: raw_race_ethnicity_recode
+- decision_id: search_outcome
+  option_id: vehicle_search

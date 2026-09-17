@@ -1,0 +1,207 @@
+id: nc-durham-stops_multiverse
+name: 'nc-durham-stops: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - confounding_adjustment
+  - missing_search_handling
+  - race_variable_definition
+  - search_outcome_definition
+  - stop_scope
+  - uncertainty_dependence
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  race_variable_definition:
+    label: Race comparison definition
+    rationale: 'Which recorded race field and categories define the Black-versus-White comparison?  [found
+      by: direct]'
+    default: subject_race_black_white
+    options:
+      subject_race_black_white:
+        label: Use subject_race categories
+        description: Retain rows with subject_race == "black" or subject_race == "white"; compare those
+          two groups and exclude all other subject_race values.
+      raw_race_black_white:
+        label: Use raw_Race codes
+        description: Retain rows with raw_Race == "B" or raw_Race == "W"; define B as Black and W as White,
+          and exclude all other raw_Race values.
+      subject_race_with_unknown_as_white:
+        label: Use subject_race with unknowns assigned to White
+        description: Use subject_race == "black" as Black and combine subject_race == "white" with subject_race
+          == "unknown" or other non-Black categories as the comparison group.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        subject_race_black_white: []
+        raw_race_black_white: []
+        subject_race_with_unknown_as_white: []
+  stop_scope:
+    label: Stops included in the estimand
+    rationale: "Does \u201Call recorded stops\u201D mean every row in the dataset or only stops from a\
+      \ Durham geographic or departmental subset?  [found by: direct]"
+    default: all_dataset_rows
+    options:
+      all_dataset_rows:
+        label: All eligible dataset rows
+        description: Use stops from every county_name and department_name represented in nc-durham-stops,
+          subject only to the selected race and outcome missingness rules.
+      durham_county_only:
+        label: Durham County stops
+        description: Retain only rows with county_name == "Durham County".
+      durham_police_only:
+        label: Durham Police Department stops
+        description: Retain only rows with department_name == "Durham Police Department".
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        all_dataset_rows: []
+        durham_county_only: []
+        durham_police_only: []
+  search_outcome_definition:
+    label: Search-rate outcome
+    rationale: 'Which column or combination of columns counts as a search?  [found by: direct]'
+    default: search_conducted
+    options:
+      search_conducted:
+        label: Any recorded search
+        description: Set the binary outcome to 1 when search_conducted == 1 and to 0 when search_conducted
+          == 0.
+      any_person_or_vehicle_search:
+        label: Person-or-vehicle search
+        description: Set the binary outcome to 1 when search_person == 1 or search_vehicle == 1; otherwise
+          set it to 0.
+      person_search_only:
+        label: Person search
+        description: Set the binary outcome to 1 only when search_person == 1; set it to 0 when search_person
+          == 0.
+      vehicle_search_only:
+        label: Vehicle search
+        description: Set the binary outcome to 1 only when search_vehicle == 1; set it to 0 when search_vehicle
+          == 0.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        search_conducted: []
+        any_person_or_vehicle_search: []
+        person_search_only: []
+        vehicle_search_only: []
+  missing_search_handling:
+    label: Missing outcome handling
+    rationale: 'How should stops with a missing value for the selected search outcome be handled?  [found
+      by: direct]'
+    default: complete_case
+    options:
+      complete_case:
+        label: Exclude missing outcome values
+        description: Exclude any retained Black or White stop whose selected search outcome is missing;
+          calculate each race-specific rate using only rows with a nonmissing outcome.
+      missing_as_no_search:
+        label: Code missing as no search
+        description: For retained Black or White stops, replace a missing selected search outcome with
+          0 before calculating rates.
+      report_missing_as_separate_status:
+        label: Treat missing outcomes as unavailable
+        description: Do not impute missing outcomes; calculate rates among nonmissing outcomes and additionally
+          report the number and fraction of missing outcomes by race.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        complete_case: []
+        missing_as_no_search: []
+        report_missing_as_separate_status: []
+  confounding_adjustment:
+    label: Adjustment for stop composition
+    rationale: 'Should the Black-versus-White search-rate comparison be an unadjusted comparison across
+      stops or adjust for recorded stop and driver characteristics?  [found by: direct]'
+    default: unadjusted_rate_comparison
+    options:
+      unadjusted_rate_comparison:
+        label: Unadjusted stop-level rates
+        description: For each race, divide the number of stops with the selected search outcome equal
+          to 1 by the number of eligible stops, with no adjustment for age, sex, reason, date, county,
+          department, or officer.
+      covariate_adjusted_logistic:
+        label: Covariate-adjusted logistic model
+        description: Fit a logistic regression for the selected binary search outcome with Black-versus-White
+          race as the focal predictor and subject_age, subject_sex, reason_for_stop, department_name,
+          county_name, and calendar year extracted from date as covariates; report the race contrast from
+          the model.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        unadjusted_rate_comparison: []
+        covariate_adjusted_logistic: []
+  uncertainty_dependence:
+    label: Dependence and uncertainty calculation
+    rationale: 'How should uncertainty account for repeated stops associated with the same officer_id_hash?  [found
+      by: direct]'
+    default: iid_two_proportion
+    options:
+      iid_two_proportion:
+        label: Independent-stop uncertainty
+        description: Use a two-sample proportion comparison or equivalent model-based standard error that
+          treats all eligible stop rows as independent.
+      officer_cluster_robust:
+        label: Officer-clustered uncertainty
+        description: Estimate uncertainty with standard errors or a bootstrap clustered by officer_id_hash,
+          allowing stops handled by the same officer to be correlated.
+      department_cluster_robust:
+        label: Department-clustered uncertainty
+        description: Estimate uncertainty with standard errors or a bootstrap clustered by department_name,
+          allowing dependence among stops reported by the same department.
+    x_astaverse:
+      kind: inference
+      post_hoc: false
+      option_support:
+        iid_two_proportion: []
+        officer_cluster_robust: []
+        department_cluster_robust: []
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: How the reported statistics become a supported / not-supported verdict. Left implicit by
+      every plan, and consequential on its own.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+        description: Conventional two-sided test at the 5% level.
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+        description: Stricter two-sided threshold at the 1% level.
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+        description: Significant at 5% AND the estimate points the way the hypothesis predicts; a significant
+          effect the other way counts as not supported.
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+      option_support:
+        alpha_05_two_sided: []
+        alpha_01_two_sided: []
+        alpha_05_directional: []
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: Among all recorded stops, Black subjects have a higher search rate than White subjects.
+x_astaverse:
+  astra_schema_shape: 0.0.13
+  note: ASTRA-shaped, emitted by astaverse without astra-tools. Run `astra validate` to check conformance.

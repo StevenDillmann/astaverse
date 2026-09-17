@@ -1,0 +1,14 @@
+id: universe_083
+decisions:
+- decision_id: confounding_adjustment
+  option_id: unadjusted_rate_comparison
+- decision_id: missing_search_handling
+  option_id: missing_as_no_search
+- decision_id: race_variable_definition
+  option_id: raw_race_black_white
+- decision_id: search_outcome_definition
+  option_id: any_person_or_vehicle_search
+- decision_id: stop_scope
+  option_id: durham_police_only
+- decision_id: uncertainty_dependence
+  option_id: iid_two_proportion

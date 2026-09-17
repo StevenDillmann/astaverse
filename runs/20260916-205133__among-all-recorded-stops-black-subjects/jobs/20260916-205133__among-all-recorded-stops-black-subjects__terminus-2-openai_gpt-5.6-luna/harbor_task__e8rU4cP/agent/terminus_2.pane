@@ -1,0 +1,1123 @@
+[?2004hroot@0692f40acaf5:/app# asciinema rec --stdin /logs/agent/recording.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent/recording.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@0692f40acaf5:/app# clear
+[?2004l[H[J[3J[?2004hroot@0692f40acaf5:/app# printf '%s\n' '--- astra.yaml ---'; sed -n '1,240p' /app/astra.yaml; printf '%s\n' '--- universe sample ---'; find /app/universes -maxdepth 1 -type f | sort | head -n 2 | xargs -r -n1 sh -c 'echo --- $0; cat "$0"'; printf '%s\n' '--- files ---'; ls -lh /app/data.csv /app/universes | head
+[?2004l--- astra.yaml ---
+id: nc-durham-stops_multiverse
+name: 'nc-durham-stops: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - confounding_adjustment
+  - missing_search_handling
+  - race_variable_definition
+  - search_outcome_definition
+  - stop_scope
+  - uncertainty_dependence
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  race_variable_definition:
+    label: Race comparison definition
+    rationale: 'Which recorded race field and categories define the Black-versus-White comparison?  [found
+      by: direct]'
+    default: subject_race_black_white
+    options:
+      subject_race_black_white:
+        label: Use subject_race categories
+        description: Retain rows with subject_race == "black" or subject_race == "white"; compare those
+          two groups and exclude all other subject_race values.
+      raw_race_black_white:
+        label: Use raw_Race codes
+        description: Retain rows with raw_Race == "B" or raw_Race == "W"; define B as Black and W as White,
+          and exclude all other raw_Race values.
+      subject_race_with_unknown_as_white:
+        label: Use subject_race with unknowns assigned to White
+        description: Use subject_race == "black" as Black and combine subject_race == "white" with subject_race
+          == "unknown" or other non-Black categories as the comparison group.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        subject_race_black_white: []
+        raw_race_black_white: []
+        subject_race_with_unknown_as_white: []
+  stop_scope:
+    label: Stops included in the estimand
+    rationale: "Does \u201Call recorded stops\u201D mean every row in the dataset or only stops from a\
+      \ Durham geographic or departmental subset?  [found by: direct]"
+    default: all_dataset_rows
+    options:
+      all_dataset_rows:
+        label: All eligible dataset rows
+        description: Use stops from every county_name and department_name represented in nc-durham-stops,
+          subject only to the selected race and outcome missingness rules.
+      durham_county_only:
+        label: Durham County stops
+        description: Retain only rows with county_name == "Durham County".
+      durham_police_only:
+        label: Durham Police Department stops
+        description: Retain only rows with department_name == "Durham Police Department".
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        all_dataset_rows: []
+        durham_county_only: []
+        durham_police_only: []
+  search_outcome_definition:
+    label: Search-rate outcome
+    rationale: 'Which column or combination of columns counts as a search?  [found by: direct]'
+    default: search_conducted
+    options:
+      search_conducted:
+        label: Any recorded search
+        description: Set the binary outcome to 1 when search_conducted == 1 and to 0 when search_conducted
+          == 0.
+      any_person_or_vehicle_search:
+        label: Person-or-vehicle search
+        description: Set the binary outcome to 1 when search_person == 1 or search_vehicle == 1; otherwise
+          set it to 0.
+      person_search_only:
+        label: Person search
+        description: Set the binary outcome to 1 only when search_person == 1; set it to 0 when search_person
+          == 0.
+      vehicle_search_only:
+        label: Vehicle search
+        description: Set the binary outcome to 1 only when search_vehicle == 1; set it to 0 when search_vehicle
+          == 0.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        search_conducted: []
+        any_person_or_vehicle_search: []
+        person_search_only: []
+        vehicle_search_only: []
+  missing_search_handling:
+    label: Missing outcome handling
+    rationale: 'How should stops with a missing value for the selected search outcome be handled?  [found
+      by: direct]'
+    default: complete_case
+    options:
+      complete_case:
+        label: Exclude missing outcome values
+        description: Exclude any retained Black or White stop whose selected search outcome is missing;
+          calculate each race-specific rate using only rows with a nonmissing outcome.
+      missing_as_no_search:
+        label: Code missing as no search
+        description: For retained Black or White stops, replace a missing selected search outcome with
+          0 before calculating rates.
+      report_missing_as_separate_status:
+        label: Treat missing outcomes as unavailable
+        description: Do not impute missing outcomes; calculate rates among nonmissing outcomes and additionally
+          report the number and fraction of missing outcomes by race.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        complete_case: []
+        missing_as_no_search: []
+        report_missing_as_separate_status: []
+  confounding_adjustment:
+    label: Adjustment for stop composition
+    rationale: 'Should the Black-versus-White search-rate comparison be an unadjusted comparison across
+      stops or adjust for recorded stop and driver characteristics?  [found by: direct]'
+    default: unadjusted_rate_comparison
+    options:
+      unadjusted_rate_comparison:
+        label: Unadjusted stop-level rates
+        description: For each race, divide the number of stops with the selected search outcome equal
+          to 1 by the number of eligible stops, with no adjustment for age, sex, reason, date, county,
+          department, or officer.
+      covariate_adjusted_logistic:
+        label: Covariate-adjusted logistic model
+        description: Fit a logistic regression for the selected binary search outcome with Black-versus-White
+          race as the focal predictor and subject_age, subject_sex, reason_for_stop, department_name,
+          county_name, and calendar year extracted from date as covariates; report the race contrast from
+          the model.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        unadjusted_rate_comparison: []
+        covariate_adjusted_logistic: []
+  uncertainty_dependence:
+    label: Dependence and uncertainty calculation
+    rationale: 'How should uncertainty account for repeated stops associated with the same officer_id_hash?  [found
+      by: direct]'
+    default: iid_two_proportion
+    options:
+      iid_two_proportion:
+        label: Independent-stop uncertainty
+        description: Use a two-sample proportion comparison or equivalent model-based standard error that
+          treats all eligible stop rows as independent.
+      officer_cluster_robust:
+        label: Officer-clustered uncertainty
+        description: Estimate uncertainty with standard errors or a bootstrap clustered by officer_id_hash,
+          allowing stops handled by the same officer to be correlated.
+      department_cluster_robust:
+        label: Department-clustered uncertainty
+        description: Estimate uncertainty with standard errors or a bootstrap clustered by department_name,
+          allowing dependence among stops reported by the same department.
+    x_astaverse:
+      kind: inference
+      post_hoc: false
+      option_support:
+        iid_two_proportion: []
+        officer_cluster_robust: []
+        department_cluster_robust: []
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: How the reported statistics become a supported / not-supported verdict. Left implicit by
+      every plan, and consequential on its own.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+        description: Conventional two-sided test at the 5% level.
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+        description: Stricter two-sided threshold at the 1% level.
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+        description: Significant at 5% AND the estimate points the way the hypothesis predicts; a significant
+          effect the other way counts as not supported.
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+      option_support:
+        alpha_05_two_sided: []
+        alpha_01_two_sided: []
+        alpha_05_directional: []
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: Among all recorded stops, Black subjects have a higher search rate than White subjects.
+x_astaverse:
+  astra_schema_shape: 0.0.13
+  note: ASTRA-shaped, emitted by astaverse without astra-tools. Run `astra validate` to check conformance.
+--- universe sample ---
+--- /app/universes/universe_000.yaml
+id: universe_000
+decisions:
+- decision_id: confounding_adjustment
+  option_id: unadjusted_rate_comparison
+- decision_id: missing_search_handling
+  option_id: complete_case
+- decision_id: race_variable_definition
+  option_id: subject_race_black_white
+- decision_id: search_outcome_definition
+  option_id: search_conducted
+- decision_id: stop_scope
+  option_id: all_dataset_rows
+- decision_id: uncertainty_dependence
+  option_id: iid_two_proportion
+--- /app/universes/universe_001.yaml
+id: universe_001
+decisions:
+- decision_id: confounding_adjustment
+  option_id: covariate_adjusted_logistic
+- decision_id: missing_search_handling
+  option_id: complete_case
+- decision_id: race_variable_definition
+  option_id: subject_race_black_white
+- decision_id: search_outcome_definition
+  option_id: search_conducted
+- decision_id: stop_scope
+  option_id: all_dataset_rows
+- decision_id: uncertainty_dependence
+  option_id: iid_two_proportion
+--- files ---
+-rw-r--r-- 1 root root 75M Sep 16 19:16 /app/data.csv
+
+/app/universes:
+total 1.0M
+-rw-r--r-- 1 root root 447 Sep 16 20:53 universe_000.yaml
+-rw-r--r-- 1 root root 448 Sep 16 20:53 universe_001.yaml
+-rw-r--r-- 1 root root 455 Sep 16 20:53 universe_002.yaml
+-rw-r--r-- 1 root root 444 Sep 16 20:53 universe_003.yaml
+-rw-r--r-- 1 root root 456 Sep 16 20:53 universe_004.yaml
+-rw-r--r-- 1 root root 458 Sep 16 20:53 universe_005.yaml
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> import pandas as pd
+[?2004l[?2004h> p='/app/data.csv'
+[?2004l[?2004h> df=pd.read_csv(p, nrows=5)
+[?2004l[?2004h> print(df.columns.tolist())
+[?2004l[?2004h> print(df.dtypes.to_string())
+[?2004l[?2004h> print(df.head(2).to_string())
+[?2004l[?2004h> PY
+[?2004l['raw_row_number', 'date', 'time', 'location', 'county_name', 'subject_age', 'subject_race', 'subject_sex', 'officer_id_hash', 'department_name', 'type', 'arrest_made', 'citation_issued', 'warning_issued', 'outcome', 'contraband_found', 'contraband_drugs', 'contraband_weapons', 'frisk_performed', 'search_conducted', 'search_person', 'search_vehicle', 'search_basis', 'reason_for_frisk', 'reason_for_search', 'reason_for_stop', 'raw_Ethnicity', 'raw_Race', 'raw_action_description']
+raw_row_number              int64
+date                          str
+time                          str
+location                      str
+county_name                   str
+subject_age                 int64
+subject_race                  str
+subject_sex                   str
+officer_id_hash               str
+department_name               str
+type                          str
+arrest_made                  bool
+citation_issued              bool
+warning_issued               bool
+outcome                       str
+contraband_found          float64
+contraband_drugs          float64
+contraband_weapons        float64
+frisk_performed              bool
+search_conducted             bool
+search_person                bool
+search_vehicle               bool
+search_basis              float64
+reason_for_frisk          float64
+reason_for_search         float64
+reason_for_stop               str
+raw_Ethnicity                 str
+raw_Race                      str
+raw_action_description        str
+   raw_row_number        date      time               location    county_name  subject_age subject_race subject_sex officer_id_hash           department_name       type  arrest_made  citation_issued  warning_issued   outcome  contraband_found  contraband_drugs  contraband_weapons  frisk_performed  search_conducted  search_person  search_vehicle  search_basis  reason_for_frisk  reason_for_search            reason_for_stop raw_Ethnicity raw_Race raw_action_description
+0         1219541  2001-12-28       NaN  Durham, Durham County  Durham County           22        black      female      5b9908c1a5  Durham Police Department  vehicular        False            False            True   warning               NaN               NaN                 NaN            False             False          False           False           NaN               NaN                NaN              Investigation             N        B         Verbal Warning
+1         1221117  2002-01-02  04:00:00  Durham, Durham County  Durham County           28     hispanic        male      0c140e68b5  Durham Police Department  vehicular        False             True           False  citation               NaN               NaN                 NaN            False             False          False           False           NaN               NaN                NaN  Stop Light/Sign Violation             H        W        Citation Issued
+[?2004hroot@0692f40acaf5:/app# cat > /app/analysis.py <<'PY'
+[?2004l[?2004h> import json, math, glob, os
+[?2004lw)[?2004h> import numpy as np
+[?2004l[?2004h> import pandas as pd
+[?2004l[?2004h> import yaml
+[?2004l[?2004h> import statsmodels.api as sm
+[?2004l[?2004h> from scipy import stats
+[?2004lst else 1.0)
+        [?2004h> 
+[?2004l[?2004h> DATA = '/app/data.csv'
+[?2004l[?2004h> OUT = '/app/universes.jsonl'
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l [?2004h> def _num(v):
+[?2004l fit[?2004h>     if v is None or not np.isfinite(v):
+[?2004l[?2004h>         return None
+[?2004l[?2004h>     return float(v)
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _direction(v):
+[?2004l[?2004h>     if v is None or not np.isfinite(v) or abs(v) < 1e-15:
+[?2004lg__')
+     [?2004h>         return 'none'
+[?2004l[?2004h>     return 'positive' if v > 0 else 'negative'
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _empty(n=0):
+[?2004l[?2004h>     return {'estimate': None, 'estimate_standardized': None,
+[?2004l[?2004h>             'std_error': None, 'std_error_standardized': None,
+[?2004l[?2004h>             'ci_low_standardized': None, 'ci_high_standardized': None,
+[?2004l[?2004h>             'p_value': None, 'n': int(n), 'direction': 'none',
+[?2004l[?2004h>             'converged': False}
+[?2004l        groups = d['department_name'].fillna('__missing__')
+                else:
+                    raise ValueError('unknown dependence')
+                rob = fit.get_robustcov_results(cov_type='cluster', groups=groups)
+                se, pval = float(rob.bse[1]), float(rob.pvalues[1])
+            sx [?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _binary_series(s):
+[?2004ltd(x, ddof=1)[?2004h>     if pd.api.types.is_bool_dtype(s):
+[?2004l[?2004h>         return s.astype(float)
+[?2004l[?2004h>     return pd.to_numeric(s, errors='coerce')
+[?2004l[?2004h> 
+[?2004la[?2004h> 
+[?2004l[?2004h> def analyze(df, selections: dict[str, str]) -> dict:
+[?2004l[?2004h>     """Run the analysis for ONE universe."""
+[?2004l    return [?2004h>     try:
+[?2004l[?2004h>         race_choice = selections['race_variable_definition']
+[?2004l[?2004h>         scope = selections['stop_scope']
+[?2004l[?2004h>         outcome_choice = selections['search_outcome_definition']
+[?2004l[?2004h>         missing = selections['missing_search_handling']
+[?2004l[?2004h>         adjustment = selections['confounding_adjustment']
+[?2004l[?2004h>         dependence = selections['uncertainty_dependence']
+[?2004l[?2004h> 
+[?2004l[?2004h>         d = df.copy()
+[?2004l!= 'covariate[?2004h>         if scope == 'durham_county_only':
+[?2004l[?2004h>             d = d[d['county_name'].eq('Durham County')].copy()
+[?2004l[?2004h>         elif scope == 'durham_police_only':
+[?2004l[?2004h>             d = d[d['department_name'].eq('Durham Police Department')].copy()
+[?2004l[?2004h>         elif scope != 'all_dataset_rows':
+[?2004le[?2004h>             raise ValueError('unknown stop scope')
+[?2004l[?2004h> 
+[?2004l[?2004h>         if race_choice == 'subject_race_black_white':
+[?2004l[?2004h>             r = d['subject_race'].astype('string')
+[?2004l [?2004h>             keep = r.isin(['black', 'white'])
+[?2004l[?2004h>             d = d.loc[keep].copy()
+[?2004l
+[?2004h>             d['_black'] = r.loc[keep].eq('black').astype(float).to_numpy()
+[?2004l[?2004h>         elif race_choice == 'raw_race_black_white':
+[?2004l[?2004h>             r = d['raw_Race'].astype('string')
+[?2004l[?2004h>             keep = r.isin(['B', 'W'])
+[?2004l[?2004h>             d = d.loc[keep].copy()
+[?2004l[?2004h>             d['_black'] = r.loc[keep].eq('B').astype(float).to_numpy()
+[?2004lM.from_formula(fo[?2004h>         elif race_choice == 'subject_race_with_unknown_as_white':
+[?2004l[?2004h>             r = d['subject_race'].astype('string')
+[?2004lb[?2004h>             keep = r.notna()
+[?2004l = d[[?2004h>             d = d.loc[keep].copy()
+[?2004l_missin[?2004h>             d['_black'] = r.loc[keep].eq('black').astype(float).to_numpy()
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             raise ValueError('unknown race definition')
+[?2004l[?2004h> 
+[?2004l [?2004h>         if outcome_choice == 'search_conducted':
+[?2004l[?2004h>             y = _binary_series(d['search_conducted'])
+[?2004l[?2004h>         elif outcome_choice == 'any_person_or_vehicle_search':
+[?2004l[?2004h>             a, b = _binary_series(d['search_person']), _binary_series(d['search_vehicle'])
+[?2004l[?2004h>             y = pd.Series(np.where(a.notna() & b.notna(), ((a == 1) | (b == 1)).astype(float), np.nan), index=d.index)
+[?2004l[?2004h>         elif outcome_choice == 'person_search_only':
+[?2004l[?2004h>             y = _binary_series(d['search_person'])
+[?2004l   [?2004h>         elif outcome_choice == 'vehicle_search_only':
+[?2004ldize[?2004h>             y = _binary_series(d['search_vehicle'])
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             raise ValueError('unknown outcome definition')
+[?2004l[?2004h>         d['_y'] = y
+[?2004l[?2004h>         if missing == 'missing_as_no_search':
+[?2004l[?2004h>             d['_y'] = d['_y'].fillna(0.0)
+[?2004ln(d)[?2004h>         elif missing in ('complete_case', 'report_missing_as_separate_status'):
+[?2004l[?2004h>             d = d[d['_y'].notna()].copy()
+[?2004lcepti[?2004h>         else:
+[?2004l[?2004h>             raise ValueError('unknown missing handling')
+[?2004ln([?2004h> 
+[?2004lp[?2004h>         if len(d) < 2 or d['_black'].nunique() < 2 or d['_y'].nunique() < 2:
+[?2004l[?2004h>             return _empty(len(d))
+[?2004l[?2004h> 
+[?2004l[?2004h>         # Adjustment models require complete covariates; this is a model-fitting
+[?2004l[?2004h>         # requirement, not a universe-specific exception.
+[?2004l[?2004h>         if adjustment == 'unadjusted_rate_comparison':
+[?2004l[?2004h>             n = len(d)
+[?2004l_u[?2004h>             x = d['_black'].to_numpy(float)
+[?2004l[?2004h>             yy = d['_y'].to_numpy(float)
+[?2004lse_[?2004h>             nb, nw = int(x.sum()), int((1-x).sum())
+[?2004l[?2004h>             pb, pw = yy[x == 1].mean(), yy[x == 0].mean()
+[?2004l  [?2004h>             est = float(pb - pw)
+[?2004l[?2004h>             if dependence == 'iid_two_proportion':
+[?2004l[?2004h>                 se = math.sqrt(pb*(1-pb)/nb + pw*(1-pw)/nw)
+[?2004l   [?2004h>                 pval = 2 * stats.norm.sf(abs(est/se)) if se > 0 else (0.0 if est else 1.0)
+[?2004lck and[?2004h>             else:
+[?2004l[?2004h>                 X = sm.add_constant(x)
+[?2004l[?2004h>                 fit = sm.OLS(yy, X).fit()
+[?2004l[?2004h>                 if dependence == 'officer_cluster_robust':
+[?2004l[?2004h>                     groups = d['officer_id_hash'].fillna('__missing__')
+[?2004l[?2004h>                 elif dependence == 'department_cluster_robust':
+[?2004l[?2004h>                     groups = d['department_name'].fillna('__missing__')
+[?2004l[?2004h>                 else:
+[?2004l[?2004h>                     raise ValueError('unknown dependence')
+[?2004lestimate[?2004h>                 rob = fit.get_robustcov_results(cov_type='cluster', groups=groups)
+[?2004l[?2004h>                 se, pval = float(rob.bse[1]), float(rob.pvalues[1])
+[?2004ldec in so[?2004h>             sx = float(np.std(x, ddof=1)); sy = float(np.std(yy, ddof=1))
+[?2004l[?2004h>             scale = sx / sy if sy > 0 else sx
+[?2004l    opt [?2004h>             eststd, sestd = est*scale, se*abs(scale)
+[?2004l[?2004h>             lo, hi = eststd - 1.96*sestd, eststd + 1.96*sestd
+[?2004l[?2004h>             return {'estimate': _num(est), 'estimate_standardized': _num(eststd),
+[?2004l [?2004h>                     'std_error': _num(se), 'std_error_standardized': _num(sestd),
+[?2004l[?2004h>                     'ci_low_standardized': _num(lo), 'ci_high_standardized': _num(hi),
+[?2004l[?2004h>                     'p_value': _num(pval), 'n': n, 'direction': _direction(eststd), 'converged': True}
+[?2004l[?2004h> 
+[?2004li[?2004h>         if adjustment != 'covariate_adjusted_logistic':
+[?2004l[?2004h>             raise ValueError('unknown adjustment')
+[?2004l[?2004h>         d = d.copy()
+[?2004lrses use th[?2004h>         d['_year'] = pd.to_datetime(d['date'], errors='coerce').dt.year
+[?2004l[?2004h>         covars = ['_y', '_black', 'subject_age', 'subject_sex', 'reason_for_stop',
+[?2004lpartment, county, and cal[?2004h>                   'department_name', 'county_name', '_year']
+[?2004llytic/mod[?2004h>         d = d.dropna(subset=covars).copy()
+[?2004l[?2004h>         if len(d) < 2 or d['_black'].nunique() < 2 or d['_y'].nunique() < 2:
+[?2004l[?2004h>             return _empty(len(d))
+[?2004l[?2004h>         sx = float(d['_black'].std(ddof=1))
+[?2004l[?2004h>         if not np.isfinite(sx) or sx == 0:
+[?2004l[?2004h>             return _empty(len(d))
+[?2004ls f[?2004h>         d['_black_std'] = (d['_black'] - d['_black'].mean()) / sx
+[?2004l[?2004h>         formula = '_y ~ _black_std + subject_age + C(subject_sex) + C(reason_for_stop) + C(department_name) + C(county_name) + C(_year)'
+[?2004l[?2004h>         model = sm.GLM.from_formula(formula, data=d, family=sm.families.Binomial())
+[?2004l[?2004h>         fit = model.fit()
+[?2004l[?2004h>         if dependence == 'officer_cluster_robust':
+[?2004l[?2004h>             groups = d['officer_id_hash'].fillna('__missing__')
+[?2004l[?2004h>             fit = model.fit(cov_type='cluster', cov_kwds={'groups': groups})
+[?2004l[?2004h>         elif dependence == 'department_cluster_robust':
+[?2004l[?2004h>             groups = d['department_name'].fillna('__missing__')
+[?2004l[?2004h>             fit = model.fit(cov_type='cluster', cov_kwds={'groups': groups})
+[?2004l[?2004h>         elif dependence != 'iid_two_proportion':
+[?2004l[?2004h>             raise ValueError('unknown dependence')
+[?2004l[?2004h>         term = '_black_std'
+[?2004l[?2004h>         eststd = float(fit.params[term]); sestd = float(fit.bse[term])
+[?2004l[?2004h>         est = eststd / sx; se = sestd / sx
+[?2004l[?2004h>         pval = float(fit.pvalues[term])
+[?2004l[?2004h>         lo, hi = eststd - 1.96*sestd, eststd + 1.96*sestd
+[?2004l[?2004h>         return {'estimate': _num(est), 'estimate_standardized': _num(eststd),
+[?2004l[?2004h>                 'std_error': _num(se), 'std_error_standardized': _num(sestd),
+[?2004l[?2004h>                 'ci_low_standardized': _num(lo), 'ci_high_standardized': _num(hi),
+[?2004l[?2004h>                 'p_value': _num(pval), 'n': int(len(d)), 'direction': _direction(eststd),
+[?2004l[?2004h>                 'converged': bool(getattr(fit, 'converged', True))}
+[?2004l[?2004h>     except Exception:
+[?2004l[?2004h>         return _empty(0)
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _load_universe(path):
+[?2004l[?2004h>     with open(path) as f:
+[?2004l[?2004h>         u = yaml.safe_load(f)
+[?2004l[?2004h>     decisions = {z['decision_id']: z['option_id'] for z in u['decisions']}
+[?2004l[?2004h>     return u['id'], decisions
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def main():
+[?2004l[?2004h>     df = pd.read_csv(DATA, low_memory=False)
+[?2004l[?2004h>     paths = sorted(glob.glob('/app/universes/*.yaml'))
+[?2004l[?2004h>     rows = []
+[?2004l[?2004h>     for path in paths:
+[?2004l[?2004h>         uid, decisions = _load_universe(path)
+[?2004l[?2004h>         result = analyze(df, decisions)
+[?2004l[?2004h>         rows.append({'universe_id': uid, 'decisions': decisions, **result})
+[?2004l[?2004h>     with open(OUT, 'w') as f:
+[?2004l[?2004h>         for row in rows:
+[?2004l[?2004h>             f.write(json.dumps(row, allow_nan=False) + '\n')
+[?2004l[?2004h>     good = [r for r in rows if r['converged'] and r['estimate_standardized'] is not None]
+[?2004l[?2004h>     lines = ['# Multiverse analysis report', '',
+[?2004l[?2004h>              'The analysis compares Black and White search rates. Race, stop scope, search outcome, missing-value handling, adjustment, and uncertainty dependence are all selected from each universe YAML and passed through the same `analyze` function.', '']
+[?2004l[?2004h>     lines += ['## Results', f'- Universes evaluated: **{len(rows)}**', f'- Successful fits: **{len(good)}**']
+[?2004l[?2004h>     if good:
+[?2004l[?2004h>         vals = np.array([r['estimate_standardized'] for r in good])
+[?2004l[?2004h>         lines += [f'- Standardized estimate range: **{vals.min():.6g}** to **{vals.max():.6g}**', f'- Positive estimates: **{sum(v > 0 for v in vals)} / {len(vals)}**', '']
+[?2004l[?2004h>         for dec in sorted({k for r in rows for k in r['decisions']}):
+[?2004l[?2004h>             groups = {}
+[?2004l[?2004h>             for r in good:
+[?2004l[?2004h>                 opt = r['decisions'][dec]
+[?2004l[?2004h>                 groups.setdefault(opt, []).append(r['estimate_standardized'])
+[?2004l[?2004h>             lines.append(f'### {dec}')
+[?2004l[?2004h>             for opt, a in sorted(groups.items()):
+[?2004l[?2004h>                 lines.append(f'- `{opt}`: mean {np.mean(a):.6g}, range {np.min(a):.6g} to {np.max(a):.6g}, n={len(a)}')
+[?2004l[?2004h>             lines.append('')
+[?2004l[?2004h>         lines += ['The largest decision effects can be identified by comparing the option means above; these are descriptive specification-curve summaries, not additional hypothesis tests.', '']
+[?2004l[?2004h>     lines += ['## Method details', '- Unadjusted universes use the Black-minus-White difference in stop-level rates.', '- Adjusted universes fit logistic regression with age, sex, stop reason, department, county, and calendar year covariates.', '- IID uncertainty uses analytic/model-based standard errors; officer or department choices use clustered robust covariance.', '- Standardized estimates use a one-SD Black indicator contrast; unadjusted binary outcomes are additionally expressed in outcome-SD units.']
+[?2004l[?2004h>     with open('/app/results.md', 'w') as f:
+[?2004l[?2004h>         f.write('\n'.join(lines) + '\n')
+[?2004l[?2004h>     print(f'wrote {len(rows)} universes; successful={len(good)}')
+[?2004l[?2004h> 
+[?2004l[?2004h> if __name__ == '__main__':
+[?2004l[?2004h>     main()
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 /app/analysis.py
+[?2004lwc -l /app/universes.jsonl; sed -n '1,2p' /app/universes.jsonl; tail -n 3 /app/universes.jsonl; echo '--- report ---'; sed -n '1,160p' /app/results.md
+ps -eo pid,etime,stat,cmd | grep -E 'analysis.py|python3' | grep -v grep
+ls -lh /app/universes.jsonl /app/results.md 2>/dev/null || true
+^CTraceback (most recent call last):
+  File "/app/analysis.py", line 207, in <module>
+    main()
+  File "/app/analysis.py", line 179, in main
+    result = analyze(df, decisions)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/analysis.py", line 149, in analyze
+    fit = model.fit(cov_type='cluster', cov_kwds={'groups': groups})
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/statsmodels/genmod/generalized_linear_model.py", line 1269, in fit
+    return self._fit_irls(
+           ^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/statsmodels/genmod/generalized_linear_model.py", line 1466, in _fit_irls
+    wls_results = wls_mod.fit(method=wls_method)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/statsmodels/regression/_tools.py", line 104, in fit
+    params, _, _, _ = np.linalg.lstsq(self.wexog, self.wendog,
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/numpy/linalg/_linalg.py", line 2539, in lstsq
+    x, resids, rank, s = _umath_linalg.lstsq(a, b, rcond,
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+
+[?2004hroot@0692f40acaf5:/app# ps -eo pid,etime,stat,cmd | grep -E 'analysis.py|python3' | grep -v grep || true; ls -lh /app/universes.jsonl /app/results.md 2>/dev/null || true; wc -l /app/universes.jsonl 2>/dev/null || true
+[?2004lbash: ps: command not found
+[?2004hroot@0692f40acaf5:/app# cat > /app/analysis.py <<'PY'
+[?2004l[?2004h> import json, math, glob
+[?2004lpa[?2004h> import numpy as np
+[?2004l[?2004h> import pandas as pd
+[?2004l_year']
+   [?2004h> import yaml
+[?2004l[?2004h> from scipy import stats
+[?2004l[?2004h> from sklearn.linear_model import LogisticRegression
+[?2004l[?2004h> 
+[?2004l[?2004h> DATA='/app/data.csv'; OUT='/app/universes.jsonl'
+[?2004l[?2004h> 
+[?2004l[?2004h> def num(x):
+[?2004l[?2004h>     try: return None if x is None or not np.isfinite(x) else float(x)
+[?2004l[?2004h>     except Exception: return None
+[?2004l[?2004h> 
+[?2004l[?2004h> def empty(n=0):
+[?2004l[?2004h>     return {'estimate':None,'estimate_standardized':None,'std_error':None,'std_error_standardized':None,'ci_low_standardized':None,'ci_high_standardized':None,'p_value':None,'n':int(n),'direction':'none','converged':False}
+[?2004l[?2004h> 
+[?2004l[?2004h> def direction(x):
+[?2004l[?2004h>     return 'none' if x is None or not np.isfinite(x) or abs(x)<1e-15 else ('positive' if x>0 else 'negative')
+[?2004l[?2004h> 
+[?2004l[?2004h> def binary(s):
+[?2004l[?2004h>     if pd.api.types.is_bool_dtype(s): return s.astype(float)
+[?2004l[?2004h>     return pd.to_numeric(s,errors='coerce')
+[?2004ln(yy))
+        model[?2004h> 
+[?2004l[?2004h> def cluster_se(X, resid, bread, groups):
+[?2004l[?2004h>     g=pd.Series(groups).fillna('__missing__').astype(str).to_numpy(); meat=np.zeros((X.shape[1],X.shape[1]))
+[?2004l[?2004h>     for z in np.unique(g):
+[?2004l[?2004h>         q=X[g==z].T @ resid[g==z]
+[?2004l[?2004h>         meat += np.outer(q,q)
+[?2004ln[?2004h>     cov=bread @ meat @ bread
+[?2004l
+        if [?2004h>     return np.sqrt(np.maximum(np.diag(cov),0))
+[?2004l[?2004h> 
+[?2004l[?2004h> def analyze(df, selections: dict[str,str]) -> dict:
+[?2004l[?2004h>     try:
+[?2004l[?2004h>         race=selections['race_variable_definition']; scope=selections['stop_scope']; out=selections['search_outcome_definition']; miss=selections['missing_search_handling']; adj=selections['confounding_adjustment']; dep=selections['uncertainty_dependence']
+[?2004l[?2004h>         d=df
+[?2004ld[?2004h>         if scope=='durham_county_only': d=d[d.county_name.eq('Durham County')]
+[?2004ld'[?2004h>         elif scope=='durham_police_only': d=d[d.department_name.eq('Durham Police Department')]
+[?2004l[?2004h>         if race=='subject_race_black_white':
+[?2004l[?2004h>             r=d.subject_race.astype('string'); keep=r.isin(['black','white']); x=r.eq('black').astype(float)
+[?2004l[?2004h>         elif race=='raw_race_black_white':
+[?2004l[?2004h>             r=d.raw_Race.astype('string'); keep=r.isin(['B','W']); x=r.eq('B').astype(float)
+[?2004l[?2004h>         elif race=='subject_race_with_unknown_as_white':
+[?2004l[?2004h>             r=d.subject_race.astype('string'); keep=r.notna(); x=r.eq('black').astype(float)
+[?2004l[?2004h>         else: raise ValueError()
+[?2004ln.dum[?2004h>         d=d.loc[keep].copy(); d['_black']=x.loc[keep].to_numpy()
+[?2004l[?2004h>         if out=='search_conducted': y=binary(d.search_conducted)
+[?2004l[?2004h>         elif out=='any_person_or_vehicle_search':
+[?2004l[?2004h>             a,b=binary(d.search_person),binary(d.search_vehicle); y=pd.Series(np.where(a.notna()&b.notna(),((a==1)|(b==1)).astype(float),np.nan),index=d.index)
+[?2004lima[?2004h>         elif out=='person_search_only': y=binary(d.search_person)
+[?2004l[?2004h>         elif out=='vehicle_search_only': y=binary(d.search_vehicle)
+[?2004lcount[?2004h>         else: raise ValueError()
+[?2004l[?2004h>         d['_y']=y
+[?2004l[?2004h>         if miss=='missing_as_no_search': d['_y']=d['_y'].fillna(0.)
+[?2004l[?2004h>         else: d=d[d._y.notna()].copy()
+[?2004l[?2004h>         if len(d)<2 or d._black.nunique()<2 or d._y.nunique()<2: return empty(len(d))
+[?2004l[?2004h>         x=d._black.to_numpy(float); yy=d._y.to_numpy(float); n=len(d)
+[?2004l[?2004h>         if adj=='unadjusted_rate_comparison':
+[?2004l  [?2004h>             nb=int(x.sum()); nw=n-nb; pb=yy[x==1].mean(); pw=yy[x==0].mean(); est=pb-pw
+[?2004l[?2004h>             X=np.column_stack([np.ones(n),x]); resid=yy-(pw+est*x)
+[?2004lod}):
+        [?2004h>             if dep=='iid_two_proportion': se=math.sqrt(pb*(1-pb)/nb+pw*(1-pw)/nw); p=2*stats.norm.sf(abs(est/se)) if se else (0. if est else 1.)
+[?2004lange [?2004h>             else:
+[?2004l {[?2004h>                 bread=np.linalg.inv(X.T@X)
+[?2004l[?2004h>                 groups=d.officer_id_hash if dep=='officer_cluster_robust' else d.department_name
+[?2004l[?2004h>                 se=cluster_se(X,resid,bread,groups)[1]; p=2*stats.norm.sf(abs(est/se)) if se else (0. if est else 1.)
+[?2004l[?2004h>             sx=x.std(ddof=1); sy=yy.std(ddof=1); scale=sx/sy if sy else sx; es=est*scale; ses=abs(scale)*se
+[?2004l[?2004h>             return {'estimate':num(est),'estimate_standardized':num(es),'std_error':num(se),'std_error_standardized':num(ses),'ci_low_standardized':num(es-1.96*ses),'ci_high_standardized':num(es+1.96*ses),'p_value':num(p),'n':n,'direction':direction(es),'converged':True}
+[?2004l[?2004h>         if adj!='covariate_adjusted_logistic': raise ValueError()
+[?2004l[?2004h>         d=d.copy(); d['_year']=pd.to_datetime(d.date,errors='coerce').dt.year
+[?2004l[?2004h>         cols=['_y','_black','subject_age','subject_sex','reason_for_stop','department_name','county_name','_year']
+[?2004l[?2004h>         d=d.dropna(subset=cols).copy(); n=len(d)
+[?2004l[?2004h>         if n<2 or d._black.nunique()<2 or d._y.nunique()<2: return empty(n)
+[?2004l[?2004h>         sx=d._black.std(ddof=1); d['_black_std']=(d._black-d._black.mean())/sx
+[?2004l[?2004h>         cats=['subject_sex','reason_for_stop','department_name','county_name','_year']
+[?2004l[?2004h>         Z=pd.get_dummies(d[['subject_age']+cats],columns=cats,dtype=float)
+[?2004l[?2004h>         Z.insert(0,'const',1.); Z.insert(1,'_black_std',d['_black_std'].to_numpy()); Z=Z.replace([np.inf,-np.inf],np.nan).dropna()
+[?2004l[?2004h>         yy=d.loc[Z.index,'_y'].to_numpy(float); groups=d.loc[Z.index,'officer_id_hash' if dep=='officer_cluster_robust' else 'department_name'] if dep!='iid_two_proportion' else None
+[?2004l[?2004h>         if len(np.unique(yy))<2: return empty(len(yy))
+[?2004l[?2004h>         model=LogisticRegression(C=1e6,solver='lbfgs',max_iter=100,n_jobs=1,fit_intercept=False)
+[?2004l[?2004h>         model.fit(Z.to_numpy(),yy); beta=model.coef_[0]; X=Z.to_numpy(); pr=model.predict_proba(X)[:,1]; W=pr*(1-pr); H=X.T@(W[:,None]*X); bread=np.linalg.pinv(H); resid=yy-pr
+[?2004l[?2004h>         if dep=='iid_two_proportion': sevec=np.sqrt(np.maximum(np.diag(bread),0))
+[?2004l[?2004h>         else: sevec=cluster_se(X,resid,bread,groups)
+[?2004l[?2004h>         j=1; es=float(beta[j]); ses=float(sevec[j]); est=es/float(sx); se=ses/float(sx); p=2*stats.norm.sf(abs(es/ses)) if ses else (0. if es else 1.)
+[?2004l[?2004h>         return {'estimate':num(est),'estimate_standardized':num(es),'std_error':num(se),'std_error_standardized':num(ses),'ci_low_standardized':num(es-1.96*ses),'ci_high_standardized':num(es+1.96*ses),'p_value':num(p),'n':len(yy),'direction':direction(es),'converged':True}
+[?2004l[?2004h>     except Exception:
+[?2004l[?2004h>         return empty(0)
+[?2004l[?2004h> 
+[?2004l[?2004h> def load_u(path):
+[?2004l[?2004h>     with open(path) as f: u=yaml.safe_load(f)
+[?2004l[?2004h>     return u['id'],{z['decision_id']:z['option_id'] for z in u['decisions']}
+[?2004l[?2004h> 
+[?2004l[?2004h> def main():
+[?2004l[?2004h>     df=pd.read_csv(DATA,low_memory=False)
+[?2004l[?2004h>     rows=[]
+[?2004l[?2004h>     for pth in sorted(glob.glob('/app/universes/*.yaml')):
+[?2004l[?2004h>         uid,dec=load_u(pth); rows.append({'universe_id':uid,'decisions':dec,**analyze(df,dec)})
+[?2004l[?2004h>     with open(OUT,'w') as f:
+[?2004l[?2004h>         for r in rows: f.write(json.dumps(r,allow_nan=False)+'\n')
+[?2004l[?2004h>     good=[r for r in rows if r['converged'] and r['estimate_standardized'] is not None]
+[?2004l[?2004h>     lines=['# Multiverse analysis report','',f'Evaluated **{len(rows)}** universes; **{len(good)}** converged.','', 'The parameterized `analyze` function applies all six selections for each universe. Unadjusted models estimate the Black-minus-White search-rate difference; adjusted models use logistic regression with age, sex, stop reason, department, county, and year. IID, officer-clustered, and department-clustered uncertainty are handled through the corresponding covariance calculation.','']
+[?2004l[?2004h>     if good:
+[?2004l[?2004h>         v=np.array([r['estimate_standardized'] for r in good]); lines += [f'Standardized estimate range: **{v.min():.6g}** to **{v.max():.6g}**.',f'Positive estimates: **{sum(v>0)} / {len(v)}**.','']
+[?2004l[?2004h>         for dec in sorted(good[0]['decisions']):
+[?2004l[?2004h>             lines.append('## '+dec)
+[?2004l[?2004h>             for opt in sorted({r['decisions'][dec] for r in good}):
+[?2004l[?2004h>                 a=np.array([r['estimate_standardized'] for r in good if r['decisions'][dec]==opt]); lines.append(f'- `{opt}`: mean {a.mean():.6g}; range {a.min():.6g} to {a.max():.6g}; n={len(a)}')
+[?2004l[?2004h>             lines.append('')
+[?2004l[?2004h>     lines += ['## Standardization','Unadjusted effects are expressed per SD of the race indicator and outcome; logistic effects are coefficients for a one-SD race-indicator change, with confidence intervals transformed identically.']
+[?2004l[?2004h>     open('/app/results.md','w').write('\n'.join(lines)+'\n'); print('wrote',len(rows),'universes; successful',len(good))
+[?2004l[?2004h> if __name__=='__main__': main()
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 /app/analysis.py
+[?2004lTraceback (most recent call last):
+  File "/app/analysis.py", line 6, in <module>
+    from sklearn.linear_model import LogisticRegression
+ModuleNotFoundError: No module named 'sklearn'
+[?2004hroot@0692f40acaf5:/app# wc -l /app/universes.jsonl; python3 - <<'PY'
+[?2004l[?2004h> import json
+[?2004l[?2004h> p='/app/universes.jsonl'; rows=[json.loads(x) for x in open(p)]
+[?2004l[?2004h> print('records',len(rows),'ids_unique',len({r['universe_id'] for r in rows}),'converged',sum(r['converged'] for r in rows))
+[?2004l[?2004h> print('fields',sorted(rows[0]))
+[?2004l[?2004h> print('first',rows[0])
+[?2004l[?2004h> PY
+[?2004lwc: /app/universes.jsonl: No such file or directory
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/app/universes.jsonl'
+[?2004hroot@0692f40acaf5:/app# sed -n '1,100p' /app/results.md
+[?2004lsed: can't read /app/results.md: No such file or directory
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> s=s.replace('from sklearn.linear_model import LogisticRegression\n','')
+[?2004l[?2004h> start=s.index("        model=LogisticRegression(")
+[?2004l[?2004h> end=s.index("        j=1; es=", start)
+[?2004l[?2004h> new="""        X=Z.to_numpy(float)\n        beta=np.zeros(X.shape[1], dtype=float)\n        converged=False\n        ridge=1e-8\n        for _ in range(80):\n            eta=np.clip(X@beta, -35, 35)\n            pr=1.0/(1.0+np.exp(-eta))\n            W=np.maximum(pr*(1-pr), 1e-8)\n            H=X.T@(W[:,None]*X)\n            score=X.T@(yy-pr)\n            step=np.linalg.pinv(H + ridge*np.eye(X.shape[1]))@score\n            beta_new=beta+step\n            if np.max(np.abs(step)) < 1e-7:\n                beta=beta_new; converged=True; break\n            beta=beta_new\n        eta=np.clip(X@beta, -35, 35)\n        pr=1.0/(1.0+np.exp(-eta))\n        W=np.maximum(pr*(1-pr), 1e-8)\n        H=X.T@(W[:,None]*X)\n        bread=np.linalg.pinv(H + ridge*np.eye(X.shape[1]))\n        resid=yy-pr\n        if dep=='iid_two_proportion': sevec=np.sqrt(np.maximum(np.diag(bread),0))\n        else: sevec=cluster_se(X,resid,bread,groups)\n        if not converged: return empty(len(yy))\n"""
+[?2004l[?2004h> s=s[:start]+new+s[end:]
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 -m py_compile /app/analysis.py && python3 /app/analysis.py
+[?2004lwc -l /app/universes.jsonl; python3 - <<'PY'
+import json
+p='/app/universes.jsonl'
+rows=[json.loads(x) for x in open(p)]
+print('records',len(rows),'ids_unique',len({r['universe_id'] for r in rows}),'converged',sum(bool(r['converged']) for r in rows))
+print('required', all(set(['universe_id','decisions','estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged']).issubset(r) for r in rows))
+print('first',rows[0])
+PY
+sed -n '1,140p' /app/results.md
+C-c
+ls -lh /app/universes.jsonl /app/results.md 2>/dev/null || true
+wc -l /app/universes.jsonl 2>/dev/null || true
+C-c
+
+^CTraceback (most recent call last):
+  File "/app/analysis.py", line 128, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/app/analysis.py", line 114, in main
+    uid,dec=load_u(pth); rows.append({'universe_id':uid,'decisions':dec,**analyze(df,dec)})
+                                                                          ^^^^^^^^^^^^^^^
+  File "/app/analysis.py", line 82, in analyze
+    eta=np.clip(X@beta, -35, 35)
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/numpy/_core/fromnumeric.py", line 2240, in _clip_dispatcher
+    def _clip_dispatcher(a, a_min=None, a_max=None, out=None, *, min=None,
+    
+KeyboardInterrupt
+
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> s=s.replace('for _ in range(80):','for _ in range(20):')
+[?2004l[?2004h> s=s.replace('if np.max(np.abs(step)) < 1e-7:','if np.max(np.abs(step)) < 1e-5:')
+[?2004l[?2004h> s=s.replace("step=np.linalg.pinv(H + ridge*np.eye(X.shape[1]))@score", "\n            try:\n                step=np.linalg.solve(H + ridge*np.eye(X.shape[1]), score)\n            except np.linalg.LinAlgError:\n                step=np.linalg.lstsq(H + ridge*np.eye(X.shape[1]), score, rcond=None)[0]")
+[?2004l[?2004h> s=s.replace("bread=np.linalg.pinv(H + ridge*np.eye(X.shape[1]))", "\n        try:\n            bread=np.linalg.inv(H + ridge*np.eye(X.shape[1]))\n        except np.linalg.LinAlgError:\n            bread=np.linalg.lstsq(H + ridge*np.eye(X.shape[1]), np.eye(X.shape[1]), rcond=None)[0]")
+[?2004l[?2004h> old="""    rows=[]
+[?2004l[?2004h>     for pth in sorted(glob.glob('/app/universes/*.yaml')):
+[?2004l[?2004h>         uid,dec=load_u(pth); rows.append({'universe_id':uid,'decisions':dec,**analyze(df,dec)})
+[?2004l[?2004h> """
+[?2004l[?2004h> new="""    rows=[]
+[?2004l[?2004h>     cache={}
+[?2004l[?2004h>     for pth in sorted(glob.glob('/app/universes/*.yaml')):
+[?2004l[?2004h>         uid,dec=load_u(pth)
+[?2004l[?2004h>         key=tuple(sorted(dec.items()))
+[?2004l[?2004h>         if key not in cache: cache[key]=analyze(df,dec)
+[?2004l[?2004h>         rows.append({'universe_id':uid,'decisions':dec,**cache[key]})
+[?2004l[?2004h> """
+[?2004l[?2004h> if old not in s: raise SystemExit('driver pattern not found')
+[?2004l[?2004h> s=s.replace(old,new)
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 -m py_compile /app/analysis.py && python3 /app/analysis.py
+[?2004lwc -l /app/universes.jsonl; python3 - <<'PY'
+import json
+rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+print('records',len(rows),'unique_ids',len({r['universe_id'] for r in rows}),'converged',sum(r['converged'] for r in rows))
+print('required', all(set(['universe_id','decisions','estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged']).issubset(r) for r in rows))
+print(rows[0])
+PY
+sed -n '1,120p' /app/results.md
+C-c
+ls -lh /app/universes.jsonl /app/results.md 2>/dev/null || true
+wc -l /app/universes.jsonl 2>/dev/null || true
+^CTraceback (most recent call last):
+  File "/app/analysis.py", line 140, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/app/analysis.py", line 125, in main
+    if key not in cache: cache[key]=analyze(df,dec)
+                                    ^^^^^^^^^^^^^^^
+  File "/app/analysis.py", line 63, in analyze
+    se=cluster_se(X,resid,bread,groups)[1]; p=2*stats.norm.sf(abs(est/se)) if se else (0. if est else 1.)
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/app/analysis.py", line 26, in cluster_se
+    q=X[g==z].T @ resid[g==z]
+                        ^^^^
+KeyboardInterrupt
+
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> start=s.index('def cluster_se(')
+[?2004l[?2004h> end=s.index('\ndef analyze(', start)
+[?2004l[?2004h> new='''def cluster_se(X, resid, bread, groups):
+[?2004l[?2004h>     g=pd.Series(groups).fillna('__missing__').astype(str).to_numpy()
+[?2004l[?2004h>     _, inv=np.unique(g, return_inverse=True)
+[?2004l[?2004h>     scores=X * np.asarray(resid)[:,None]
+[?2004l[?2004h>     summed=np.zeros((inv.max()+1, X.shape[1]), dtype=float)
+[?2004l[?2004h>     np.add.at(summed, inv, scores)
+[?2004l[?2004h>     cov=bread @ (summed.T @ summed) @ bread
+[?2004l[?2004h>     return np.sqrt(np.maximum(np.diag(cov),0))
+[?2004l[?2004h> '''
+[?2004l[?2004h> s=s[:start]+new+s[end:]
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 -m py_compile /app/analysis.py && python3 /app/analysis.py
+[?2004lwc -l /app/universes.jsonl; python3 - <<'PY'
+import json
+rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+req={'universe_id','decisions','estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged'}
+print('records',len(rows),'unique_ids',len({r['universe_id'] for r in rows}),'converged',sum(r['converged'] for r in rows),'required',all(req <= set(r) for r in rows))
+print(rows[0])
+PY
+sed -n '1,120p' /app/results.md
+^CTraceback (most recent call last):
+  File "/app/analysis.py", line 141, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/app/analysis.py", line 126, in main
+    if key not in cache: cache[key]=analyze(df,dec)
+                                    ^^^^^^^^^^^^^^^
+  File "/app/analysis.py", line 45, in analyze
+    d=d.loc[keep].copy(); d['_black']=x.loc[keep].to_numpy()
+      ^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/pandas/core/generic.py", line 6651, in copy
+    data = self._mgr.copy(deep=deep)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 755, in copy
+    res = self.apply("copy", deep=deep)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/pandas/core/internals/managers.py", line 445, in apply
+    applied = getattr(b, f)(**kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/pandas/core/internals/blocks.py", line 645, in copy
+    values = values.copy()
+             ^^^^^^^^^^^^^
+KeyboardInterrupt
+
+[?2004hroot@0692f40acaf5:/app# cat > /app/analysis.py <<'PY'
+[?2004l[?2004h> import json, glob, math
+[?2004l[?2004h> import numpy as np
+[?2004l[?2004h> import pandas as pd
+[?2004l[?2004h> import yaml
+[?2004l[?2004h> from scipy import stats
+[?2004l[?2004h> 
+[?2004l[?2004h> DATA='/app/data.csv'; OUT='/app/universes.jsonl'
+[?2004l[?2004h> 
+[?2004l[?2004h> def num(x):
+[?2004l[?2004h>     try: return None if x is None or not np.isfinite(x) else float(x)
+[?2004lal[?2004h>     except Exception: return None
+[?2004l[?2004h> 
+[?2004le[?2004h> def empty(n=0):
+[?2004l[?2004h>     return {'estimate':None,'estimate_standardized':None,'std_error':None,'std_error_standardized':None,'ci_low_standardized':None,'ci_high_standardized':None,'p_value':None,'n':int(n),'direction':'none','converged':False}
+[?2004l[?2004h> 
+[?2004l[?2004h> def direction(x):
+[?2004l[?2004h>     return 'none' if x is None or not np.isfinite(x) or abs(x)<1e-15 else ('positive' if x>0 else 'negative')
+[?2004l[?2004h> 
+[?2004l[?2004h> def codes(s):
+[?2004l[?2004h>     return pd.factorize(s, sort=True)[0].astype(float)
+[?2004l[?2004h> 
+[?2004l[?2004h> def cluster_se(X, resid, groups, bread):
+[?2004l[?2004h>     _, inv=np.unique(np.asarray(groups).astype(str), return_inverse=True)
+[?2004l[?2004h>     scores=X*np.asarray(resid)[:,None]
+[?2004l[?2004h>     sums=np.zeros((inv.max()+1,X.shape[1]))
+[?2004l[?2004h>     np.add.at(sums,inv,scores)
+[?2004l[?2004h>     return np.sqrt(np.maximum(np.diag(bread@(sums.T@sums)@bread),0))
+[?2004l[?2004h> 
+[?2004l[?2004h> def logistic(X,y,groups=None):
+[?2004l[?2004h>     p=X.shape[1]; b=np.zeros(p); ok=False; ridge=1e-5
+[?2004l[?2004h>     for _ in range(15):
+[?2004l[?2004h>         eta=np.clip(X@b,-30,30); pr=1/(1+np.exp(-eta)); w=np.maximum(pr*(1-pr),1e-5)
+[?2004l[?2004h>         H=X.T@(w[:,None]*X)+ridge*np.eye(p); score=X.T@(y-pr)
+[?2004l[?2004h>         try: step=np.linalg.solve(H,score)
+[?2004l[?2004h>         except Exception: step=np.linalg.lstsq(H,score,rcond=None)[0]
+[?2004l[?2004h>         b += step
+[?2004l[?2004h>         if np.max(np.abs(step))<1e-5: ok=True; break
+[?2004ls,z(age),[?2004h>     eta=np.clip(X@b,-30,30); pr=1/(1+np.exp(-eta)); w=np.maximum(pr*(1-pr),1e-5)
+[?2004l[?2004h>     H=X.T@(w[:,None]*X)+ridge*np.eye(p)
+[?2004l[?2004h>     try: bread=np.linalg.inv(H)
+[?2004l[?2004h>     except Exception: bread=np.linalg.pinv(H)
+[?2004l   else: g=d[?2004h>     se=np.sqrt(np.maximum(np.diag(bread),0)) if groups is None else cluster_se(X,y-pr,groups,bread)
+[?2004lk: [?2004h>     return b,se,ok
+[?2004l[?2004h> 
+[?2004l[?2004h> def analyze(df, selections: dict[str,str]) -> dict:
+[?2004l/sx; [?2004h>     try:
+[?2004l[?2004h>         race=selections['race_variable_definition']; scope=selections['stop_scope']; out=selections['search_outcome_definition']; miss=selections['missing_search_handling']; adj=selections['confounding_adjustment']; dep=selections['uncertainty_dependence']
+[?2004l[?2004h>         # Arrays are created without copying the complete dataframe per universe.
+[?2004l[?2004h>         if scope=='durham_county_only': scope_mask=(df['county_name'].to_numpy()== 'Durham County')
+[?2004l[?2004h>         elif scope=='durham_police_only': scope_mask=(df['department_name'].to_numpy()== 'Durham Police Department')
+[?2004l[?2004h>         else: scope_mask=np.ones(len(df),dtype=bool)
+[?2004l[?2004h>         sr=df['subject_race'].astype('string').to_numpy(); rr=df['raw_Race'].astype('string').to_numpy()
+[?2004l[?2004h>         if race=='subject_race_black_white': keep=np.isin(sr,['black','white']); black=(sr=='black').astype(float)
+[?2004l\n[?2004h>         elif race=='raw_race_black_white': keep=np.isin(rr,['B','W']); black=(rr=='B').astype(float)
+[?2004l[?2004h>         else: keep=pd.notna(sr); black=(sr=='black').astype(float)
+[?2004l)}** univ[?2004h>         mask=scope_mask&keep
+[?2004l[?2004h>         if out=='search_conducted': y=pd.to_numeric(df['search_conducted'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>         elif out=='person_search_only': y=pd.to_numeric(df['search_person'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>         elif out=='vehicle_search_only': y=pd.to_numeric(df['search_vehicle'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             a=pd.to_numeric(df['search_person'],errors='coerce').to_numpy(float); b=pd.to_numeric(df['search_vehicle'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>             y=np.where(np.isfinite(a)&np.isfinite(b),((a==1)|(b==1)).astype(float),np.nan)
+[?2004lec)
+ [?2004h>         if miss=='missing_as_no_search': y=np.nan_to_num(y,nan=0.)
+[?2004l[?2004h>         else: mask &= np.isfinite(y)
+[?2004l[?2004h>         x=black[mask]; yy=y[mask]; n=len(yy)
+[?2004lf r['decisio[?2004h>         if n<2 or len(np.unique(x))<2 or len(np.unique(yy))<2: return empty(n)
+[?2004ln()[?2004h>         if adj=='unadjusted_rate_comparison':
+[?2004l
+         [?2004h>             nb=int(x.sum()); nw=n-nb; pb=yy[x==1].mean(); pw=yy[x==0].mean(); est=pb-pw
+[?2004l[?2004h>             X=np.column_stack([np.ones(n),x]); resid=yy-(pw+est*x)
+[?2004l[?2004h>             if dep=='iid_two_proportion': se=math.sqrt(pb*(1-pb)/nb+pw*(1-pw)/nw)
+[?2004lcovarianc[?2004h>             else:
+[?2004l[?2004h>                 g=df['officer_id_hash'].to_numpy()[mask] if dep=='officer_cluster_robust' else df['department_name'].to_numpy()[mask]
+[?2004l_=='__main__'[?2004h>                 bread=np.linalg.inv(X.T@X); se=cluster_se(X,resid,g,bread)[1]
+[?2004l[?2004h>             p=2*stats.norm.sf(abs(est/se)) if se else (0. if est else 1.); sx=x.std(ddof=1); sy=yy.std(ddof=1); scale=sx/sy if sy else sx; es=est*scale; ses=abs(scale)*se
+[?2004l[?2004h>             return {'estimate':num(est),'estimate_standardized':num(es),'std_error':num(se),'std_error_standardized':num(ses),'ci_low_standardized':num(es-1.96*ses),'ci_high_standardized':num(es+1.96*ses),'p_value':num(p),'n':n,'direction':direction(es),'converged':True}
+[?2004l[?2004h>         # Compact numeric representation of the specified adjustment covariates.
+[?2004l[?2004h>         age=pd.to_numeric(df['subject_age'],errors='coerce').to_numpy(float)[mask]
+[?2004l[?2004h>         sex=codes(df['subject_sex'])[mask]; reason=codes(df['reason_for_stop'])[mask]; dept=codes(df['department_name'])[mask]; county=codes(df['county_name'])[mask]; year=pd.to_datetime(df['date'],errors='coerce').dt.year.to_numpy(float)[mask]
+[?2004l[?2004h>         valid=np.isfinite(age)&np.isfinite(sex)&np.isfinite(reason)&np.isfinite(dept)&np.isfinite(county)&np.isfinite(year)
+[?2004l[?2004h>         x=x[valid]; yy=yy[valid]; n=len(yy); age=age[valid]; sex=sex[valid]; reason=reason[valid]; dept=dept[valid]; county=county[valid]; year=year[valid]
+[?2004l[?2004h>         if n<2 or len(np.unique(x))<2 or len(np.unique(yy))<2: return empty(n)
+[?2004l[?2004h>         sx=x.std(ddof=1); xs=(x-x.mean())/sx
+[?2004l[?2004h>         def z(a): return (a-a.mean())/(a.std(ddof=1) or 1)
+[?2004l[?2004h>         X=np.column_stack([np.ones(n),xs,z(age),z(sex),z(reason),z(dept),z(county),z(year)])
+[?2004l[?2004h>         if dep=='iid_two_proportion': g=None
+[?2004l[?2004h>         elif dep=='officer_cluster_robust': g=df['officer_id_hash'].to_numpy()[mask][valid]
+[?2004l[?2004h>         else: g=df['department_name'].to_numpy()[mask][valid]
+[?2004l[?2004h>         b,sevec,ok=logistic(X,yy,g)
+[?2004l[?2004h>         if not ok: return empty(n)
+[?2004l[?2004h>         es=float(b[1]); ses=float(sevec[1]); est=es/sx; se=ses/sx; p=2*stats.norm.sf(abs(es/ses)) if ses else (0. if es else 1.)
+[?2004l[?2004h>         return {'estimate':num(est),'estimate_standardized':num(es),'std_error':num(se),'std_error_standardized':num(ses),'ci_low_standardized':num(es-1.96*ses),'ci_high_standardized':num(es+1.96*ses),'p_value':num(p),'n':n,'direction':direction(es),'converged':True}
+[?2004l[?2004h>     except Exception: return empty(0)
+[?2004l[?2004h> 
+[?2004l[?2004h> def load_u(path):
+[?2004l[?2004h>     with open(path) as f: u=yaml.safe_load(f)
+[?2004l[?2004h>     return u['id'],{z['decision_id']:z['option_id'] for z in u['decisions']}
+[?2004l[?2004h> 
+[?2004l[?2004h> def main():
+[?2004l[?2004h>     df=pd.read_csv(DATA,low_memory=False)
+[?2004l[?2004h>     rows=[]
+[?2004l[?2004h>     for path in sorted(glob.glob('/app/universes/*.yaml')):
+[?2004l[?2004h>         uid,dec=load_u(path); rows.append({'universe_id':uid,'decisions':dec,**analyze(df,dec)})
+[?2004l[?2004h>     with open(OUT,'w') as f:
+[?2004l[?2004h>         for r in rows: f.write(json.dumps(r,allow_nan=False)+'\n')
+[?2004l[?2004h>     good=[r for r in rows if r['converged'] and r['estimate_standardized'] is not None]
+[?2004l[?2004h>     lines=['# Multiverse analysis report','',f'Evaluated **{len(rows)}** universes; **{len(good)}** converged.','', 'All six decisions are applied inside one parameterized `analyze` function. Unadjusted estimates are Black-minus-White rate differences; adjusted estimates use logistic regression with the specified age, sex, stop reason, department, county, and year covariates.','']
+[?2004l[?2004h>     if good:
+[?2004l[?2004h>         v=np.array([r['estimate_standardized'] for r in good]); lines += [f'Standardized estimate range: **{v.min():.6g}** to **{v.max():.6g}**.',f'Positive estimates: **{int((v>0).sum())} / {len(v)}**.','']
+[?2004l[?2004h>         for dec in sorted(good[0]['decisions']):
+[?2004l[?2004h>             lines.append('## '+dec)
+[?2004l[?2004h>             for opt in sorted({r['decisions'][dec] for r in good}):
+[?2004l[?2004h>                 a=np.array([r['estimate_standardized'] for r in good if r['decisions'][dec]==opt]); lines.append(f'- `{opt}`: mean {a.mean():.6g}; range {a.min():.6g} to {a.max():.6g}; n={len(a)}')
+[?2004l[?2004h>             lines.append('')
+[?2004l[?2004h>     lines += ['## Standardization','Unadjusted estimates are scaled by the SDs of race and outcome; adjusted coefficients are for a one-SD race-indicator contrast. Cluster choices use cluster-robust sandwich covariance.']
+[?2004l[?2004h>     open('/app/results.md','w').write('\n'.join(lines)+'\n'); print(f'wrote {len(rows)} universes; successful {len(good)}')
+[?2004l[?2004h> if __name__=='__main__': main()
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 -m py_compile /app/analysis.py && python3 /app/analysis.py
+[?2004lwrote 256 universes; successful 0
+[?2004hroot@0692f40acaf5:/app# wc -l /app/universes.jsonl; python3 - <<'PY'
+[?2004l[?2004h> import json
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> req={'universe_id','decisions','estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged'}
+[?2004l[?2004h> print('records',len(rows),'unique_ids',len({r['universe_id'] for r in rows}),'converged',sum(bool(r['converged']) for r in rows),'required',all(req <= set(r) for r in rows))
+[?2004l[?2004h> print('first',rows[0])
+[?2004l[?2004h> PY
+[?2004l256 /app/universes.jsonl
+records 256 unique_ids 256 converged 0 required True
+first {'universe_id': 'universe_000', 'decisions': {'confounding_adjustment': 'unadjusted_rate_comparison', 'missing_search_handling': 'complete_case', 'race_variable_definition': 'subject_race_black_white', 'search_outcome_definition': 'search_conducted', 'stop_scope': 'all_dataset_rows', 'uncertainty_dependence': 'iid_two_proportion'}, 'estimate': None, 'estimate_standardized': None, 'std_error': None, 'std_error_standardized': None, 'ci_low_standardized': None, 'ci_high_standardized': None, 'p_value': None, 'n': 0, 'direction': 'none', 'converged': False}
+[?2004hroot@0692f40acaf5:/app# sed -n '1,100p' /app/results.md
+[?2004l# Multiverse analysis report
+
+Evaluated **256** universes; **0** converged.
+
+All six decisions are applied inside one parameterized `analyze` function. Unadjusted estimates are Black-minus-White rate differences; adjusted estimates use logistic regression with the specified age, sex, stop reason, department, county, and year covariates.
+
+## Standardization
+Unadjusted estimates are scaled by the SDs of race and outcome; adjusted coefficients are for a one-SD race-indicator contrast. Cluster choices use cluster-robust sandwich covariance.
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> s=s.replace('    except Exception: return empty(0)', "    except Exception:\n        import traceback; traceback.print_exc()\n        return empty(0)")
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> import pandas as pd, yaml, sys
+[?2004l[?2004h> sys.path.insert(0,'/app')
+[?2004l[?2004h> import analysis
+[?2004l[?2004h> df=pd.read_csv('/app/data.csv',low_memory=False)
+[?2004l[?2004h> u=yaml.safe_load(open('/app/universes/universe_000.yaml'))
+[?2004l[?2004h> d={z['decision_id']:z['option_id'] for z in u['decisions']}
+[?2004l[?2004h> print(analysis.analyze(df,d))
+[?2004l[?2004h> PY
+[?2004lTraceback (most recent call last):
+  File "/app/analysis.py", line 53, in analyze
+    if race=='subject_race_black_white': keep=np.isin(sr,['black','white']); black=(sr=='black').astype(float)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/numpy/lib/_arraysetops_impl.py", line 1075, in isin
+    return _isin(element, test_elements, assume_unique=assume_unique,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/numpy/lib/_arraysetops_impl.py", line 925, in _isin
+    mask |= (ar1 == a)
+             ^^^^^^^^
+  File "pandas/_libs/missing.pyx", line 415, in pandas._libs.missing.NAType.__bool__
+TypeError: boolean value of NA is ambiguous
+{'estimate': None, 'estimate_standardized': None, 'std_error': None, 'std_error_standardized': None, 'ci_low_standardized': None, 'ci_high_standardized': None, 'p_value': None, 'n': 0, 'direction': 'none', 'converged': False}
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> s=s.replace("sr=df['subject_race'].astype('string').to_numpy(); rr=df['raw_Race'].astype('string').to_numpy()", "sr=df['subject_race'].astype('string').fillna('').to_numpy(dtype=object); rr=df['raw_Race'].astype('string').fillna('').to_numpy(dtype=object)")
+[?2004l[?2004h> s=s.replace("    except Exception:\n        import traceback; traceback.print_exc()\n        return empty(0)", "    except Exception:\n        return empty(0)")
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 -m py_compile /app/analysis.py && python3 /app/analysis.py
+[?2004lwc -l /app/universes.jsonl; python3 - <<'PY'
+import json
+rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+req={'universe_id','decisions','estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged'}
+print('records',len(rows),'unique_ids',len({r['universe_id'] for r in rows}),'converged',sum(bool(r['converged']) for r in rows),'required',all(req <= set(r) for r in rows))
+print('n range',min(r['n'] for r in rows),max(r['n'] for r in rows))
+print('first',rows[0])
+print('adjusted',next(r for r in rows if r['decisions']['confounding_adjustment']=='covariate_adjusted_logistic'))
+PY
+sed -n '1,140p' /app/results.md
+wrote 256 universes; successful 256
+[?2004hroot@0692f40acaf5:/app# wc -l /app/universes.jsonl; python3 - <<'PY'
+[?2004l[?2004h> import json
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> req={'universe_id','decisions','estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged'}
+[?2004l[?2004h> print('records',len(rows),'unique_ids',len({r['universe_id'] for r in rows}),'converged',sum(bool(r['converged']) for r in rows),'required',all(req <= set(r) for r in rows))
+[?2004l[?2004h> print('n range',min(r['n'] for r in rows),max(r['n'] for r in rows))
+[?2004l[?2004h> print('first',rows[0])
+[?2004l[?2004h> print('adjusted',next(r for r in rows if r['decisions']['confounding_adjustment']=='covariate_adjusted_logistic'))
+[?2004l[?2004h> PY
+[?2004l256 /app/universes.jsonl
+records 256 unique_ids 256 converged 256 required True
+n range 266249 326024
+first {'universe_id': 'universe_000', 'decisions': {'confounding_adjustment': 'unadjusted_rate_comparison', 'missing_search_handling': 'complete_case', 'race_variable_definition': 'subject_race_black_white', 'search_outcome_definition': 'search_conducted', 'stop_scope': 'all_dataset_rows', 'uncertainty_dependence': 'iid_two_proportion'}, 'estimate': 0.04889884546883177, 'estimate_standardized': 0.09269193585704943, 'std_error': 0.000887703170218469, 'std_error_standardized': 0.0016827171383102916, 'ci_low_standardized': 0.08939381026596126, 'ci_high_standardized': 0.09599006144813761, 'p_value': 0.0, 'n': 278266, 'direction': 'positive', 'converged': True}
+adjusted {'universe_id': 'universe_001', 'decisions': {'confounding_adjustment': 'covariate_adjusted_logistic', 'missing_search_handling': 'complete_case', 'race_variable_definition': 'subject_race_black_white', 'search_outcome_definition': 'search_conducted', 'stop_scope': 'all_dataset_rows', 'uncertainty_dependence': 'iid_two_proportion'}, 'estimate': 0.8835655506667992, 'estimate_standardized': 0.42145827449888384, 'std_error': 0.019599460201412854, 'std_error_standardized': 0.009348887212005014, 'ci_low_standardized': 0.40313445556335403, 'ci_high_standardized': 0.43978209343441366, 'p_value': 0.0, 'n': 278261, 'direction': 'positive', 'converged': True}
+[?2004hroot@0692f40acaf5:/app# sed -n '1,140p' /app/results.md
+[?2004l# Multiverse analysis report
+
+Evaluated **256** universes; **256** converged.
+
+All six decisions are applied inside one parameterized `analyze` function. Unadjusted estimates are Black-minus-White rate differences; adjusted estimates use logistic regression with the specified age, sex, stop reason, department, county, and year covariates.
+
+Standardized estimate range: **0.0780798** to **0.46318**.
+Positive estimates: **256 / 256**.
+
+## confounding_adjustment
+- `covariate_adjusted_logistic`: mean 0.414199; range 0.388434 to 0.46318; n=128
+- `unadjusted_rate_comparison`: mean 0.0845753; range 0.0780798 to 0.0926919; n=128
+
+## missing_search_handling
+- `complete_case`: mean 0.250024; range 0.0780798 to 0.46318; n=120
+- `missing_as_no_search`: mean 0.249014; range 0.0780798 to 0.46318; n=70
+- `report_missing_as_separate_status`: mean 0.248626; range 0.0780798 to 0.46318; n=66
+
+## race_variable_definition
+- `raw_race_black_white`: mean 0.247661; range 0.0780798 to 0.46318; n=156
+- `subject_race_black_white`: mean 0.257817; range 0.0889211 to 0.433617; n=50
+- `subject_race_with_unknown_as_white`: mean 0.246345; range 0.0796381 to 0.419482; n=50
+
+## search_outcome_definition
+- `any_person_or_vehicle_search`: mean 0.248994; range 0.080762 to 0.448625; n=90
+- `person_search_only`: mean 0.252764; range 0.0780798 to 0.46318; n=46
+- `search_conducted`: mean 0.247713; range 0.0809738 to 0.444683; n=90
+- `vehicle_search_only`: mean 0.250413; range 0.0798132 to 0.457268; n=30
+
+## stop_scope
+- `all_dataset_rows`: mean 0.246788; range 0.0781567 to 0.433617; n=152
+- `durham_county_only`: mean 0.236364; range 0.0780798 to 0.400653; n=52
+- `durham_police_only`: mean 0.270009; range 0.086957 to 0.46318; n=52
+
+## uncertainty_dependence
+- `department_cluster_robust`: mean 0.249718; range 0.0780798 to 0.46318; n=96
+- `iid_two_proportion`: mean 0.249189; range 0.0780798 to 0.46318; n=80
+- `officer_cluster_robust`: mean 0.249189; range 0.0780798 to 0.46318; n=80
+
+## Standardization
+Unadjusted estimates are scaled by the SDs of race and outcome; adjusted coefficients are for a one-SD race-indicator contrast. Cluster choices use cluster-robust sandwich covariance.
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> marker='def load_u(path):\n'
+[?2004l[?2004h> helper=r'''def missing_note(df, selections):
+[?2004l[?2004h>     if selections.get('missing_search_handling') != 'report_missing_as_separate_status':
+[?2004l[?2004h>         return None
+[?2004l[?2004h>     scope=selections['stop_scope']
+[?2004l[?2004h>     if scope=='durham_county_only': scope_mask=(df['county_name'].to_numpy()=='Durham County')
+[?2004l[?2004h>     elif scope=='durham_police_only': scope_mask=(df['department_name'].to_numpy()=='Durham Police Department')
+[?2004l[?2004h>     else: scope_mask=np.ones(len(df),dtype=bool)
+[?2004l[?2004h>     sr=df['subject_race'].astype('string').fillna('').to_numpy(dtype=object)
+[?2004l[?2004h>     rr=df['raw_Race'].astype('string').fillna('').to_numpy(dtype=object)
+[?2004l[?2004h>     race=selections['race_variable_definition']
+[?2004l[?2004h>     if race=='subject_race_black_white': keep=np.isin(sr,['black','white']); black=(sr=='black')
+[?2004l[?2004h>     elif race=='raw_race_black_white': keep=np.isin(rr,['B','W']); black=(rr=='B')
+[?2004l[?2004h>     else: keep=sr!=''; black=(sr=='black')
+[?2004l[?2004h>     if selections['search_outcome_definition']=='search_conducted': y=pd.to_numeric(df['search_conducted'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>     elif selections['search_outcome_definition']=='person_search_only': y=pd.to_numeric(df['search_person'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>     elif selections['search_outcome_definition']=='vehicle_search_only': y=pd.to_numeric(df['search_vehicle'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>     else:
+[?2004l[?2004h>         a=pd.to_numeric(df['search_person'],errors='coerce').to_numpy(float); b=pd.to_numeric(df['search_vehicle'],errors='coerce').to_numpy(float)
+[?2004l[?2004h>         y=np.where(np.isfinite(a)&np.isfinite(b),((a==1)|(b==1)).astype(float),np.nan)
+[?2004l[?2004h>     m=scope_mask&keep
+[?2004l[?2004h>     out=[]
+[?2004l[?2004h>     for label, g in [('black',black),('white',~black)]:
+[?2004l[?2004h>         z=m&g; total=int(z.sum()); missing=int((z&~np.isfinite(y)).sum())
+[?2004l[?2004h>         out.append(f'{label}: {missing}/{total} missing ({missing/total:.6g})' if total else f'{label}: 0/0 missing (null)')
+[?2004l[?2004h>     return '; '.join(out)
+[?2004l[?2004h> 
+[?2004l[?2004h> '''
+[?2004l[?2004h> if marker not in s: raise SystemExit('marker missing')
+[?2004l[?2004h> s=s.replace(marker,helper+marker)
+[?2004l[?2004h> old="uid,dec=load_u(path); rows.append({'universe_id':uid,'decisions':dec,**analyze(df,dec)})"
+[?2004l[?2004h> new="uid,dec=load_u(path); result=analyze(df,dec); note=missing_note(df,dec); row={'universe_id':uid,'decisions':dec,**result};\n        if note is not None: row['notes']=note\n        rows.append(row)"
+[?2004l[?2004h> if old not in s: raise SystemExit('driver line missing')
+[?2004l[?2004h> s=s.replace(old,new)
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@0692f40acaf5:/app# python3 -m py_compile /app/analysis.py && python3 /app/analysis.py
+[?2004lpython3 - <<'PY'
+import json
+rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+print('records',len(rows),'unique',len({r['universe_id'] for r in rows}),'converged',sum(r['converged'] for r in rows))
+reported=[r for r in rows if r['decisions']['missing_search_handling']=='report_missing_as_separate_status']
+print('report_missing_records',len(reported),'notes_present',sum('notes' in r for r in reported))
+print('sample_note',reported[0].get('notes'))
+print('all_json_valid',all(r['universe_id']==f'universe_{i:03d}' for i,r in enumerate(rows)))
+PY
+wrote 256 universes; successful 256
+[?2004hroot@0692f40acaf5:/app# python3 - <<'PY'
+[?2004l[?2004h> import json
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> print('records',len(rows),'unique',len({r['universe_id'] for r in rows}),'converged',sum(r['converged'] for r in rows))
+[?2004l[?2004h> reported=[r for r in rows if r['decisions']['missing_search_handling']=='report_missing_as_separate_status']
+[?2004l[?2004h> print('report_missing_records',len(reported),'notes_present',sum('notes' in r for r in reported))
+[?2004l[?2004h> print('sample_note',reported[0].get('notes'))
+[?2004l[?2004h> print('all_json_valid',all(r['universe_id']==f'universe_{i:03d}' for i,r in enumerate(rows)))
+[?2004l[?2004h> PY
+[?2004lrecords 256 unique 256 converged 256
+report_missing_records 66 notes_present 66
+sample_note black: 0/181573 missing (0); white: 0/131637 missing (0)
+all_json_valid True
+[?2004hroot@0692f40acaf5:/app# 

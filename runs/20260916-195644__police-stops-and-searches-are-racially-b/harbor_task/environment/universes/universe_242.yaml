@@ -1,0 +1,14 @@
+id: universe_242
+decisions:
+- decision_id: bias_outcome
+  option_id: search_and_hit_rates
+- decision_id: geographic_scope
+  option_id: durham_police_department
+- decision_id: hit_definition
+  option_id: any_contraband
+- decision_id: outcome_model_and_inference
+  option_id: adjusted_logistic_officer_clustered
+- decision_id: race_comparison_set
+  option_id: include_unknown_as_category
+- decision_id: time_of_day_adjustment
+  option_id: veil_of_darkness

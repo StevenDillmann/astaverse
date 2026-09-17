@@ -1,0 +1,14 @@
+id: universe_057
+decisions:
+- decision_id: bias_outcome
+  option_id: contraband_hit_rate
+- decision_id: geographic_scope
+  option_id: durham_county
+- decision_id: hit_definition
+  option_id: any_contraband
+- decision_id: outcome_model_and_inference
+  option_id: adjusted_logistic_officer_clustered
+- decision_id: race_comparison_set
+  option_id: all_known_races
+- decision_id: time_of_day_adjustment
+  option_id: clock_time_controls

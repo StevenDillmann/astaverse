@@ -1,0 +1,225 @@
+id: nc-durham-stops_multiverse
+name: 'nc-durham-stops: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - bias_outcome
+  - geographic_scope
+  - hit_definition
+  - outcome_model_and_inference
+  - race_comparison_set
+  - time_of_day_adjustment
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  geographic_scope:
+    label: Geographic scope of stops
+    rationale: 'Which records should represent the population of police stops being tested for racial
+      bias?  [found by: direct]'
+    default: all_records
+    options:
+      all_records:
+        label: All records in the dataset
+        description: Include every row with a usable subject_race value, regardless of county_name, location,
+          or department_name.
+      durham_county:
+        label: Durham County stops
+        description: Keep only rows where county_name equals "Durham County"; retain stops from all departments
+          in that county.
+      durham_police_department:
+        label: Durham Police Department stops
+        description: Keep only rows where department_name equals "Durham Police Department", regardless
+          of county_name.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        all_records: []
+        durham_county: []
+        durham_police_department: []
+  race_comparison_set:
+    label: Race comparison and coding
+    rationale: 'Which recorded driver-race groups should be compared?  [found by: direct]'
+    default: black_vs_white
+    options:
+      black_vs_white:
+        label: Black versus white comparison
+        description: Keep only rows with subject_race equal to "black" or "white"; model or report the
+          black-minus-white difference, with white as the reference group.
+      all_known_races:
+        label: All known race categories
+        description: Keep all rows whose subject_race is not "unknown" and estimate separate associations
+          for black, white, hispanic, asian/pacific islander, and other, using white as the reference
+          group.
+      include_unknown_as_category:
+        label: Include unknown race as a category
+        description: Retain all rows, including subject_race equal to "unknown", and treat "unknown" as
+          an additional categorical race level rather than missing data.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        black_vs_white: []
+        all_known_races: []
+        include_unknown_as_category: []
+  bias_outcome:
+    label: Primary observable outcome
+    rationale: 'Which observable consequence of a stop should be treated as the test outcome for racial
+      bias?  [found by: direct]'
+    default: search_and_hit_rates
+    options:
+      search_rate:
+        label: Search-conducted rate
+        description: Use search_conducted as a binary outcome for every included stop; estimate the racial
+          difference in the probability of a search.
+      contraband_hit_rate:
+        label: Contraband hit rate among searches
+        description: Restrict to stops with search_conducted equal to 1 and use contraband_found as the
+          binary outcome; estimate racial differences in the probability that a search recovered contraband.
+      search_and_hit_rates:
+        label: Both search rate and hit rate
+        description: Report a search_conducted outcome for all included stops and a separate contraband_found
+          outcome among searched stops, treating both as primary racial-bias tests.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        search_rate: []
+        contraband_hit_rate: []
+        search_and_hit_rates: []
+  hit_definition:
+    label: Definition of a contraband hit
+    rationale: 'When a hit-rate analysis is conducted, what should count as recovered contraband?  [found
+      by: direct]'
+    default: any_contraband
+    options:
+      any_contraband:
+        label: Any contraband
+        description: Among rows with search_conducted equal to 1, code a hit as contraband_found equal
+          to TRUE and a non-hit as contraband_found equal to FALSE; exclude missing contraband_found values.
+        incompatible_with:
+        - bias_outcome.search_rate
+      drugs_only:
+        label: Drugs only
+        description: Among rows with search_conducted equal to 1, use contraband_drugs as the binary hit
+          outcome; exclude rows where contraband_drugs is missing.
+        incompatible_with:
+        - bias_outcome.search_rate
+      weapons_only:
+        label: Weapons only
+        description: Among rows with search_conducted equal to 1, use contraband_weapons as the binary
+          hit outcome; exclude rows where contraband_weapons is missing.
+        incompatible_with:
+        - bias_outcome.search_rate
+      not_applicable:
+        label: Not applicable
+        description: Do not define a hit outcome because the analysis uses only search_conducted.
+        incompatible_with:
+        - bias_outcome.contraband_hit_rate
+        - bias_outcome.search_and_hit_rates
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        any_contraband: []
+        drugs_only: []
+        weapons_only: []
+        not_applicable: []
+  time_of_day_adjustment:
+    label: Treatment of stop time
+    rationale: 'How should date and time be used when comparing racial search or hit outcomes?  [found
+      by: direct]'
+    default: no_time_adjustment
+    options:
+      no_time_adjustment:
+        label: No time adjustment
+        description: Use date and time only for parsing or descriptive summaries; estimate racial differences
+          without conditioning on date, hour, or daylight status.
+      clock_time_controls:
+        label: Clock-time and calendar controls
+        description: Include hour-of-day indicators derived from time, plus calendar-year and month indicators
+          derived from date, as adjustment variables in the outcome model.
+      veil_of_darkness:
+        label: Veil-of-darkness comparison
+        description: Construct daylight status from date, time, and a specified sunset calculation for
+          the stop location; compare stops near the daylight-to-dark transition while controlling for
+          date or season, rather than using all hours equally.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        no_time_adjustment: []
+        clock_time_controls: []
+        veil_of_darkness: []
+  outcome_model_and_inference:
+    label: Outcome model and uncertainty calculation
+    rationale: 'How should racial differences be estimated and how should repeated stops or officers affect
+      uncertainty?  [found by: direct]'
+    default: unadjusted_proportions_iid
+    options:
+      unadjusted_proportions_iid:
+        label: Unadjusted proportions with independent-stop uncertainty
+        description: Estimate group-specific outcome proportions and their differences directly, using
+          a two-sample proportion test or equivalent model with observations treated as independent; do
+          not adjust for subject_age, subject_sex, reason_for_stop, officer_id_hash, or department_name.
+      adjusted_logistic_officer_clustered:
+        label: Covariate-adjusted logistic regression clustered by officer
+        description: Fit a logistic regression for the selected binary outcome with race, subject_age,
+          subject_sex, and reason_for_stop as predictors; include calendar or time variables only if selected
+          separately, and use officer_id_hash-clustered standard errors.
+      department_and_officer_controls:
+        label: Officer and department controls
+        description: Fit a logistic regression including race, subject_age, subject_sex, reason_for_stop,
+          department_name indicators, and officer_id_hash fixed effects, with uncertainty clustered by
+          officer_id_hash; observations from officers with no within-officer race variation cannot identify
+          the race coefficient.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        unadjusted_proportions_iid: []
+        adjusted_logistic_officer_clustered: []
+        department_and_officer_controls: []
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: How the reported statistics become a supported / not-supported verdict. Left implicit by
+      every plan, and consequential on its own.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+        description: Conventional two-sided test at the 5% level.
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+        description: Stricter two-sided threshold at the 1% level.
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+        description: Significant at 5% AND the estimate points the way the hypothesis predicts; a significant
+          effect the other way counts as not supported.
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+      option_support:
+        alpha_05_two_sided: []
+        alpha_01_two_sided: []
+        alpha_05_directional: []
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: Police stops and searches are racially biased.
+x_astaverse:
+  astra_schema_shape: 0.0.13
+  note: ASTRA-shaped, emitted by astaverse without astra-tools. Run `astra validate` to check conformance.

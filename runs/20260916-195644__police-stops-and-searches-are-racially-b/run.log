@@ -1,0 +1,15 @@
+[2026-09-16T19:56:45+00:00] study: profiled /Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv (326024 rows, 29 columns)
+[2026-09-16T19:56:51+00:00] run-all: starting decisions
+[2026-09-16T19:57:31+00:00] decisions: mode=direct models=openai/gpt-5.6-luna -> 6 execution decisions
+[2026-09-16T19:57:31+00:00] run-all: starting universes
+[2026-09-16T19:57:31+00:00] universes: 256 universes to execute (grid 972, 405 dropped by constraints); 311 DROPPED BY CAP 256 using pair_balanced (127-211 matched pairs/decision); x3 post-hoc verdict rules = 768 analysed
+[2026-09-16T19:57:31+00:00] run-all: starting task
+[2026-09-16T19:57:31+00:00] task: emitted Harbor task with 266 files at /Users/stevend/Desktop/Asta/astaverse/runs/20260916-195644__police-stops-and-searches-are-racially-b/harbor_task
+[2026-09-16T19:57:31+00:00] run-all: starting execute
+[2026-09-16T19:57:31+00:00] execute: running: harbor run --yes -p /Users/stevend/Desktop/Asta/astaverse/runs/20260916-195644__police-stops-and-searches-are-racially-b/harbor_task -a terminus-2 -o /Users/stevend/Desktop/Asta/astaverse/runs/20260916-195644__police-stops-and-searches-are-racially-b/jobs --job-name 20260916-195644__police-stops-and-searches-are-racially-b__terminus-2-openai_gpt-5.6-luna -m openai/gpt-5.6-luna --artifact /app/universes.jsonl --artifact /app/results.md --artifact /app/analysis.py
+[2026-09-16T20:04:09+00:00] run-all: starting verdicts
+[2026-09-16T20:04:09+00:00] verdicts: 768 results from 1 source(s) x 3 verdict rule(s)
+[2026-09-16T20:04:09+00:00] run-all: starting conclusion
+[2026-09-16T20:04:21+00:00] conclusion: partially_supported + requires refinement
+[2026-09-16T20:39:24+00:00] conclusion: partially_supported + requires refinement
+[2026-09-16T20:42:23+00:00] refinement: 3 successor hypotheses proposed

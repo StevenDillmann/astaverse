@@ -1,0 +1,14 @@
+id: universe_134
+decisions:
+- decision_id: contraband_hit_coding
+  option_id: direct_contraband_complete_case
+- decision_id: date_scope
+  option_id: stated_2002_2015_window
+- decision_id: dependence_and_uncertainty
+  option_id: independent_stops
+- decision_id: race_analytic_sample
+  option_id: black_white_only
+- decision_id: race_comparison_model
+  option_id: adjusted_logistic
+- decision_id: searched_stop_definition
+  option_id: person_or_vehicle_search

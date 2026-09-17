@@ -1,0 +1,46 @@
+Hypothesis: Among player–referee dyads in the dataset, the probability of at least one sending-off (including second-yellow sendings-off) is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a dyad-level any-event logistic model.
+
+Decisions:
+
+- sending_off_outcome: Sending-off outcome definition
+  Which columns define the dyad-level indicator for at least one sending-off?  [found by: direct]
+    * include_second_yellows [default]: Include straight and second-yellow sendings-off — Set outcome = 1 when redCards > 0 or yellowReds > 0; otherwise set outcome = 0.
+    * straight_red_only: Straight red cards only — Set outcome = 1 when redCards > 0 and ignore yellowReds, even when yellowReds > 0.
+
+- skin_tone_combination: Combining the two skin-tone ratings
+  How should rater1 and rater2 be combined into the player skin-tone score before dichotomization?  [found by: direct]
+    * mean_raters [default]: Mean of both raters — For every row, define skin_score = (rater1 + rater2) / 2.
+    * rater1_only: Use rater 1 only — Define skin_score = rater1 for every row and ignore rater2.
+    * rater2_only: Use rater 2 only — Define skin_score = rater2 for every row and ignore rater1.
+    * conservative_agreement: Use only exact rater agreement — Retain rows only when rater1 = rater2, and define skin_score as that common value.
+
+- skin_tone_threshold: Binary skin-tone threshold
+  Which prespecified rule converts the combined skin-tone score into the dark-skinned exposure?  [found by: direct]
+    * dark_at_least_half [default]: Dark at score at least 0.5 — Define dark_skin = 1 when skin_score >= 0.5 and dark_skin = 0 otherwise; scores 0.5, 0.75, and 1 are dark.
+    * dark_above_half: Dark above 0.5 — Define dark_skin = 1 when skin_score > 0.5 and dark_skin = 0 otherwise; only scores above 0.5 are dark.
+    * dark_at_least_three_quarters: Dark at score at least 0.75 — Define dark_skin = 1 when skin_score >= 0.75 and dark_skin = 0 otherwise.
+
+- games_exposure_handling: Handling games as exposure
+  How should the games column enter the dyad-level any-event logistic analysis?  [found by: direct]
+    * unweighted_dyads [default]: One equally weighted observation per dyad — Fit the binary logistic model to the 146,028 dyad rows without weights; games is not used as a weight or offset.
+    * games_frequency_weights: Weight dyads by games — Fit the binary logistic model with games as a frequency weight, so a dyad with games = k contributes k times the likelihood contribution of a dyad with games = 1.
+    * games_as_predictor: Adjust for games as a covariate — Fit the unweighted binary logistic model and include the numeric games column as a linear predictor; do not use it as a weight.
+
+- logistic_model_specification: Covariate and referee-effect specification
+  Which predictor structure should be used for the dyad-level logistic model estimating the dark_skin odds ratio?  [found by: direct]
+    * crude_logistic [default]: Crude logistic model — Fit outcome ~ dark_skin using a standard logistic link, with no additional columns and no referee effects.
+    * adjusted_player_league_logistic: Adjust for league and player characteristics — Fit outcome ~ dark_skin + leagueCountry + position + height + weight using a standard logistic link; do not include referee effects.
+    * referee_fixed_effect_logistic: Add referee fixed effects — Fit outcome ~ dark_skin + leagueCountry + position + height + weight + factor(refNum) using a standard logistic link; omit any player fixed effect because dark_skin is constant within player.
+    * crossed_random_intercepts: Crossed player and referee random intercepts — Fit a logistic mixed model with fixed effect dark_skin and random intercepts (1 | playerShort) and (1 | refNum); include no other fixed covariates.
+
+- uncertainty_estimation: Uncertainty estimation for repeated dyads
+  How should standard errors and intervals for the dark_skin odds ratio account for repeated players and referees?  [found by: direct]
+    * model_based_standard_errors [default]: Model-based standard errors — Use the fitted logistic model's default model-based variance and report its Wald standard error and confidence interval.
+    * two_way_cluster_robust: Two-way cluster-robust standard errors — Estimate a sandwich variance clustered simultaneously by playerShort and refNum, and use it for the dark_skin odds ratio interval.
+    * cluster_bootstrap: Cluster bootstrap — Resample playerShort clusters and refNum clusters using a two-way cluster bootstrap procedure, refit the selected model for each successful replicate, and use the bootstrap distribution for the interval.
+
+- verdict_rule: Verdict decision rule (applied downstream, not executed)
+  How the reported statistics become a supported / not-supported verdict. Left implicit by every plan, and consequential on its own.
+    * alpha_05_two_sided [default]: p < 0.05, two-sided — Conventional two-sided test at the 5% level.
+    * alpha_01_two_sided: p < 0.01, two-sided — Stricter two-sided threshold at the 1% level.
+    * alpha_05_directional: p < 0.05 and direction matches — Significant at 5% AND the estimate points the way the hypothesis predicts; a significant effect the other way counts as not supported.

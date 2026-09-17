@@ -1,0 +1,33 @@
+{
+  "jobs": [
+    {
+      "job_name": "20260916-205136__among-all-recorded-stops-search-rates-di__terminus-2-openai_gpt-5.6-luna",
+      "agent": "terminus-2",
+      "model": "openai/gpt-5.6-luna",
+      "command": [
+        "harbor",
+        "run",
+        "--yes",
+        "-p",
+        "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/harbor_task",
+        "-a",
+        "terminus-2",
+        "-o",
+        "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/jobs",
+        "--job-name",
+        "20260916-205136__among-all-recorded-stops-search-rates-di__terminus-2-openai_gpt-5.6-luna",
+        "-m",
+        "openai/gpt-5.6-luna",
+        "--artifact",
+        "/app/universes.jsonl",
+        "--artifact",
+        "/app/results.md",
+        "--artifact",
+        "/app/analysis.py"
+      ],
+      "returncode": 0,
+      "job_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/jobs/20260916-205136__among-all-recorded-stops-search-rates-di__terminus-2-openai_gpt-5.6-luna"
+    }
+  ],
+  "dry_run": false
+}

@@ -1,0 +1,47 @@
+Hypothesis: Among all recorded stops, search rates differ across the known race categories.
+
+Decisions:
+
+- analysis_universe: Analysis universe
+  Which recorded stops should be included in the comparison?  [found by: direct]
+    * all_recorded_rows [default]: All recorded rows — Include every row in the dataset, regardless of date or county_name, provided subject_race and the selected search outcome are usable.
+    * period_all_counties: 2002–2015 stops in all counties — Keep rows with date from 2002-01-01 through 2015-12-31 inclusive, regardless of county_name.
+    * period_durham_county: 2002–2015 Durham County stops — Keep rows with date from 2002-01-01 through 2015-12-31 inclusive and county_name equal to Durham County.
+
+- race_definition: Race-category definition and unknown handling
+  Which column and category set should define the known race groups?  [found by: direct]
+    * subject_race_known_only [default]: Recorded subject_race, known categories only — Use subject_race and retain only black, white, hispanic, asian/pacific islander, and other; exclude rows coded unknown or missing.
+    * subject_race_with_unknown: Recorded subject_race including unknown — Use subject_race with black, white, hispanic, asian/pacific islander, other, and unknown as separate comparison categories; exclude only missing values.
+    * raw_race_ethnicity_recode: Reconstructed race from raw fields — Use raw_Race and raw_Ethnicity, applying the source release coding scheme to reconstruct mutually exclusive black, white, hispanic, asian/pacific islander, other, and unknown categories before analysis.
+
+- search_outcome: Search outcome definition
+  Which recorded action should count as a search for the search rate?  [found by: direct]
+    * search_conducted [default]: Any recorded search — Define the binary outcome as search_conducted = 1 versus search_conducted = 0; exclude rows with missing search_conducted.
+    * person_search: Person search — Define the binary outcome as search_person = 1 versus search_person = 0; exclude rows with missing search_person.
+    * vehicle_search: Vehicle search — Define the binary outcome as search_vehicle = 1 versus search_vehicle = 0; exclude rows with missing search_vehicle.
+    * search_or_frisk: Search or frisk — Define the binary outcome as 1 when search_conducted = 1 or frisk_performed = 1, and 0 otherwise; exclude rows missing both component indicators.
+
+- race_adjustment_model: Adjustment and rate-comparison model
+  Should race-group search rates be compared without adjustment or conditional on recorded stop characteristics?  [found by: direct]
+    * crude_rate_comparison [default]: Unadjusted group-rate comparison — For each race category, report searches divided by stops and compare the categories using a single omnibus comparison of the unadjusted rates; do not include covariates.
+    * unadjusted_logistic: Unadjusted logistic regression — Fit a binary logistic regression of the selected search outcome on race category alone, reporting race-group predicted probabilities or odds ratios.
+    * adjusted_logistic: Adjusted logistic regression — Fit a binary logistic regression of the selected search outcome on race category, subject_age, subject_sex, reason_for_stop, county_name, department_name, and calendar date; report race-group adjusted predicted probabilities.
+
+- contrast_structure: Race contrasts
+  What race comparison should constitute the primary test?  [found by: direct]
+    * global_omnibus [default]: Global omnibus comparison — Test the null that all included race categories have the same search probability, using one joint race comparison; do not make a specific race the reference for the primary claim.
+    * white_reference: Each category versus white — Use white as the reference category and report separate contrasts of black, hispanic, asian/pacific islander, and other versus white; omit unknown unless it is included by the race-definition decision.
+    * all_pairwise: All pairwise race comparisons — Report a separate comparison for every pair of included race categories, rather than one global comparison or only comparisons with white.
+
+- dependence_handling: Dependence and uncertainty calculation
+  How should repeated stops associated with the same officer or department affect uncertainty estimates?  [found by: direct]
+    * iid [default]: Independent-stop standard errors — Treat rows as independent when computing standard errors, confidence intervals, and test statistics.
+    * cluster_officer: Cluster by officer — Compute heteroskedasticity-robust standard errors clustered by officer_id_hash, allowing arbitrary dependence among stops handled by the same officer.
+    * cluster_department: Cluster by department — Compute heteroskedasticity-robust standard errors clustered by department_name, allowing dependence within reporting departments.
+    * two_way_cluster: Two-way officer and department clustering — Compute two-way cluster-robust standard errors using officer_id_hash and department_name as the two clustering dimensions.
+
+- verdict_rule: Verdict decision rule (applied downstream, not executed)
+  How the reported statistics become a supported / not-supported verdict. Left implicit by every plan, and consequential on its own.
+    * alpha_05_two_sided [default]: p < 0.05, two-sided — Conventional two-sided test at the 5% level.
+    * alpha_01_two_sided: p < 0.01, two-sided — Stricter two-sided threshold at the 1% level.
+    * alpha_05_directional: p < 0.05 and direction matches — Significant at 5% AND the estimate points the way the hypothesis predicts; a significant effect the other way counts as not supported.

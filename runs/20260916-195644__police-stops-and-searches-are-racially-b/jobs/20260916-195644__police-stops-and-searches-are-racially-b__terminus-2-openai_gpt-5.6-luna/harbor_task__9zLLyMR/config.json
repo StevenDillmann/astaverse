@@ -1,0 +1,17 @@
+{
+    "task": {
+        "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-195644__police-stops-and-searches-are-racially-b/harbor_task"
+    },
+    "trial_name": "harbor_task__9zLLyMR",
+    "trials_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-195644__police-stops-and-searches-are-racially-b/jobs/20260916-195644__police-stops-and-searches-are-racially-b__terminus-2-openai_gpt-5.6-luna",
+    "agent": {
+        "name": "terminus-2",
+        "model_name": "openai/gpt-5.6-luna"
+    },
+    "artifacts": [
+        "/app/universes.jsonl",
+        "/app/results.md",
+        "/app/analysis.py"
+    ],
+    "job_id": "1f7fc99c-a9c1-461b-ad88-2272e6d1dcc0"
+}

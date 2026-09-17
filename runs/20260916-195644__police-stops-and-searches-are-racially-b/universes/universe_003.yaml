@@ -1,0 +1,14 @@
+id: universe_003
+decisions:
+- decision_id: bias_outcome
+  option_id: contraband_hit_rate
+- decision_id: geographic_scope
+  option_id: all_records
+- decision_id: hit_definition
+  option_id: drugs_only
+- decision_id: outcome_model_and_inference
+  option_id: unadjusted_proportions_iid
+- decision_id: race_comparison_set
+  option_id: black_vs_white
+- decision_id: time_of_day_adjustment
+  option_id: no_time_adjustment

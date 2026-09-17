@@ -1,0 +1,46 @@
+Hypothesis: Referees are more likely to award red cards to dark-skinned players than to light-skinned players.
+
+Decisions:
+
+- sendoff_outcome_definition: Definition of a red-card outcome
+  Should the outcome be straight red cards only, or all sendings-off including second-yellow cards?  [found by: direct]
+    * straight_red_only [default]: Straight red cards only — Define the event count for each player-referee dyad as `redCards`; exclude `yellowReds`.
+    * all_sendings_off: Straight red or second-yellow sending-off — Define the event count as `redCards + yellowReds` for each player-referee dyad.
+
+- skin_tone_measurement_and_encoding: Measurement and encoding of skin tone
+  How should `rater1` and `rater2` be combined and represented as the exposure?  [found by: direct]
+    * mean_continuous [default]: Mean rater score as a continuous predictor — Compute `skin_tone = (rater1 + rater2) / 2` and enter it as a linear predictor ranging from 0 to 1.
+    * mean_five_level_factor: Mean score as a five-level factor — Compute `(rater1 + rater2) / 2` and treat the values 0, 0.25, 0.5, 0.75, and 1 as five indicator-coded categories, using 0 as the reference category.
+    * mean_binary_threshold: Binary light/dark classification — Compute `(rater1 + rater2) / 2`; classify scores below 0.5 as light and scores greater than or equal to 0.5 as dark, then estimate the dark-versus-light contrast.
+    * rater1_continuous: First rater score as a continuous predictor — Use `rater1` directly as a linear predictor from 0 to 1 and ignore `rater2`.
+
+- exposure_and_event_model: Model for event counts and game exposure
+  How should the `redCards` or combined sending-off count be related to the number of games in `games`?  [found by: direct]
+    * binomial_count_rate [default]: Binomial rate model — Use the selected sending-off count as the number of successes and `games` as the number of trials in a binomial regression; report the skin-tone odds ratio.
+    * dyad_any_event_logistic: Any-event logistic model — Replace the selected sending-off count by an indicator equal to 1 when the dyad has at least one event and 0 otherwise; fit an unweighted logistic regression with one observation per dyad, without using `games` as a denominator.
+    * poisson_exposure_model: Count model with game exposure offset — Model the selected sending-off count with Poisson regression and include `log(games)` as an offset, interpreting the skin-tone coefficient as a rate-ratio contrast rather than an odds ratio.
+
+- repeated_player_referee_structure: Dependence from repeated players and referees
+  How should the repeated observations for the same `playerShort` and `refNum` be represented in the model?  [found by: direct]
+    * no_random_effects [default]: No player or referee random effects — Fit the selected event model with no random intercept for `playerShort` or `refNum`; any adjustment variables are included only as fixed effects.
+    * player_referee_random_intercepts: Random intercepts for player and referee — Add independent random intercepts for `playerShort` and `refNum` to the selected regression model, while estimating the fixed effect of skin tone.
+    * referee_random_intercept_only: Random intercept for referee only — Add a random intercept for `refNum` but not for `playerShort`, leaving player characteristics represented only by observed covariates.
+
+- fixed_covariate_adjustment: Adjustment for observed player, league, and referee characteristics
+  Which variables in addition to skin tone should be included as fixed-effect covariates?  [found by: direct]
+    * unadjusted [default]: Skin tone only — Include no covariates beyond the selected skin-tone exposure and the selected outcome model.
+    * league_position_adjusted: League and position adjusted — Include categorical `leagueCountry` and categorical `position` as fixed effects in addition to skin tone.
+    * player_characteristics_adjusted: Add player characteristics — Include `leagueCountry`, `position`, `height`, `weight`, and birth year extracted from `birthday` as fixed effects in addition to skin tone.
+    * referee_bias_adjusted: Add referee-country bias measures — Include `leagueCountry`, `position`, `height`, `weight`, birth year from `birthday`, `meanIAT`, and `meanExp` as fixed effects in addition to skin tone.
+
+- uncertainty_accounting: Uncertainty calculation for repeated dyads
+  How should standard errors or confidence intervals account for dependence among rows involving the same players and referees?  [found by: direct]
+    * model_based_uncertainty [default]: Model-based standard errors — Use the standard errors and confidence intervals implied by the selected regression model, with no additional clustering or resampling.
+    * two_way_clustered_uncertainty: Two-way clustered uncertainty — Calculate sandwich standard errors clustered simultaneously by `playerShort` and `refNum`, using a multiway-cluster correction for their overlap.
+    * cluster_bootstrap_uncertainty: Cluster bootstrap — Resample `playerShort` clusters and `refNum` clusters in a two-way cluster bootstrap, refit the complete model for each replicate, and use the bootstrap distribution for confidence intervals.
+
+- verdict_rule: Verdict decision rule (applied downstream, not executed)
+  How the reported statistics become a supported / not-supported verdict. Left implicit by every plan, and consequential on its own.
+    * alpha_05_two_sided [default]: p < 0.05, two-sided — Conventional two-sided test at the 5% level.
+    * alpha_01_two_sided: p < 0.01, two-sided — Stricter two-sided threshold at the 1% level.
+    * alpha_05_directional: p < 0.05 and direction matches — Significant at 5% AND the estimate points the way the hypothesis predicts; a significant effect the other way counts as not supported.

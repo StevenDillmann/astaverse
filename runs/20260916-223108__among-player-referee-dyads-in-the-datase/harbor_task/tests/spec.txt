@@ -1,0 +1,45 @@
+Hypothesis: Among player–referee dyads in the dataset, the probability of at least one straight red card is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a dyad-level any-event logistic model.
+
+Decisions:
+
+- skin_tone_rater_combination: Skin-tone score construction
+  How should `rater1` and `rater2` be combined into the player skin-tone score before dichotomization?  [found by: direct]
+    * mean_raters [default]: Mean of both raters — For each dyad, define skin_score = (`rater1` + `rater2`) / 2.
+    * rater1_only: Use first rater only — Define skin_score = `rater1`, ignoring `rater2`.
+    * both_raters_thresholded: Require both raters to classify as dark — Retain the two separate scores for dichotomization; a player is dark only if both `rater1` and `rater2` meet the selected dark-skin threshold, and light otherwise.
+
+- skin_tone_threshold: Binary skin-tone threshold
+  Which prespecified threshold should convert the combined skin-tone score into dark versus light skin?  [found by: direct]
+    * at_least_050 [default]: Dark if score ≥ 0.50 — Set dark_skin = 1 when the score constructed from the selected rater rule is at least 0.50; otherwise set dark_skin = 0.
+    * at_least_075: Dark if score ≥ 0.75 — Set dark_skin = 1 when the score constructed from the selected rater rule is at least 0.75; otherwise set dark_skin = 0.
+    * above_050: Dark if score > 0.50 — Set dark_skin = 1 when the score constructed from the selected rater rule is strictly greater than 0.50; otherwise set dark_skin = 0.
+
+- red_card_outcome_definition: Any-event outcome definition
+  Should the dyad outcome count only straight red cards, or also second-yellow sendings-off?  [found by: direct]
+    * straight_red_only [default]: At least one straight red card — Set outcome = 1 when `redCards` ≥ 1 and outcome = 0 when `redCards` = 0; ignore `yellowReds`.
+    * any_sending_off: At least one sending-off of either type — Set outcome = 1 when `redCards` + `yellowReds` ≥ 1 and outcome = 0 otherwise.
+
+- games_exposure_handling: Handling variation in games per dyad
+  How should the `games` exposure difference across player–referee dyads enter the logistic analysis?  [found by: direct]
+    * unweighted_dyads [default]: Unweighted dyad-level logistic regression — Fit the binary logistic model with one equal-weight observation per row, without using `games` as a weight, offset, or predictor.
+    * games_frequency_weight: Weight dyads by games — Fit the binary logistic model using `games` as a frequency or analytic weight, so a dyad with 20 games contributes 20 times as much as a dyad with 1 game.
+    * adjust_for_log_games: Adjust for log games — Fit the binary logistic model with `log(games)` included as a continuous covariate; do not use `games` as a frequency weight.
+
+- covariate_adjustment: Adjustment set for the skin-tone association
+  Which variables, if any, should be included alongside the binary skin-tone predictor in the dyad-level logistic model?  [found by: direct]
+    * skin_tone_only [default]: Unadjusted skin-tone model — Use only the binary skin-tone indicator as a predictor of the selected dyad outcome, with an intercept.
+    * player_and_league_covariates: Adjust for player and league characteristics — Include binary skin tone plus `leagueCountry`, `position`, `height`, and `weight` as predictors; do not include referee-country variables.
+    * player_league_referee_country_covariates: Also adjust for referee-country characteristics — Include binary skin tone, `leagueCountry`, `position`, `height`, `weight`, `refCountry`, `meanIAT`, and `meanExp` as predictors. Treat `refCountry` as categorical and the two bias measures as continuous.
+
+- dependence_inference: Inference for repeated players and referees
+  How should uncertainty account for the fact that rows repeatedly involve the same `playerShort` and `refNum`?  [found by: direct]
+    * model_based_iid [default]: Model-based iid standard errors — Use the ordinary logistic-regression covariance matrix, treating the 146028 rows as independent for standard-error and confidence-interval calculation.
+    * player_clustered: Cluster by player — Use a sandwich covariance estimator clustered on `playerShort`, allowing arbitrary dependence among dyads involving the same player.
+    * two_way_clustered: Two-way cluster by player and referee — Use a multiway sandwich covariance estimator with clustering on both `playerShort` and `refNum`, allowing dependence within either repeated-player or repeated-referee groups.
+    * random_intercepts: Random intercepts for player and referee — Fit a mixed-effects logistic model with random intercepts for `playerShort` and `refNum`, and report the fixed-effect odds ratio for binary skin tone using model-based mixed-model uncertainty.
+
+- verdict_rule: Verdict decision rule (applied downstream, not executed)
+  How the reported statistics become a supported / not-supported verdict. Left implicit by every plan, and consequential on its own.
+    * alpha_05_two_sided [default]: p < 0.05, two-sided — Conventional two-sided test at the 5% level.
+    * alpha_01_two_sided: p < 0.01, two-sided — Stricter two-sided threshold at the 1% level.
+    * alpha_05_directional: p < 0.05 and direction matches — Significant at 5% AND the estimate points the way the hypothesis predicts; a significant effect the other way counts as not supported.

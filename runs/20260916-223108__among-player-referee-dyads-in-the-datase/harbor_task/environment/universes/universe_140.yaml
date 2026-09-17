@@ -1,0 +1,14 @@
+id: universe_140
+decisions:
+- decision_id: covariate_adjustment
+  option_id: skin_tone_only
+- decision_id: dependence_inference
+  option_id: model_based_iid
+- decision_id: games_exposure_handling
+  option_id: adjust_for_log_games
+- decision_id: red_card_outcome_definition
+  option_id: straight_red_only
+- decision_id: skin_tone_rater_combination
+  option_id: mean_raters
+- decision_id: skin_tone_threshold
+  option_id: above_050

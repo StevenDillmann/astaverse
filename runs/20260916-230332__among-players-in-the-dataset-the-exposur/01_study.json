@@ -1,0 +1,429 @@
+{
+  "hypothesis": "Among players in the dataset, the exposure-adjusted rate of all sendings-off is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a Poisson exposure model.",
+  "dataset_path": "/Users/stevend/Desktop/Asta/astaverse/data/datasets/silberzahn-red-cards/data.csv",
+  "dataset_name": "silberzahn-red-cards",
+  "dataset_description": "The Silberzahn et al. (2018) 'Many Analysts, One Data Set' data: 146,028 player-referee dyads from four European leagues, covering 2,053 players, 3,147 referees and 426,572 games, with 1,834 straight red cards and 1,662 second-yellow sendings-off. Each player's skin tone was scored independently by two raters on a 5-point scale. Twenty-nine independent teams analysed these rows to answer one question and reported odds ratios from 0.89 to 2.93, so the analytic spread here has a published benchmark.",
+  "n_rows": 146028,
+  "columns": [
+    {
+      "name": "playerShort",
+      "dtype": "string",
+      "description": "Short player identifier; one player appears in many rows, once per referee.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "aaron-hughes",
+        "aaron-hunt",
+        "aaron-lennon"
+      ],
+      "std": null,
+      "num_unique_values": 2053
+    },
+    {
+      "name": "player",
+      "dtype": "string",
+      "description": "Player name.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        " Abdón Prats",
+        " Adriano",
+        " Adrián"
+      ],
+      "std": null,
+      "num_unique_values": 2034
+    },
+    {
+      "name": "club",
+      "dtype": "string",
+      "description": "Club the player played for.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "1. FC Nürnberg",
+        "1. FSV Mainz 05",
+        "1899 Hoffenheim"
+      ],
+      "std": null,
+      "num_unique_values": 118
+    },
+    {
+      "name": "leagueCountry",
+      "dtype": "category",
+      "description": "League the club competed in: England, Germany, France or Spain.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "England",
+        "France",
+        "Germany"
+      ],
+      "std": null,
+      "num_unique_values": 4
+    },
+    {
+      "name": "birthday",
+      "dtype": "string",
+      "description": "Player date of birth (DD.MM.YYYY).",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "01.01.1981",
+        "01.01.1985",
+        "01.01.1988"
+      ],
+      "std": null,
+      "num_unique_values": 1726
+    },
+    {
+      "name": "height",
+      "dtype": "number",
+      "description": "Player height in cm.",
+      "n_missing": 263,
+      "min": 161.0,
+      "max": 203.0,
+      "samples": [
+        161,
+        162,
+        163
+      ],
+      "std": 6.738726074757214,
+      "num_unique_values": 43
+    },
+    {
+      "name": "weight",
+      "dtype": "number",
+      "description": "Player weight in kg.",
+      "n_missing": 2243,
+      "min": 54.0,
+      "max": 100.0,
+      "samples": [
+        54,
+        55,
+        56
+      ],
+      "std": 7.140906351541053,
+      "num_unique_values": 45
+    },
+    {
+      "name": "position",
+      "dtype": "category",
+      "description": "Playing position.",
+      "n_missing": 17726,
+      "min": null,
+      "max": null,
+      "samples": [
+        "Attacking Midfielder",
+        "Center Back",
+        "Center Forward"
+      ],
+      "std": null,
+      "num_unique_values": 12
+    },
+    {
+      "name": "games",
+      "dtype": "number",
+      "description": "Games this player played under this referee — the exposure for any rate.",
+      "n_missing": 0,
+      "min": 1.0,
+      "max": 47.0,
+      "samples": [
+        1,
+        2,
+        3
+      ],
+      "std": 3.413632854486367,
+      "num_unique_values": 45
+    },
+    {
+      "name": "victories",
+      "dtype": "number",
+      "description": "Games won under this referee.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 29.0,
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "std": 1.7907254477150707,
+      "num_unique_values": 29
+    },
+    {
+      "name": "ties",
+      "dtype": "number",
+      "description": "Games drawn under this referee.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 14.0,
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "std": 1.116792520156222,
+      "num_unique_values": 15
+    },
+    {
+      "name": "defeats",
+      "dtype": "number",
+      "description": "Games lost under this referee.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 18.0,
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "std": 1.383058962434939,
+      "num_unique_values": 19
+    },
+    {
+      "name": "goals",
+      "dtype": "number",
+      "description": "Goals scored under this referee.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 23.0,
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "std": 0.9064805502464165,
+      "num_unique_values": 22
+    },
+    {
+      "name": "yellowCards",
+      "dtype": "number",
+      "description": "Yellow cards received from this referee.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 14.0,
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "std": 0.7953327981767239,
+      "num_unique_values": 15
+    },
+    {
+      "name": "yellowReds",
+      "dtype": "number",
+      "description": "Second-yellow sendings-off from this referee; whether these count as red cards is an analytic choice.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 3.0,
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "std": 0.10793102891403203,
+      "num_unique_values": 4
+    },
+    {
+      "name": "redCards",
+      "dtype": "number",
+      "description": "Straight red cards received from this referee.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 2.0,
+      "samples": [
+        0,
+        1,
+        2
+      ],
+      "std": 0.1128892740010416,
+      "num_unique_values": 3
+    },
+    {
+      "name": "photoID",
+      "dtype": "string",
+      "description": "Photo used for the skin-tone ratings.",
+      "n_missing": 21407,
+      "min": null,
+      "max": null,
+      "samples": [
+        "100063.jpg",
+        "100350.jpg",
+        "10037.jpg"
+      ],
+      "std": null,
+      "num_unique_values": 1585
+    },
+    {
+      "name": "rater1",
+      "dtype": "number",
+      "description": "First rater's skin-tone score on a 5-point scale: 0 very light, 0.25, 0.5, 0.75, 1 very dark.",
+      "n_missing": 21407,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        0,
+        0.25,
+        0.5
+      ],
+      "std": 0.29538220453074965,
+      "num_unique_values": 5
+    },
+    {
+      "name": "rater2",
+      "dtype": "number",
+      "description": "Second rater's skin-tone score on the same scale; the two raters agree exactly on 80.2% of dyads, so how to combine them is an analytic choice.",
+      "n_missing": 21407,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        0,
+        0.25,
+        0.5
+      ],
+      "std": 0.293019740512479,
+      "num_unique_values": 5
+    },
+    {
+      "name": "refNum",
+      "dtype": "number",
+      "description": "Anonymous referee identifier.",
+      "n_missing": 0,
+      "min": 1.0,
+      "max": 3147.0,
+      "samples": [
+        1,
+        2,
+        3
+      ],
+      "std": 918.7366248371987,
+      "num_unique_values": 3147
+    },
+    {
+      "name": "refCountry",
+      "dtype": "number",
+      "description": "Referee country identifier.",
+      "n_missing": 0,
+      "min": 1.0,
+      "max": 161.0,
+      "samples": [
+        1,
+        2,
+        3
+      ],
+      "std": 27.496188572551272,
+      "num_unique_values": 161
+    },
+    {
+      "name": "Alpha_3",
+      "dtype": "string",
+      "description": "Referee country ISO code.",
+      "n_missing": 1,
+      "min": null,
+      "max": null,
+      "samples": [
+        "ABW",
+        "AGO",
+        "ALB"
+      ],
+      "std": null,
+      "num_unique_values": 160
+    },
+    {
+      "name": "meanIAT",
+      "dtype": "number",
+      "description": "Country-level mean implicit racial bias (IAT) score for the referee's country.",
+      "n_missing": 163,
+      "min": -0.0472542252767709,
+      "max": 0.573793286802122,
+      "samples": [
+        -0.047,
+        -0.028,
+        -0.007
+      ],
+      "std": 0.03224568722564801,
+      "num_unique_values": 154
+    },
+    {
+      "name": "nIAT",
+      "dtype": "number",
+      "description": "Number of IAT respondents for that country.",
+      "n_missing": 163,
+      "min": 2.0,
+      "max": 1975803.0,
+      "samples": [
+        2,
+        3,
+        4
+      ],
+      "std": 127126.19714291782,
+      "num_unique_values": 129
+    },
+    {
+      "name": "seIAT",
+      "dtype": "number",
+      "description": "Standard error of the country IAT mean.",
+      "n_missing": 163,
+      "min": 2.23537294251686e-7,
+      "max": 0.286287118980536,
+      "samples": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "std": 0.00473585715825575,
+      "num_unique_values": 154
+    },
+    {
+      "name": "meanExp",
+      "dtype": "number",
+      "description": "Country-level mean explicit racial bias score for the referee's country.",
+      "n_missing": 163,
+      "min": -1.375,
+      "max": 1.8,
+      "samples": [
+        -1.375,
+        -1.357,
+        -1.267
+      ],
+      "std": 0.2174688610710672,
+      "num_unique_values": 149
+    },
+    {
+      "name": "nExp",
+      "dtype": "number",
+      "description": "Number of explicit-bias respondents for that country.",
+      "n_missing": 163,
+      "min": 2.0,
+      "max": 2029548.0,
+      "samples": [
+        2,
+        3,
+        5
+      ],
+      "std": 130615.7451026793,
+      "num_unique_values": 136
+    },
+    {
+      "name": "seExp",
+      "dtype": "number",
+      "description": "Standard error of the country explicit-bias mean.",
+      "n_missing": 163,
+      "min": 1.04333425479502e-6,
+      "max": 1.06066017177982,
+      "samples": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "std": 0.019723404769701785,
+      "num_unique_values": 154
+    }
+  ]
+}

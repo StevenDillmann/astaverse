@@ -1,0 +1,14 @@
+id: universe_045
+decisions:
+- decision_id: analysis_universe
+  option_id: all_recorded_rows
+- decision_id: contrast_structure
+  option_id: global_omnibus
+- decision_id: dependence_handling
+  option_id: cluster_department
+- decision_id: race_adjustment_model
+  option_id: crude_rate_comparison
+- decision_id: race_definition
+  option_id: subject_race_known_only
+- decision_id: search_outcome
+  option_id: search_conducted

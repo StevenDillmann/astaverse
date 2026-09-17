@@ -1,0 +1,17 @@
+{
+    "task": {
+        "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/harbor_task"
+    },
+    "trial_name": "harbor_task__veMgyTo",
+    "trials_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/jobs/20260916-205136__among-all-recorded-stops-search-rates-di__terminus-2-openai_gpt-5.6-luna",
+    "agent": {
+        "name": "terminus-2",
+        "model_name": "openai/gpt-5.6-luna"
+    },
+    "artifacts": [
+        "/app/universes.jsonl",
+        "/app/results.md",
+        "/app/analysis.py"
+    ],
+    "job_id": "215b3bdf-324b-407d-a429-161287eca84c"
+}

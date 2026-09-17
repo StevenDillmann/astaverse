@@ -1,0 +1,14 @@
+id: universe_027
+decisions:
+- decision_id: contraband_hit_coding
+  option_id: direct_contraband_complete_case
+- decision_id: date_scope
+  option_id: all_supplied_rows
+- decision_id: dependence_and_uncertainty
+  option_id: cluster_department
+- decision_id: race_analytic_sample
+  option_id: use_raw_race_mapping
+- decision_id: race_comparison_model
+  option_id: unadjusted_rate_comparison
+- decision_id: searched_stop_definition
+  option_id: search_conducted

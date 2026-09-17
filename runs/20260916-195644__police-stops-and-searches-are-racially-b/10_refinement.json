@@ -1,0 +1,109 @@
+{
+  "needed": true,
+  "reason": "The broad hypothesis combines distinct outcomes and race-comparison populations whose estimated effects and inferences differ materially.",
+  "parent_hypothesis": "Police stops and searches are racially biased.",
+  "dimensions": [
+    "Primary outcome: search rate versus contraband hit rate",
+    "Race comparison: black versus white versus all known or unknown-inclusive categories"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "Among all recorded stops, Black subjects have a higher search rate than White subjects.",
+      "pins": [
+        {
+          "decision_id": "geographic_scope",
+          "option_id": "all_records"
+        },
+        {
+          "decision_id": "race_comparison_set",
+          "option_id": "black_vs_white"
+        },
+        {
+          "decision_id": "bias_outcome",
+          "option_id": "search_rate"
+        },
+        {
+          "decision_id": "hit_definition",
+          "option_id": "not_applicable"
+        },
+        {
+          "decision_id": "time_of_day_adjustment",
+          "option_id": "no_time_adjustment"
+        },
+        {
+          "decision_id": "outcome_model_and_inference",
+          "option_id": "unadjusted_proportions_iid"
+        }
+      ],
+      "rationale": "Search rate and contraband hit rate are distinct outcomes, and the multiverse results show substantial changes when the outcome is changed. The black-versus-white comparison is fixed because changing the race-comparison set also materially changes the estimated effect and inference. The claim is limited to an observable difference and does not assert a causal mechanism.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among searched stops in all recorded stops, Black subjects have a higher rate of any contraband hit than White subjects.",
+      "pins": [
+        {
+          "decision_id": "geographic_scope",
+          "option_id": "all_records"
+        },
+        {
+          "decision_id": "race_comparison_set",
+          "option_id": "black_vs_white"
+        },
+        {
+          "decision_id": "bias_outcome",
+          "option_id": "contraband_hit_rate"
+        },
+        {
+          "decision_id": "hit_definition",
+          "option_id": "any_contraband"
+        },
+        {
+          "decision_id": "time_of_day_adjustment",
+          "option_id": "no_time_adjustment"
+        },
+        {
+          "decision_id": "outcome_model_and_inference",
+          "option_id": "unadjusted_proportions_iid"
+        }
+      ],
+      "rationale": "Contraband hit rate is a different outcome from search rate and must be tested among searched stops rather than pooled with the decision to search. A specific hit definition is required because any-, drug-, and weapon-related hits produce materially different estimates. The direction follows the parent’s implied bias claim while remaining an observational comparison.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among all recorded stops, search rates differ across the known race categories.",
+      "pins": [
+        {
+          "decision_id": "geographic_scope",
+          "option_id": "all_records"
+        },
+        {
+          "decision_id": "race_comparison_set",
+          "option_id": "all_known_races"
+        },
+        {
+          "decision_id": "bias_outcome",
+          "option_id": "search_rate"
+        },
+        {
+          "decision_id": "hit_definition",
+          "option_id": "not_applicable"
+        },
+        {
+          "decision_id": "time_of_day_adjustment",
+          "option_id": "no_time_adjustment"
+        },
+        {
+          "decision_id": "outcome_model_and_inference",
+          "option_id": "unadjusted_proportions_iid"
+        }
+      ],
+      "rationale": "The all-known-races comparison is not interchangeable with the Black-versus-White contrast: the multiverse shows large effect changes and inference flips between these comparison sets. Because an omnibus comparison does not specify a single direction across categories, a non-directional differences claim is appropriate.",
+      "directional": false,
+      "answerable_with_dataset": true
+    }
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T20:42:23+00:00"
+}

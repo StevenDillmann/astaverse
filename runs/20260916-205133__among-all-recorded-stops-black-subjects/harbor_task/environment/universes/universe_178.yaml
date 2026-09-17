@@ -1,0 +1,14 @@
+id: universe_178
+decisions:
+- decision_id: confounding_adjustment
+  option_id: unadjusted_rate_comparison
+- decision_id: missing_search_handling
+  option_id: complete_case
+- decision_id: race_variable_definition
+  option_id: raw_race_black_white
+- decision_id: search_outcome_definition
+  option_id: search_conducted
+- decision_id: stop_scope
+  option_id: durham_county_only
+- decision_id: uncertainty_dependence
+  option_id: officer_cluster_robust

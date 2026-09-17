@@ -1,0 +1,125 @@
+{
+  "needed": true,
+  "reason": "The hypothesis combines distinct claims about the observational unit and the covariate or heterogeneity structure of the Poisson model, and these choices materially alter the estimated effect and inference.",
+  "parent_hypothesis": "Among players in the dataset, the exposure-adjusted rate of all sendings-off is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a Poisson exposure model.",
+  "dimensions": [
+    "analysis unit",
+    "Poisson mean-model adjustment and heterogeneity structure"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "Among player aggregates, dark-skinned players—defined as having a mean skin-tone score of at least 0.50—have a higher exposure-adjusted rate of straight reds plus second yellows than light-skinned players, estimated with an exposure-only Poisson mean model and model-based standard errors.",
+      "pins": [
+        {
+          "decision_id": "analysis_unit",
+          "option_id": "player_aggregate"
+        },
+        {
+          "decision_id": "poisson_mean_structure",
+          "option_id": "exposure_only"
+        },
+        {
+          "decision_id": "sending_off_definition",
+          "option_id": "straight_and_second_yellow"
+        },
+        {
+          "decision_id": "skin_tone_binary_rule",
+          "option_id": "mean_at_least_050"
+        },
+        {
+          "decision_id": "standard_error_method",
+          "option_id": "model_based"
+        }
+      ],
+      "rationale": "The player-aggregate and player-referee-dyad analyses produced materially different effects and inference, so the observational unit must be fixed. The exposure-only specification also provides a distinct, explicitly defined mean-model question. The sending-off definition, skin-tone rule, and standard-error method are pinned to make the claim testable; the multiverse evidence does not establish that these operational choices are uniquely preferable.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player-referee dyads, dark-skinned players—defined as having a mean skin-tone score of at least 0.50—have a higher exposure-adjusted rate of straight reds plus second yellows than light-skinned players, estimated with an exposure-only Poisson mean model and model-based standard errors.",
+      "pins": [
+        {
+          "decision_id": "analysis_unit",
+          "option_id": "player_referee_dyad"
+        },
+        {
+          "decision_id": "poisson_mean_structure",
+          "option_id": "exposure_only"
+        },
+        {
+          "decision_id": "sending_off_definition",
+          "option_id": "straight_and_second_yellow"
+        },
+        {
+          "decision_id": "skin_tone_binary_rule",
+          "option_id": "mean_at_least_050"
+        },
+        {
+          "decision_id": "standard_error_method",
+          "option_id": "model_based"
+        }
+      ],
+      "rationale": "This isolates the player-referee-dyad question from the player-aggregate question. The analysis-unit sensitivity was large, including sign and inference reversals, so these cannot be treated as one claim. The remaining decisions are fixed for a testable comparison using the existing dataset.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player aggregates, dark-skinned players—defined as having a mean skin-tone score of at least 0.50—have a higher exposure-adjusted rate of straight reds plus second yellows than light-skinned players, estimated with a Poisson mean model adjusted for player and league and model-based standard errors.",
+      "pins": [
+        {
+          "decision_id": "analysis_unit",
+          "option_id": "player_aggregate"
+        },
+        {
+          "decision_id": "poisson_mean_structure",
+          "option_id": "player_and_league_adjusted"
+        },
+        {
+          "decision_id": "sending_off_definition",
+          "option_id": "straight_and_second_yellow"
+        },
+        {
+          "decision_id": "skin_tone_binary_rule",
+          "option_id": "mean_at_least_050"
+        },
+        {
+          "decision_id": "standard_error_method",
+          "option_id": "model_based"
+        }
+      ],
+      "rationale": "This asks the player-aggregate question under explicit adjustment for player and league rather than the exposure-only mean model. Mean-model specifications materially changed effect estimates and inference, particularly when comparing exposure-only with player-and-league adjustment, warranting a separate successor rather than a hedged claim.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player-referee dyads, dark-skinned players—defined as having a mean skin-tone score of at least 0.50—have a higher exposure-adjusted rate of straight reds plus second yellows than light-skinned players, estimated with a Poisson mean model adjusted for player and league and model-based standard errors.",
+      "pins": [
+        {
+          "decision_id": "analysis_unit",
+          "option_id": "player_referee_dyad"
+        },
+        {
+          "decision_id": "poisson_mean_structure",
+          "option_id": "player_and_league_adjusted"
+        },
+        {
+          "decision_id": "sending_off_definition",
+          "option_id": "straight_and_second_yellow"
+        },
+        {
+          "decision_id": "skin_tone_binary_rule",
+          "option_id": "mean_at_least_050"
+        },
+        {
+          "decision_id": "standard_error_method",
+          "option_id": "model_based"
+        }
+      ],
+      "rationale": "This combines the dyad-specific observational question with the explicitly adjusted mean-model question. Both dimensions materially affected the estimated effect or inference in the multiverse, so fixing both is necessary to produce one testable successor. All required variables and outcomes are represented in the same dataset.",
+      "directional": true,
+      "answerable_with_dataset": true
+    }
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T23:47:28+00:00"
+}

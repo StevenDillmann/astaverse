@@ -1,0 +1,37 @@
+{
+    "id": "1f7fc99c-a9c1-461b-ad88-2272e6d1dcc0",
+    "started_at": "2026-09-16T12:57:32.304867",
+    "updated_at": "2026-09-16T13:04:08.974574",
+    "finished_at": "2026-09-16T13:04:08.974574",
+    "n_total_trials": 1,
+    "stats": {
+        "n_completed_trials": 1,
+        "n_errored_trials": 1,
+        "n_running_trials": 0,
+        "n_pending_trials": 0,
+        "n_cancelled_trials": 0,
+        "n_retries": 0,
+        "evals": {
+            "terminus-2__gpt-5.6-luna__adhoc": {
+                "n_trials": 0,
+                "n_errors": 1,
+                "metrics": [
+                    {
+                        "mean": 0.0
+                    }
+                ],
+                "pass_at_k": {},
+                "reward_stats": {},
+                "exception_stats": {
+                    "RewardFileNotFoundError": [
+                        "harbor_task__9zLLyMR"
+                    ]
+                }
+            }
+        },
+        "n_input_tokens": 247219,
+        "n_cache_tokens": 215103,
+        "n_output_tokens": 14352,
+        "cost_usd": 0.02955181
+    }
+}

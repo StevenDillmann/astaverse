@@ -1,0 +1,199 @@
+#!/usr/bin/env python3
+"""Structural check on the agent's multiverse output.
+
+This enforces the two properties the downstream metric depends on:
+
+1. Coverage — every specified universe is present exactly once, with the
+   decision selections it was asked for.
+2. Parametric structure — `analysis.py` exposes a single `analyze` entry point
+   and does not special-case individual universes. A per-universe branch would
+   let implementation choices masquerade as decision effects.
+
+It also rejects a verdict field: verdicts are assigned downstream from the
+numbers, deliberately not by the agent.
+
+Exits non-zero with a specific message on failure.
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+# The workspace under test. Fixed at /app inside Harbor; overridable so the
+# check can be exercised directly in the test suite.
+APP = Path(os.environ.get("ASTAVERSE_APP_DIR", "/app"))
+
+EXPECTED = {"universe_000": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_001": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_002": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_003": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_004": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_005": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_006": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_007": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_008": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_009": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_010": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_011": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_012": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_013": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_014": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_015": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_016": {"analysis_unit": "player_aggregate", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_017": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_018": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_019": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_020": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_021": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_022": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_023": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_024": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_025": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_026": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_027": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_028": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}, "universe_029": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_030": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_031": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_032": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_033": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_034": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_035": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_036": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_037": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_038": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_039": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_040": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "exposure_only", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}, "universe_041": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_042": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_043": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_044": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_045": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_046": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_047": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_048": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_049": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_050": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_051": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}, "universe_052": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_053": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_054": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_055": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_056": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_057": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_058": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_059": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_060": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_061": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_062": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_063": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_and_league_adjusted", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}, "universe_064": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_065": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_066": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_067": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_068": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_069": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_070": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_071": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_072": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_073": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_074": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_075": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}, "universe_076": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_077": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_078": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_079": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_080": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_081": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_082": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_083": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_084": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_085": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_086": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_087": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "player_referee_random_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}, "universe_088": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_089": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_090": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_091": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_092": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_093": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_094": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_095": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_096": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_097": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_098": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_099": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_and_second_yellow", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}, "universe_100": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "model_based"}, "universe_101": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_102": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "both_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_103": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "model_based"}, "universe_104": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_105": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "either_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_106": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "model_based"}, "universe_107": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "player_cluster_robust"}, "universe_108": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_050", "standard_error_method": "two_way_cluster_robust"}, "universe_109": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "model_based"}, "universe_110": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "player_cluster_robust"}, "universe_111": {"analysis_unit": "player_referee_dyad", "poisson_mean_structure": "referee_fixed_effects", "sending_off_definition": "straight_reds_only", "skin_tone_binary_rule": "mean_at_least_075", "standard_error_method": "two_way_cluster_robust"}}
+REQUIRED_FIELDS = [
+    "estimate",
+    "estimate_standardized",
+    "std_error",
+    "std_error_standardized",
+    "ci_low_standardized",
+    "ci_high_standardized",
+    "p_value",
+    "n",
+    "direction",
+    "converged",
+]
+# Ratio of largest to smallest |estimate_standardized| above which the values
+# cannot plausibly be on one scale. Genuinely standardized effects across
+# specifications of the same hypothesis stay well inside an order of magnitude;
+# a real gpt-5.6-luna run that reported raw coefficients spanned 82x, so the
+# threshold has to sit comfortably below that to catch the case it exists for.
+MAX_STANDARDIZED_SPREAD = 20.0
+FORBIDDEN_FIELDS = ["verdict", "supported", "significant", "conclusion", "is_supported"]
+
+failures: list[str] = []
+
+
+def fail(msg: str) -> None:
+    failures.append(msg)
+
+
+# -- 1. universes.jsonl ------------------------------------------------------
+
+path = APP / "universes.jsonl"
+rows: dict[str, dict] = {}
+if not path.exists():
+    fail(f"{path} is missing")
+else:
+    for lineno, line in enumerate(path.read_text().splitlines(), 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as exc:
+            fail(f"universes.jsonl line {lineno} is not valid JSON: {exc}")
+            continue
+        uid = row.get("universe_id")
+        if not uid:
+            fail(f"universes.jsonl line {lineno} has no universe_id")
+            continue
+        if uid in rows:
+            fail(f"universe {uid} appears more than once")
+        rows[uid] = row
+
+    missing = sorted(set(EXPECTED) - set(rows))
+    extra = sorted(set(rows) - set(EXPECTED))
+    if missing:
+        fail(f"missing {len(missing)} universes: {', '.join(missing[:8])}")
+    if extra:
+        fail(f"unexpected universe ids: {', '.join(extra[:8])}")
+
+    for uid, row in rows.items():
+        if uid not in EXPECTED:
+            continue
+        for field in REQUIRED_FIELDS:
+            if field not in row:
+                fail(f"{uid}: missing required field '{field}'")
+        for field in FORBIDDEN_FIELDS:
+            if field in row:
+                fail(
+                    f"{uid}: field '{field}' is not allowed — report statistics only, "
+                    "verdicts are assigned downstream"
+                )
+        for field in (
+            "estimate",
+            "estimate_standardized",
+            "std_error",
+            "std_error_standardized",
+            "ci_low_standardized",
+            "ci_high_standardized",
+            "p_value",
+        ):
+            value = row.get(field)
+            if value is not None and not isinstance(value, (int, float)):
+                fail(f"{uid}: '{field}' must be a number or null, got {type(value).__name__}")
+        ci_low = row.get("ci_low_standardized")
+        ci_high = row.get("ci_high_standardized")
+        estimate_standardized = row.get("estimate_standardized")
+        if isinstance(ci_low, (int, float)) and isinstance(ci_high, (int, float)):
+            if ci_low > ci_high:
+                fail(f"{uid}: standardized confidence interval bounds are reversed")
+            if (
+                isinstance(estimate_standardized, (int, float))
+                and not ci_low <= estimate_standardized <= ci_high
+            ):
+                fail(f"{uid}: standardized confidence interval does not contain its estimate")
+        declared = row.get("decisions")
+        if isinstance(declared, dict) and declared and declared != EXPECTED[uid]:
+            fail(f"{uid}: reported decisions {declared} do not match the spec {EXPECTED[uid]}")
+
+    # The comparable estimand must actually be comparable. A huge spread means
+    # the natural-scale coefficient was copied in, and every downstream number
+    # (specification curve, sensitivity ranking) would then be measuring unit
+    # changes rather than analytic disagreement.
+    standardized = [
+        abs(r["estimate_standardized"])
+        for r in rows.values()
+        if isinstance(r.get("estimate_standardized"), (int, float))
+        and r["estimate_standardized"]
+    ]
+    if len(standardized) > 1:
+        spread = max(standardized) / min(standardized)
+        if spread > MAX_STANDARDIZED_SPREAD:
+            fail(
+                f"estimate_standardized spans {spread:.0f}x across universes "
+                f"({min(standardized):.4g} to {max(standardized):.4g}). It is meant to be "
+                "on one comparable scale — standardize the focal predictor (and divide "
+                "by the modelled outcome's SD) rather than reporting the raw coefficient."
+            )
+
+
+# -- 2. analysis.py structure -----------------------------------------------
+
+analysis_path = APP / "analysis.py"
+if not analysis_path.exists():
+    fail(f"{analysis_path} is missing")
+else:
+    source = analysis_path.read_text()
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as exc:
+        fail(f"analysis.py does not parse: {exc}")
+        tree = None
+
+    if tree is not None:
+        functions = [n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
+        analyze_fns = [f for f in functions if f.name == "analyze"]
+        if not analyze_fns:
+            fail("analysis.py defines no `analyze` function — the parametric entry point is required")
+        elif len(analyze_fns) > 1:
+            fail("analysis.py defines `analyze` more than once")
+        else:
+            args = [a.arg for a in analyze_fns[0].args.args]
+            if len(args) < 2:
+                fail(f"`analyze` must take (df, selections); got ({', '.join(args)})")
+
+    # A literal universe id inside the source is the signature of a per-cell
+    # branch, which is exactly what this design forbids.
+    for uid in EXPECTED:
+        for match in re.finditer(re.escape(uid), source):
+            line = source[: match.start()].count("\n") + 1
+            context = source.splitlines()[line - 1] if line <= len(source.splitlines()) else ""
+            # Reading the id from the universe files is fine; comparing against
+            # a hard-coded one is not.
+            if re.search(r"==|!=|\bin\b\s*[\[({]|\bif\b", context):
+                fail(
+                    f"analysis.py line {line} branches on a specific universe id ({uid}): "
+                    "every universe must take the same code path"
+                )
+                break
+
+
+# -- report -----------------------------------------------------------------
+
+if failures:
+    print("STRUCTURAL CHECK FAILED")
+    for f in failures:
+        print(f"  - {f}")
+    sys.exit(1)
+
+print(f"structural check passed: {len(rows)} universes, parametric analyze() present")

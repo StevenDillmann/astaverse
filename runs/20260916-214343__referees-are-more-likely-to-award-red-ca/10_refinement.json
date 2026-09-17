@@ -1,0 +1,110 @@
+{
+  "needed": true,
+  "reason": "The multiverse combines different red-card outcomes, event/exposure estimands, and skin-tone representations. These choices define substantively different claims, especially because some specifications use continuous or multi-level skin-tone predictors rather than a direct dark-versus-light contrast.",
+  "parent_hypothesis": "Referees are more likely to award red cards to dark-skinned players than to light-skinned players.",
+  "dimensions": [
+    "Outcome definition: all sendings-off versus straight red cards only",
+    "Event/exposure estimand: count rate, any-event probability, versus exposure-adjusted event rate",
+    "Skin-tone measurement and encoding: binary dark-versus-light versus continuous or five-level representations"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "Among player–referee dyads in the dataset, the probability of at least one sending-off (including second-yellow sendings-off) is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a dyad-level any-event logistic model.",
+      "pins": [
+        {
+          "decision_id": "sendoff_outcome_definition",
+          "option_id": "all_sendings_off"
+        },
+        {
+          "decision_id": "skin_tone_measurement_and_encoding",
+          "option_id": "mean_binary_threshold"
+        },
+        {
+          "decision_id": "exposure_and_event_model",
+          "option_id": "dyad_any_event_logistic"
+        },
+        {
+          "decision_id": "repeated_player_referee_structure",
+          "option_id": "player_referee_random_intercepts"
+        },
+        {
+          "decision_id": "fixed_covariate_adjustment",
+          "option_id": "player_characteristics_adjusted"
+        },
+        {
+          "decision_id": "uncertainty_accounting",
+          "option_id": "model_based_uncertainty"
+        }
+      ],
+      "rationale": "The parent conflates any sending-off with straight red cards and also leaves the event estimand and skin-tone encoding open. Outcome choice changed inference in 51.6% of paired specifications, and the any-event model is a distinct probability estimand. Binary encoding is fixed because the parent states a dark-versus-light contrast. Covariate adjustment is also pinned because it produced large effect changes and inference flips; the remaining analytic choices are fixed to define one reproducible target rather than treated as additional forks.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among player–referee dyads in the dataset, the probability of at least one straight red card is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a dyad-level any-event logistic model.",
+      "pins": [
+        {
+          "decision_id": "sendoff_outcome_definition",
+          "option_id": "straight_red_only"
+        },
+        {
+          "decision_id": "skin_tone_measurement_and_encoding",
+          "option_id": "mean_binary_threshold"
+        },
+        {
+          "decision_id": "exposure_and_event_model",
+          "option_id": "dyad_any_event_logistic"
+        },
+        {
+          "decision_id": "repeated_player_referee_structure",
+          "option_id": "player_referee_random_intercepts"
+        },
+        {
+          "decision_id": "fixed_covariate_adjustment",
+          "option_id": "player_characteristics_adjusted"
+        },
+        {
+          "decision_id": "uncertainty_accounting",
+          "option_id": "model_based_uncertainty"
+        }
+      ],
+      "rationale": "Straight red cards are substantively different from all sendings-off, and the two outcome definitions produced different inference in 51.6% of paired specifications without reversing the estimated sign. This successor therefore isolates the straight-red outcome while fixing the binary contrast, event estimand, and adjustment choices that otherwise leave the parent ambiguous.",
+      "directional": true,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among players in the dataset, the exposure-adjusted rate of all sendings-off is higher for dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and a Poisson exposure model.",
+      "pins": [
+        {
+          "decision_id": "sendoff_outcome_definition",
+          "option_id": "all_sendings_off"
+        },
+        {
+          "decision_id": "skin_tone_measurement_and_encoding",
+          "option_id": "mean_binary_threshold"
+        },
+        {
+          "decision_id": "exposure_and_event_model",
+          "option_id": "poisson_exposure_model"
+        },
+        {
+          "decision_id": "repeated_player_referee_structure",
+          "option_id": "player_referee_random_intercepts"
+        },
+        {
+          "decision_id": "fixed_covariate_adjustment",
+          "option_id": "player_characteristics_adjusted"
+        },
+        {
+          "decision_id": "uncertainty_accounting",
+          "option_id": "model_based_uncertainty"
+        }
+      ],
+      "rationale": "An exposure-adjusted event rate is a different estimand from the probability that a dyad has any event. Count-rate, any-event, and Poisson exposure specifications showed materially different effect magnitudes and inference changes, so the rate claim must be separated rather than combined with the probability claims. The binary skin-tone contrast and covariate adjustment are fixed because their alternatives also materially altered results.",
+      "directional": true,
+      "answerable_with_dataset": true
+    }
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T22:03:54+00:00"
+}

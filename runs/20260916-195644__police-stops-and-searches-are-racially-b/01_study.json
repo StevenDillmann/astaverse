@@ -1,0 +1,429 @@
+{
+  "hypothesis": "Police stops and searches are racially biased.",
+  "dataset_path": "/Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv",
+  "dataset_name": "nc-durham-stops",
+  "dataset_description": "Every recorded vehicular police stop in Durham, North Carolina, 2002-2015, from the Stanford Open Policing Project: 326,024 stops with driver race, stop date and time, whether a search was conducted, and whether contraband was recovered. Supports outcome/hit-rate tests and time-of-day (veil-of-darkness) designs; it carries no population denominator, so per-capita benchmark tests are not computable from it alone.",
+  "n_rows": 326024,
+  "columns": [
+    {
+      "name": "raw_row_number",
+      "dtype": "number",
+      "description": "Row identifier from the source release.",
+      "n_missing": 0,
+      "min": 1219541.0,
+      "max": 20280228.0,
+      "samples": [
+        1219541,
+        1221117,
+        1221124
+      ],
+      "std": 5464798.410229397,
+      "num_unique_values": 326024
+    },
+    {
+      "name": "date",
+      "dtype": "string",
+      "description": "Date of the stop (YYYY-MM-DD).",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "2001-12-28",
+        "2002-01-01",
+        "2002-01-02"
+      ],
+      "std": null,
+      "num_unique_values": 5112
+    },
+    {
+      "name": "time",
+      "dtype": "string",
+      "description": "Time of the stop (HH:MM:SS); needed for any time-of-day or sunset-based analysis.",
+      "n_missing": 48239,
+      "min": null,
+      "max": null,
+      "samples": [
+        "00:00:01",
+        "00:00:02",
+        "00:00:03"
+      ],
+      "std": null,
+      "num_unique_values": 57162
+    },
+    {
+      "name": "location",
+      "dtype": "string",
+      "description": "Free-text stop location.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "+Durham, Durham County",
+        ", Brunswick County",
+        ", Dare County"
+      ],
+      "std": null,
+      "num_unique_values": 96
+    },
+    {
+      "name": "county_name",
+      "dtype": "category",
+      "description": "County of the stop.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "Beaufort County",
+        "Brunswick County",
+        "Dare County"
+      ],
+      "std": null,
+      "num_unique_values": 12
+    },
+    {
+      "name": "subject_age",
+      "dtype": "number",
+      "description": "Age of the driver.",
+      "n_missing": 7,
+      "min": 10.0,
+      "max": 99.0,
+      "samples": [
+        10,
+        11,
+        12
+      ],
+      "std": 12.832317289392321,
+      "num_unique_values": 89
+    },
+    {
+      "name": "subject_race",
+      "dtype": "category",
+      "description": "Race of the driver as recorded: black, white, hispanic, asian/pacific islander, other, unknown.",
+      "n_missing": 1,
+      "min": null,
+      "max": null,
+      "samples": [
+        "asian/pacific islander",
+        "black",
+        "hispanic"
+      ],
+      "std": null,
+      "num_unique_values": 6
+    },
+    {
+      "name": "subject_sex",
+      "dtype": "category",
+      "description": "Sex of the driver.",
+      "n_missing": 1,
+      "min": null,
+      "max": null,
+      "samples": [
+        "female",
+        "male"
+      ],
+      "std": null,
+      "num_unique_values": 2
+    },
+    {
+      "name": "officer_id_hash",
+      "dtype": "string",
+      "description": "Anonymised officer identifier; supports officer-level clustering.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "00155aed0d",
+        "002e4938f6",
+        "0044ef63f5"
+      ],
+      "std": null,
+      "num_unique_values": 1642
+    },
+    {
+      "name": "department_name",
+      "dtype": "category",
+      "description": "Reporting department.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "Durham County Sheriff's Office",
+        "Durham Police Department"
+      ],
+      "std": null,
+      "num_unique_values": 2
+    },
+    {
+      "name": "type",
+      "dtype": "category",
+      "description": "Stop type; all rows are vehicular.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "vehicular"
+      ],
+      "std": null,
+      "num_unique_values": 1
+    },
+    {
+      "name": "arrest_made",
+      "dtype": "category",
+      "description": "Whether an arrest resulted.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": 0.1515956721155506,
+      "num_unique_values": 2
+    },
+    {
+      "name": "citation_issued",
+      "dtype": "category",
+      "description": "Whether a citation was issued.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": 0.4997325179600314,
+      "num_unique_values": 2
+    },
+    {
+      "name": "warning_issued",
+      "dtype": "category",
+      "description": "Whether a warning was issued.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": 0.4946456570391246,
+      "num_unique_values": 2
+    },
+    {
+      "name": "outcome",
+      "dtype": "category",
+      "description": "Most severe outcome: citation, warning or arrest.",
+      "n_missing": 10782,
+      "min": null,
+      "max": null,
+      "samples": [
+        "arrest",
+        "citation",
+        "warning"
+      ],
+      "std": null,
+      "num_unique_values": 3
+    },
+    {
+      "name": "contraband_found",
+      "dtype": "category",
+      "description": "Whether contraband was recovered; NA where no search was conducted.",
+      "n_missing": 304318,
+      "min": null,
+      "max": null,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": null,
+      "num_unique_values": 2
+    },
+    {
+      "name": "contraband_drugs",
+      "dtype": "category",
+      "description": "Whether drugs were recovered.",
+      "n_missing": 304318,
+      "min": null,
+      "max": null,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": null,
+      "num_unique_values": 2
+    },
+    {
+      "name": "contraband_weapons",
+      "dtype": "category",
+      "description": "Whether weapons were recovered.",
+      "n_missing": 304318,
+      "min": null,
+      "max": null,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": null,
+      "num_unique_values": 2
+    },
+    {
+      "name": "frisk_performed",
+      "dtype": "category",
+      "description": "Whether a frisk was performed.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": 0.04866651274811211,
+      "num_unique_values": 2
+    },
+    {
+      "name": "search_conducted",
+      "dtype": "category",
+      "description": "Whether the stop involved a search.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": 0.24928997521546267,
+      "num_unique_values": 2
+    },
+    {
+      "name": "search_person",
+      "dtype": "category",
+      "description": "Whether the person was searched.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": 0.23589229533063277,
+      "num_unique_values": 2
+    },
+    {
+      "name": "search_vehicle",
+      "dtype": "category",
+      "description": "Whether the vehicle was searched.",
+      "n_missing": 0,
+      "min": 0.0,
+      "max": 1.0,
+      "samples": [
+        "FALSE",
+        "TRUE"
+      ],
+      "std": 0.24177055477446918,
+      "num_unique_values": 2
+    },
+    {
+      "name": "search_basis",
+      "dtype": "category",
+      "description": "Recorded legal basis for the search (consent, probable cause, etc.).",
+      "n_missing": 305092,
+      "min": null,
+      "max": null,
+      "samples": [
+        "consent",
+        "other",
+        "probable cause"
+      ],
+      "std": null,
+      "num_unique_values": 3
+    },
+    {
+      "name": "reason_for_frisk",
+      "dtype": "string",
+      "description": "Recorded reason for the frisk.",
+      "n_missing": 325250,
+      "min": null,
+      "max": null,
+      "samples": [
+        "Erratic/Suspicious Behavior",
+        "Erratic/Suspicious Behavior|Informant Tip",
+        "Erratic/Suspicious Behavior|Informant Tip|Other Official Information"
+      ],
+      "std": null,
+      "num_unique_values": 27
+    },
+    {
+      "name": "reason_for_search",
+      "dtype": "string",
+      "description": "Recorded reason for the search.",
+      "n_missing": 304318,
+      "min": null,
+      "max": null,
+      "samples": [
+        "Erratic/Suspicious Behavior",
+        "Erratic/Suspicious Behavior|Informant Tip",
+        "Erratic/Suspicious Behavior|Informant Tip|Other Official Information"
+      ],
+      "std": null,
+      "num_unique_values": 57
+    },
+    {
+      "name": "reason_for_stop",
+      "dtype": "category",
+      "description": "Recorded reason for the stop.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "Checkpoint",
+        "Driving While Impaired",
+        "Investigation"
+      ],
+      "std": null,
+      "num_unique_values": 10
+    },
+    {
+      "name": "raw_Ethnicity",
+      "dtype": "category",
+      "description": "Ethnicity exactly as recorded in the source data.",
+      "n_missing": 1,
+      "min": null,
+      "max": null,
+      "samples": [
+        "H",
+        "N"
+      ],
+      "std": null,
+      "num_unique_values": 2
+    },
+    {
+      "name": "raw_Race",
+      "dtype": "category",
+      "description": "Race exactly as recorded in the source data.",
+      "n_missing": 1,
+      "min": null,
+      "max": null,
+      "samples": [
+        "A",
+        "B",
+        "I"
+      ],
+      "std": null,
+      "num_unique_values": 5
+    },
+    {
+      "name": "raw_action_description",
+      "dtype": "category",
+      "description": "Action description exactly as recorded in the source data.",
+      "n_missing": 0,
+      "min": null,
+      "max": null,
+      "samples": [
+        "Citation Issued",
+        "No Action Taken",
+        "On-View Arrest"
+      ],
+      "std": null,
+      "num_unique_values": 5
+    }
+  ]
+}

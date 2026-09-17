@@ -1,0 +1,664 @@
+{
+  "evidence_status": "inconclusive",
+  "requires_refinement": true,
+  "answer": "The evidence does not provide a stable conclusion for the broad hypothesis that search rates differ across known race categories. Although all 94 available estimates were statistically significant, the result depends strongly on the race contrast: the median standardized effect was -0.279 for all-pairwise/global comparisons but 0.196 for comparisons versus white, with a 74.7% inference-flip and sign-reversal rate.",
+  "rationale": "There is evidence of race-related differences under the available specifications, but the major contrast-structure dependence makes the broad claim non-comparable across specifications. In addition, 66 of 160 universes were unavailable, so the evidence is incomplete rather than sufficient for a definitive overall assessment.",
+  "key_evidence": [
+    "94 estimates had confidence intervals and none were indeterminate; 57 were significantly negative and 37 significantly positive.",
+    "The median standardized effect was -0.2788 for all-pairwise comparisons and -0.2788 for the global omnibus comparison, versus 0.1956 when each category was compared with white.",
+    "Changing contrast structure produced a 0.7467 inference-flip rate and a 0.7467 sign-reversal rate.",
+    "Only 94 of 160 universes were available; 66 were unavailable."
+  ],
+  "refinement_reason": "The hypothesis combines substantively different race-contrast structures and search-outcome definitions. Race contrast choice is highly consequential, and the outcome choice changes the median standardized effect from -0.2788 for any recorded search to approximately -0.046 to -0.048 for the other outcomes.",
+  "refinement_dimensions": [
+    "race contrast structure",
+    "search outcome definition"
+  ],
+  "suggested_hypotheses": [
+    "Among all recorded stops, known race categories differ in search_conducted rates when assessed using a prespecified all-pairwise or global omnibus comparison.",
+    "Among all recorded stops, each specified known race category differs from white in person-search rates, with category-specific effects reported separately.",
+    "Among all recorded stops, known race categories differ in vehicle-search rates under a prespecified race-contrast structure."
+  ],
+  "caveats": [
+    "The supplied summaries do not identify which specific race categories drive the positive or negative results.",
+    "The large contrast-structure sensitivity limits direct comparability of the standardized effects.",
+    "Non-significance cannot be inferred for unavailable universes; 66 of 160 universes were unavailable."
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T21:27:07+00:00",
+  "evidence_snapshot": {
+    "curve_summary": {
+      "scale": "standardized",
+      "n_universes": 160,
+      "n_estimates": 94,
+      "n_with_ci": 94,
+      "minimum": -0.2808226078024079,
+      "q25": -0.27876834184697763,
+      "median": -0.26159256434832867,
+      "q75": 0.18944230190536845,
+      "maximum": 0.1961538021550665,
+      "n_significant_positive": 37,
+      "n_significant_negative": 57,
+      "n_indeterminate": 0,
+      "n_unavailable": 66
+    },
+    "decision_sensitivity": [
+      {
+        "decision_id": "contrast_structure",
+        "scale": "standardized",
+        "n_pairs": 117,
+        "n_effect_pairs": 75,
+        "n_inference_pairs": 75,
+        "median_abs_effect_change": 0.47447028651972684,
+        "normalized_effect_change": 1.0133692876292058,
+        "normalized_ci_low": 0.9716756104938978,
+        "normalized_ci_high": 1.0133692876293956,
+        "effect_change_p90": 0.4757268362061554,
+        "effect_change_max": 0.4768248581936704,
+        "median_abs_log10p_change": 3.383092688597097,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.7466666666666667,
+        "sign_reversal_rate": 0.7466666666666667,
+        "option_medians": {
+          "global_omnibus": -0.27876834184697763,
+          "all_pairwise": -0.27876685966896514,
+          "white_reference": 0.1955509006412782
+        },
+        "option_pairs": [
+          {
+            "option_a": "all_pairwise",
+            "option_b": "global_omnibus",
+            "n_pairs": 28,
+            "n_effect_pairs": 19,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "all_pairwise",
+            "option_b": "white_reference",
+            "n_pairs": 61,
+            "n_effect_pairs": 37,
+            "median_abs_change": 0.4744702865198157,
+            "median_shift": 0.4744702865198157,
+            "normalized_shift": 1.0133692876293956,
+            "inference_flip_rate": 1.0
+          },
+          {
+            "option_a": "global_omnibus",
+            "option_b": "white_reference",
+            "n_pairs": 28,
+            "n_effect_pairs": 19,
+            "median_abs_change": 0.4744733700781443,
+            "median_shift": 0.4744733700781443,
+            "normalized_shift": 1.0133758734650014,
+            "inference_flip_rate": 1.0
+          }
+        ]
+      },
+      {
+        "decision_id": "race_adjustment_model",
+        "scale": "standardized",
+        "n_pairs": 112,
+        "n_effect_pairs": 55,
+        "n_inference_pairs": 55,
+        "median_abs_effect_change": 0.024375785405615746,
+        "normalized_effect_change": 0.05206157897279456,
+        "normalized_ci_low": 0.046436741439463164,
+        "normalized_ci_high": 0.05229186117314887,
+        "effect_change_p90": 0.036903976734570014,
+        "effect_change_max": 0.036980763391246035,
+        "median_abs_log10p_change": 94.77488242779907,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "crude_rate_comparison": -0.27876685966896514,
+          "adjusted_logistic": -0.24665961184774648,
+          "unadjusted_logistic": -0.2688122137902631
+        },
+        "option_pairs": [
+          {
+            "option_a": "adjusted_logistic",
+            "option_b": "crude_rate_comparison",
+            "n_pairs": 37,
+            "n_effect_pairs": 18,
+            "median_abs_change": 0.024483605982897894,
+            "median_shift": -0.021823901693577563,
+            "normalized_shift": -0.04661128913831577,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "adjusted_logistic",
+            "option_b": "unadjusted_logistic",
+            "n_pairs": 37,
+            "n_effect_pairs": 18,
+            "median_abs_change": 0.024483605982888346,
+            "median_shift": -0.02182390169357834,
+            "normalized_shift": -0.04661128913831743,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "crude_rate_comparison",
+            "option_b": "unadjusted_logistic",
+            "n_pairs": 38,
+            "n_effect_pairs": 19,
+            "median_abs_change": 9.547918011776346e-15,
+            "median_shift": 2.4980018054066022e-15,
+            "normalized_shift": 5.3352093523270855e-15,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "search_outcome",
+        "scale": "standardized",
+        "n_pairs": 120,
+        "n_effect_pairs": 72,
+        "n_inference_pairs": 72,
+        "median_abs_effect_change": 0.005652937055478008,
+        "normalized_effect_change": 0.012073491132482787,
+        "normalized_ci_low": 0.00978445018851064,
+        "normalized_ci_high": 0.013292975437982675,
+        "effect_change_p90": 0.010337905035432299,
+        "effect_change_max": 0.01061204637657942,
+        "median_abs_log10p_change": 1.4565033812513306,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "search_conducted": -0.27876685966896514,
+          "person_search": -0.04589217478724815,
+          "search_or_frisk": -0.04774190178490921,
+          "vehicle_search": -0.04793856101709634
+        },
+        "option_pairs": [
+          {
+            "option_a": "person_search",
+            "option_b": "search_conducted",
+            "n_pairs": 30,
+            "n_effect_pairs": 12,
+            "median_abs_change": 0.007912428701729216,
+            "median_shift": -0.0018404377502201225,
+            "normalized_shift": -0.00393079007232821,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "person_search",
+            "option_b": "search_or_frisk",
+            "n_pairs": 18,
+            "n_effect_pairs": 12,
+            "median_abs_change": 0.007912428701729216,
+            "median_shift": -0.0018404377502201225,
+            "normalized_shift": -0.00393079007232821,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "person_search",
+            "option_b": "vehicle_search",
+            "n_pairs": 18,
+            "n_effect_pairs": 12,
+            "median_abs_change": 0.00241904970995796,
+            "median_shift": -0.002045193522548422,
+            "normalized_shift": -0.004368105573503793,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "search_conducted",
+            "option_b": "search_or_frisk",
+            "n_pairs": 18,
+            "n_effect_pairs": 12,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "search_conducted",
+            "option_b": "vehicle_search",
+            "n_pairs": 18,
+            "n_effect_pairs": 12,
+            "median_abs_change": 0.006177482946223722,
+            "median_shift": -0.00020475577232829945,
+            "normalized_shift": -0.0004373155011755827,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "search_or_frisk",
+            "option_b": "vehicle_search",
+            "n_pairs": 18,
+            "n_effect_pairs": 12,
+            "median_abs_change": 0.006177482946223722,
+            "median_shift": -0.00020475577232829945,
+            "normalized_shift": -0.0004373155011755827,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "race_definition",
+        "scale": "standardized",
+        "n_pairs": 100,
+        "n_effect_pairs": 33,
+        "n_inference_pairs": 33,
+        "median_abs_effect_change": 0.0006392411409316678,
+        "normalized_effect_change": 0.0013652853677324475,
+        "normalized_ci_low": 0.0009584872319503692,
+        "normalized_ci_high": 0.0013652853677325661,
+        "effect_change_p90": 0.0007470617182043227,
+        "effect_change_max": 0.0008208506787686365,
+        "median_abs_log10p_change": 0.0,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "subject_race_known_only": -0.2703767036489263,
+          "subject_race_with_unknown": -0.25503031540427157
+        },
+        "option_pairs": [
+          {
+            "option_a": "raw_race_ethnicity_recode",
+            "option_b": "subject_race_known_only",
+            "n_pairs": 33,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          },
+          {
+            "option_a": "raw_race_ethnicity_recode",
+            "option_b": "subject_race_with_unknown",
+            "n_pairs": 34,
+            "n_effect_pairs": 0,
+            "median_abs_change": null,
+            "median_shift": null,
+            "normalized_shift": null,
+            "inference_flip_rate": null
+          },
+          {
+            "option_a": "subject_race_known_only",
+            "option_b": "subject_race_with_unknown",
+            "n_pairs": 33,
+            "n_effect_pairs": 33,
+            "median_abs_change": 0.0006392411409316678,
+            "median_shift": -0.0006392411409316678,
+            "normalized_shift": -0.0013652853677324475,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "analysis_universe",
+        "scale": "standardized",
+        "n_pairs": 100,
+        "n_effect_pairs": 46,
+        "n_inference_pairs": 46,
+        "median_abs_effect_change": 0.0001541275898884198,
+        "normalized_effect_change": 0.00032918429331978957,
+        "normalized_ci_low": 0.00032025027614353464,
+        "normalized_ci_high": 0.0030063257567552047,
+        "effect_change_p90": 0.0014090758959121041,
+        "effect_change_max": 0.001416506992511113,
+        "median_abs_log10p_change": 0.0798842068836425,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "all_recorded_rows": -0.25428325368606725,
+          "period_all_counties": -0.27876834184697763,
+          "period_durham_county": -0.28017593556487724
+        },
+        "option_pairs": [
+          {
+            "option_a": "all_recorded_rows",
+            "option_b": "period_all_counties",
+            "n_pairs": 34,
+            "n_effect_pairs": 16,
+            "median_abs_change": 1.4853897265243443e-6,
+            "median_shift": -1.4821780124907313e-6,
+            "normalized_shift": -3.16562220929499e-6,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "all_recorded_rows",
+            "option_b": "period_durham_county",
+            "n_pairs": 33,
+            "n_effect_pairs": 15,
+            "median_abs_change": 0.0014090758959121041,
+            "median_shift": -0.0014090758959121041,
+            "normalized_shift": -0.0030094913789644995,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "period_all_counties",
+            "option_b": "period_durham_county",
+            "n_pairs": 33,
+            "n_effect_pairs": 15,
+            "median_abs_change": 0.0014075937178996134,
+            "median_shift": -0.0014075937178996134,
+            "normalized_shift": -0.0030063257567552047,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "dependence_handling",
+        "scale": "standardized",
+        "n_pairs": 72,
+        "n_effect_pairs": 54,
+        "n_inference_pairs": 54,
+        "median_abs_effect_change": 0.0,
+        "normalized_effect_change": 0.0,
+        "normalized_ci_low": 0.0,
+        "normalized_ci_high": 0.0,
+        "effect_change_p90": 0.0,
+        "effect_change_max": 0.0,
+        "median_abs_log10p_change": 82.34000562050949,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.0,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "iid": -0.27876685966896514,
+          "cluster_department": -0.25428325368606725,
+          "cluster_officer": -0.27876685966896514,
+          "two_way_cluster": -0.27876685966896514
+        },
+        "option_pairs": [
+          {
+            "option_a": "cluster_department",
+            "option_b": "cluster_officer",
+            "n_pairs": 12,
+            "n_effect_pairs": 9,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "cluster_department",
+            "option_b": "iid",
+            "n_pairs": 12,
+            "n_effect_pairs": 9,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "cluster_department",
+            "option_b": "two_way_cluster",
+            "n_pairs": 12,
+            "n_effect_pairs": 9,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "cluster_officer",
+            "option_b": "iid",
+            "n_pairs": 12,
+            "n_effect_pairs": 9,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "cluster_officer",
+            "option_b": "two_way_cluster",
+            "n_pairs": 12,
+            "n_effect_pairs": 9,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "iid",
+            "option_b": "two_way_cluster",
+            "n_pairs": 12,
+            "n_effect_pairs": 9,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      }
+    ],
+    "decisions": {
+      "analysis_universe": {
+        "label": "Analysis universe",
+        "kind": "preprocessing",
+        "rationale": "Which recorded stops should be included in the comparison?  [found by: direct]",
+        "options": {
+          "all_recorded_rows": {
+            "label": "All recorded rows",
+            "description": "Include every row in the dataset, regardless of date or county_name, provided subject_race and the selected search outcome are usable."
+          },
+          "period_all_counties": {
+            "label": "2002–2015 stops in all counties",
+            "description": "Keep rows with date from 2002-01-01 through 2015-12-31 inclusive, regardless of county_name."
+          },
+          "period_durham_county": {
+            "label": "2002–2015 Durham County stops",
+            "description": "Keep rows with date from 2002-01-01 through 2015-12-31 inclusive and county_name equal to Durham County."
+          }
+        }
+      },
+      "race_definition": {
+        "label": "Race-category definition and unknown handling",
+        "kind": "variable_choice",
+        "rationale": "Which column and category set should define the known race groups?  [found by: direct]",
+        "options": {
+          "subject_race_known_only": {
+            "label": "Recorded subject_race, known categories only",
+            "description": "Use subject_race and retain only black, white, hispanic, asian/pacific islander, and other; exclude rows coded unknown or missing."
+          },
+          "subject_race_with_unknown": {
+            "label": "Recorded subject_race including unknown",
+            "description": "Use subject_race with black, white, hispanic, asian/pacific islander, other, and unknown as separate comparison categories; exclude only missing values."
+          },
+          "raw_race_ethnicity_recode": {
+            "label": "Reconstructed race from raw fields",
+            "description": "Use raw_Race and raw_Ethnicity, applying the source release coding scheme to reconstruct mutually exclusive black, white, hispanic, asian/pacific islander, other, and unknown categories before analysis."
+          }
+        }
+      },
+      "search_outcome": {
+        "label": "Search outcome definition",
+        "kind": "variable_choice",
+        "rationale": "Which recorded action should count as a search for the search rate?  [found by: direct]",
+        "options": {
+          "search_conducted": {
+            "label": "Any recorded search",
+            "description": "Define the binary outcome as search_conducted = 1 versus search_conducted = 0; exclude rows with missing search_conducted."
+          },
+          "person_search": {
+            "label": "Person search",
+            "description": "Define the binary outcome as search_person = 1 versus search_person = 0; exclude rows with missing search_person."
+          },
+          "vehicle_search": {
+            "label": "Vehicle search",
+            "description": "Define the binary outcome as search_vehicle = 1 versus search_vehicle = 0; exclude rows with missing search_vehicle."
+          },
+          "search_or_frisk": {
+            "label": "Search or frisk",
+            "description": "Define the binary outcome as 1 when search_conducted = 1 or frisk_performed = 1, and 0 otherwise; exclude rows missing both component indicators."
+          }
+        }
+      },
+      "race_adjustment_model": {
+        "label": "Adjustment and rate-comparison model",
+        "kind": "model",
+        "rationale": "Should race-group search rates be compared without adjustment or conditional on recorded stop characteristics?  [found by: direct]",
+        "options": {
+          "crude_rate_comparison": {
+            "label": "Unadjusted group-rate comparison",
+            "description": "For each race category, report searches divided by stops and compare the categories using a single omnibus comparison of the unadjusted rates; do not include covariates."
+          },
+          "unadjusted_logistic": {
+            "label": "Unadjusted logistic regression",
+            "description": "Fit a binary logistic regression of the selected search outcome on race category alone, reporting race-group predicted probabilities or odds ratios."
+          },
+          "adjusted_logistic": {
+            "label": "Adjusted logistic regression",
+            "description": "Fit a binary logistic regression of the selected search outcome on race category, subject_age, subject_sex, reason_for_stop, county_name, department_name, and calendar date; report race-group adjusted predicted probabilities."
+          }
+        }
+      },
+      "contrast_structure": {
+        "label": "Race contrasts",
+        "kind": "inference",
+        "rationale": "What race comparison should constitute the primary test?  [found by: direct]",
+        "options": {
+          "global_omnibus": {
+            "label": "Global omnibus comparison",
+            "description": "Test the null that all included race categories have the same search probability, using one joint race comparison; do not make a specific race the reference for the primary claim."
+          },
+          "white_reference": {
+            "label": "Each category versus white",
+            "description": "Use white as the reference category and report separate contrasts of black, hispanic, asian/pacific islander, and other versus white; omit unknown unless it is included by the race-definition decision."
+          },
+          "all_pairwise": {
+            "label": "All pairwise race comparisons",
+            "description": "Report a separate comparison for every pair of included race categories, rather than one global comparison or only comparisons with white."
+          }
+        }
+      },
+      "dependence_handling": {
+        "label": "Dependence and uncertainty calculation",
+        "kind": "inference",
+        "rationale": "How should repeated stops associated with the same officer or department affect uncertainty estimates?  [found by: direct]",
+        "options": {
+          "iid": {
+            "label": "Independent-stop standard errors",
+            "description": "Treat rows as independent when computing standard errors, confidence intervals, and test statistics."
+          },
+          "cluster_officer": {
+            "label": "Cluster by officer",
+            "description": "Compute heteroskedasticity-robust standard errors clustered by officer_id_hash, allowing arbitrary dependence among stops handled by the same officer."
+          },
+          "cluster_department": {
+            "label": "Cluster by department",
+            "description": "Compute heteroskedasticity-robust standard errors clustered by department_name, allowing dependence within reporting departments."
+          },
+          "two_way_cluster": {
+            "label": "Two-way officer and department clustering",
+            "description": "Compute two-way cluster-robust standard errors using officer_id_hash and department_name as the two clustering dimensions."
+          }
+        }
+      }
+    },
+    "reported_results": 480,
+    "expected_results": 768,
+    "missing_universe_ids": [
+      "universe_160",
+      "universe_161",
+      "universe_162",
+      "universe_163",
+      "universe_164",
+      "universe_165",
+      "universe_166",
+      "universe_167",
+      "universe_168",
+      "universe_169",
+      "universe_170",
+      "universe_171",
+      "universe_172",
+      "universe_173",
+      "universe_174",
+      "universe_175",
+      "universe_176",
+      "universe_177",
+      "universe_178",
+      "universe_179",
+      "universe_180",
+      "universe_181",
+      "universe_182",
+      "universe_183",
+      "universe_184",
+      "universe_185",
+      "universe_186",
+      "universe_187",
+      "universe_188",
+      "universe_189",
+      "universe_190",
+      "universe_191",
+      "universe_192",
+      "universe_193",
+      "universe_194",
+      "universe_195",
+      "universe_196",
+      "universe_197",
+      "universe_198",
+      "universe_199",
+      "universe_200",
+      "universe_201",
+      "universe_202",
+      "universe_203",
+      "universe_204",
+      "universe_205",
+      "universe_206",
+      "universe_207",
+      "universe_208",
+      "universe_209",
+      "universe_210",
+      "universe_211",
+      "universe_212",
+      "universe_213",
+      "universe_214",
+      "universe_215",
+      "universe_216",
+      "universe_217",
+      "universe_218",
+      "universe_219",
+      "universe_220",
+      "universe_221",
+      "universe_222",
+      "universe_223",
+      "universe_224",
+      "universe_225",
+      "universe_226",
+      "universe_227",
+      "universe_228",
+      "universe_229",
+      "universe_230",
+      "universe_231",
+      "universe_232",
+      "universe_233",
+      "universe_234",
+      "universe_235",
+      "universe_236",
+      "universe_237",
+      "universe_238",
+      "universe_239",
+      "universe_240",
+      "universe_241",
+      "universe_242",
+      "universe_243",
+      "universe_244",
+      "universe_245",
+      "universe_246",
+      "universe_247",
+      "universe_248",
+      "universe_249",
+      "universe_250",
+      "universe_251",
+      "universe_252",
+      "universe_253",
+      "universe_254",
+      "universe_255"
+    ],
+    "unexpected_universe_ids": []
+  }
+}

@@ -1,0 +1,14 @@
+id: universe_186
+decisions:
+- decision_id: exposure_and_event_model
+  option_id: poisson_exposure_model
+- decision_id: fixed_covariate_adjustment
+  option_id: league_position_adjusted
+- decision_id: repeated_player_referee_structure
+  option_id: referee_random_intercept_only
+- decision_id: sendoff_outcome_definition
+  option_id: all_sendings_off
+- decision_id: skin_tone_measurement_and_encoding
+  option_id: mean_binary_threshold
+- decision_id: uncertainty_accounting
+  option_id: model_based_uncertainty

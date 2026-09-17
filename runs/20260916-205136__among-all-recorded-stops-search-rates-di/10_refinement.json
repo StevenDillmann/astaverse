@@ -1,0 +1,109 @@
+{
+  "needed": true,
+  "reason": "The hypothesis combines substantively different race-contrast structures and search-outcome definitions. Race contrast choice is highly consequential, and the outcome choice changes the median standardized effect from -0.2788 for any recorded search to approximately -0.046 to -0.048 for the other outcomes.",
+  "parent_hypothesis": "Among all recorded stops, search rates differ across the known race categories.",
+  "dimensions": [
+    "race contrast structure",
+    "search outcome definition"
+  ],
+  "hypotheses": [
+    {
+      "hypothesis": "Among all recorded stops with known subject race, search-conducted rates differ across the race categories under a global omnibus comparison.",
+      "pins": [
+        {
+          "decision_id": "analysis_universe",
+          "option_id": "all_recorded_rows"
+        },
+        {
+          "decision_id": "race_definition",
+          "option_id": "subject_race_known_only"
+        },
+        {
+          "decision_id": "search_outcome",
+          "option_id": "search_conducted"
+        },
+        {
+          "decision_id": "contrast_structure",
+          "option_id": "global_omnibus"
+        }
+      ],
+      "rationale": "The parent’s search-conducted outcome and omnibus race comparison are separately specified here. This branch is warranted because global omnibus and white-reference contrasts have opposite standardized-effect medians, while the evidence does not establish a directional effect for the omnibus comparison.",
+      "directional": false,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among all recorded stops with known subject race, each race category’s search-conducted rate differs from the other specified categories in the all-pairwise comparisons.",
+      "pins": [
+        {
+          "decision_id": "analysis_universe",
+          "option_id": "all_recorded_rows"
+        },
+        {
+          "decision_id": "race_definition",
+          "option_id": "subject_race_known_only"
+        },
+        {
+          "decision_id": "search_outcome",
+          "option_id": "search_conducted"
+        },
+        {
+          "decision_id": "contrast_structure",
+          "option_id": "all_pairwise"
+        }
+      ],
+      "rationale": "All-pairwise and global omnibus comparisons produced nearly identical standardized-effect summaries, but they answer different inferential questions and therefore should not be combined. The claim is non-directional because the evidence does not support one common sign for all pairwise contrasts.",
+      "directional": false,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among all recorded stops with known subject race, each specified race category’s person-search rate differs from the white category.",
+      "pins": [
+        {
+          "decision_id": "analysis_universe",
+          "option_id": "all_recorded_rows"
+        },
+        {
+          "decision_id": "race_definition",
+          "option_id": "subject_race_known_only"
+        },
+        {
+          "decision_id": "search_outcome",
+          "option_id": "person_search"
+        },
+        {
+          "decision_id": "contrast_structure",
+          "option_id": "white_reference"
+        }
+      ],
+      "rationale": "This isolates the white-reference contrast and person-search outcome, both of which were combined with alternative choices in the parent. The reported evidence does not establish a direction for every category-specific comparison, so a non-directional claim is appropriate.",
+      "directional": false,
+      "answerable_with_dataset": true
+    },
+    {
+      "hypothesis": "Among all recorded stops with known subject race, vehicle-search rates differ across the specified race categories under an all-pairwise comparison.",
+      "pins": [
+        {
+          "decision_id": "analysis_universe",
+          "option_id": "all_recorded_rows"
+        },
+        {
+          "decision_id": "race_definition",
+          "option_id": "subject_race_known_only"
+        },
+        {
+          "decision_id": "search_outcome",
+          "option_id": "vehicle_search"
+        },
+        {
+          "decision_id": "contrast_structure",
+          "option_id": "all_pairwise"
+        }
+      ],
+      "rationale": "Vehicle search is a distinct outcome from person search and from any recorded search, and its race contrasts must be stated explicitly. The available summary supports separating this question but does not support a common directional prediction.",
+      "directional": false,
+      "answerable_with_dataset": true
+    }
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T21:27:25+00:00"
+}

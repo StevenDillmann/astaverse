@@ -1,0 +1,45 @@
+Hypothesis: Among searched stops in all recorded stops, Black subjects have a higher rate of any contraband hit than White subjects.
+
+Decisions:
+
+- race_analytic_sample: Race groups included
+  Which recorded driver races should define the Black-versus-White comparison?  [found by: direct]
+    * black_white_only [default]: Black and White subjects only — Retain rows where `subject_race` is exactly `black` or `white`; exclude `hispanic`, `asian/pacific islander`, `other`, `unknown`, and missing values.
+    * use_raw_race_mapping: Use raw race fields to classify Black and White — Classify subjects using `raw_Race` (and, if needed, `raw_Ethnicity`) according to the source codes; retain only source-coded Black and White subjects, excluding other or ambiguous codes.
+    * include_unknown_as_nonwhite: Black versus all non-Black subjects — Retain Black subjects as the exposed group and combine White, Hispanic, Asian/Pacific Islander, Other, Unknown, and missing `subject_race` values into the comparison group.
+
+- searched_stop_definition: Definition of a searched stop
+  Which rows count as searched stops for the denominator?  [found by: direct]
+    * search_conducted [default]: Recorded conducted search — Retain rows with `search_conducted == 1`; exclude all rows with `search_conducted == 0` or missing.
+    * person_or_vehicle_search: Person or vehicle search indicator — Retain rows with `search_person == 1` or `search_vehicle == 1`; exclude rows where both indicators are 0 or missing.
+    * any_search_related_action: Any search-related action — Retain rows with `search_conducted == 1`, `search_person == 1`, `search_vehicle == 1`, or `frisk_performed == 1`; treat a row as searched if any of these indicators equals 1.
+
+- contraband_hit_coding: Any-contraband outcome coding
+  How should `contraband_found`, `contraband_drugs`, and `contraband_weapons` define a hit among selected searched stops?  [found by: direct]
+    * direct_contraband_complete_case [default]: Direct contraband field, complete cases — Define a hit as `contraband_found == TRUE` and a non-hit as `contraband_found == FALSE`; exclude selected searched rows where `contraband_found` is missing.
+    * direct_contraband_missing_nonhit: Direct contraband field, missing as no hit — Define a hit as `contraband_found == TRUE`; define every other selected searched row, including missing `contraband_found`, as a non-hit.
+    * drug_or_weapon_union: Union of drugs and weapons fields — Define a hit if `contraband_drugs == TRUE` or `contraband_weapons == TRUE`; define a non-hit if both are FALSE; exclude rows where both component fields are missing.
+
+- date_scope: Calendar scope of recorded stops
+  Which dates in the supplied rows should enter the analysis?  [found by: direct]
+    * all_supplied_rows [default]: All supplied rows — Use every row passing the race, searched-stop, and outcome rules, regardless of the value of `date`; do not impose an additional date filter.
+    * stated_2002_2015_window: Stops dated 2002 through 2015 — Retain only rows whose parsed `date` is between `2002-01-01` and `2015-12-31`, inclusive; exclude missing, invalid, and out-of-window dates.
+    * complete_date_only: All rows with valid dates — Retain all rows with a successfully parsed `date`, including dates outside 2002–2015; exclude only missing or invalid dates.
+
+- race_comparison_model: Statistical comparison of hit rates
+  Should the Black-versus-White comparison use raw rates or adjust for observed stop and driver characteristics?  [found by: direct]
+    * unadjusted_rate_comparison [default]: Unadjusted two-group rate comparison — For each race, calculate hits divided by selected searched stops and compare the two proportions without adjustment for `subject_age`, `subject_sex`, `reason_for_stop`, `department_name`, officer, date, or time.
+    * race_only_logistic: Race-only logistic model — Fit `hit ~ Black`, where `hit` is the coded any-contraband outcome and Black indicates `subject_race == black` versus `white`; report the race coefficient as the comparison.
+    * adjusted_logistic: Observed-characteristics adjusted logistic model — Fit `hit ~ Black + subject_age + subject_sex + reason_for_stop + department_name + calendar_year`, using complete cases for these predictors; report the adjusted Black coefficient, with `calendar_year` derived from `date`.
+
+- dependence_and_uncertainty: Dependence structure for uncertainty
+  How should repeated stops associated with the same officer or department affect standard errors and the hypothesis test?  [found by: direct]
+    * independent_stops [default]: Treat stops as independent — Compute uncertainty as if each searched stop were independent, with no clustering adjustment for `officer_id_hash` or `department_name`.
+    * cluster_officer: Cluster by officer — Use cluster-robust uncertainty with `officer_id_hash` as the clustering unit, allowing arbitrary dependence among stops handled by the same officer.
+    * cluster_department: Cluster by department — Use cluster-robust uncertainty with `department_name` as the clustering unit, allowing arbitrary dependence among stops reported by the same department.
+
+- verdict_rule: Verdict decision rule (applied downstream, not executed)
+  How the reported statistics become a supported / not-supported verdict. Left implicit by every plan, and consequential on its own.
+    * alpha_05_two_sided [default]: p < 0.05, two-sided — Conventional two-sided test at the 5% level.
+    * alpha_01_two_sided: p < 0.01, two-sided — Stricter two-sided threshold at the 1% level.
+    * alpha_05_directional: p < 0.05 and direction matches — Significant at 5% AND the estimate points the way the hypothesis predicts; a significant effect the other way counts as not supported.

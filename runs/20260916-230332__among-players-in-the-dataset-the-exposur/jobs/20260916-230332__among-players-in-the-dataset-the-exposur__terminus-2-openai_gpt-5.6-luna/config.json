@@ -1,0 +1,20 @@
+{
+    "job_name": "20260916-230332__among-players-in-the-dataset-the-exposur__terminus-2-openai_gpt-5.6-luna",
+    "jobs_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-230332__among-players-in-the-dataset-the-exposur/jobs",
+    "agents": [
+        {
+            "name": "terminus-2",
+            "model_name": "openai/gpt-5.6-luna"
+        }
+    ],
+    "tasks": [
+        {
+            "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-230332__among-players-in-the-dataset-the-exposur/harbor_task"
+        }
+    ],
+    "artifacts": [
+        "/app/universes.jsonl",
+        "/app/results.md",
+        "/app/analysis.py"
+    ]
+}

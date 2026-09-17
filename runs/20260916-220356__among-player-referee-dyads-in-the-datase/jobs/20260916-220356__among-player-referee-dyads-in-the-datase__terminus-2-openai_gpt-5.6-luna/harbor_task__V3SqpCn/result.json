@@ -1,0 +1,142 @@
+{
+    "id": "9f7be054-d8ec-45f7-9da4-aafd25fbdfef",
+    "task_name": "astaverse/multiverse__silberzahn-red-cards_multiverse",
+    "trial_name": "harbor_task__V3SqpCn",
+    "trial_uri": "file:///Users/stevend/Desktop/Asta/astaverse/runs/20260916-220356__among-player-referee-dyads-in-the-datase/jobs/20260916-220356__among-player-referee-dyads-in-the-datase__terminus-2-openai_gpt-5.6-luna/harbor_task__V3SqpCn",
+    "task_id": {
+        "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-220356__among-player-referee-dyads-in-the-datase/harbor_task"
+    },
+    "source": null,
+    "task_checksum": "8d9984aaef5591c8940311faef245c98e9b420ba1eab373f89ffcf402e82ac63",
+    "config": {
+        "task": {
+            "path": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-220356__among-player-referee-dyads-in-the-datase/harbor_task",
+            "git_url": null,
+            "git_commit_id": null,
+            "name": null,
+            "ref": null,
+            "overwrite": false,
+            "download_dir": null,
+            "source": null
+        },
+        "trial_name": "harbor_task__V3SqpCn",
+        "trials_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-220356__among-player-referee-dyads-in-the-datase/jobs/20260916-220356__among-player-referee-dyads-in-the-datase__terminus-2-openai_gpt-5.6-luna",
+        "install_only": false,
+        "timeout_multiplier": 1.0,
+        "agent_timeout_multiplier": null,
+        "verifier_timeout_multiplier": null,
+        "agent_setup_timeout_multiplier": null,
+        "environment_build_timeout_multiplier": null,
+        "agent": {
+            "name": "terminus-2",
+            "import_path": null,
+            "model_name": "openai/gpt-5.6-luna",
+            "n_concurrent": null,
+            "concurrency_group": null,
+            "skills": [],
+            "override_timeout_sec": null,
+            "override_setup_timeout_sec": null,
+            "max_timeout_sec": null,
+            "resume_trajectory": false,
+            "load_trajectory": null,
+            "extra_allowed_hosts": [],
+            "kwargs": {},
+            "mcp_servers": []
+        },
+        "environment": {
+            "type": "docker",
+            "import_path": null,
+            "force_build": false,
+            "delete": true,
+            "cpu_enforcement_policy": "auto",
+            "memory_enforcement_policy": "auto",
+            "override_cpus": null,
+            "override_memory_mb": null,
+            "override_storage_mb": null,
+            "override_gpus": null,
+            "override_tpu": null,
+            "mounts": null,
+            "extra_docker_compose": [],
+            "kwargs": {},
+            "extra_allowed_hosts": []
+        },
+        "verifier": {
+            "override_timeout_sec": null,
+            "max_timeout_sec": null,
+            "disable": false
+        },
+        "artifacts": [
+            "/app/universes.jsonl",
+            "/app/results.md",
+            "/app/analysis.py"
+        ],
+        "extra_instruction_paths": [],
+        "job_id": "704fa51e-f713-452d-97e0-417f40b7813d",
+        "source_trial": null
+    },
+    "agent_info": {
+        "name": "terminus-2",
+        "version": "2.0.0",
+        "model_info": {
+            "name": "gpt-5.6-luna",
+            "provider": "openai"
+        }
+    },
+    "agent_result": {
+        "n_input_tokens": 453213,
+        "n_cache_tokens": 420114,
+        "n_output_tokens": 17016,
+        "cost_usd": 0.037093230000000005,
+        "rollout_details": [],
+        "metadata": {
+            "n_episodes": 20,
+            "api_request_times_msec": [
+                4610.24284362793,
+                41582.72409439087,
+                17151.384830474854,
+                5895.583152770996,
+                3553.2660484313965,
+                8203.576803207397,
+                7864.490032196045,
+                6454.958915710449,
+                9069.692134857178,
+                3119.204044342041,
+                2341.18914604187,
+                4508.040189743042,
+                3693.716049194336,
+                8985.923051834106,
+                6077.981233596802,
+                10333.361148834229,
+                2838.7389183044434,
+                2567.1839714050293,
+                4181.572914123535,
+                4311.292886734009
+            ],
+            "summarization_count": 0
+        }
+    },
+    "verifier_result": null,
+    "verifier_environment_mode": "shared",
+    "exception_info": {
+        "exception_type": "RuntimeError",
+        "exception_message": "harbor_task__V3SqpCn__env: failed to send non-blocking keys: command=\"tmux send-keys -t terminus-2 -- 'echo SHELL_OK\\n'\", return_code=1, stderr=None, stdout='no server running on /tmp/tmux-0/default\\n'",
+        "exception_traceback": "Traceback (most recent call last):\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/trial.py\", line 378, in run\n    await self._run()\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/single_step.py\", line 41, in _run\n    await self._run_agent()\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/single_step.py\", line 77, in _run_agent\n    await self._run_agent_phase(\n    ...<5 lines>...\n    )\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/trial/trial.py\", line 480, in _run_agent_phase\n    await asyncio.wait_for(\n    ...<6 lines>...\n    )\n  File \"/Users/stevend/.local/share/uv/python/cpython-3.13.14-macos-aarch64-none/lib/python3.13/asyncio/tasks.py\", line 507, in wait_for\n    return await fut\n           ^^^^^^^^^\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1607, in run\n    await self._run_agent_loop(\n    ...<3 lines>...\n    )\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1399, in _run_agent_loop\n    timeout_occurred, terminal_output = await self._execute_commands(\n                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    ...<2 lines>...\n    )\n    ^\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/terminus_2.py\", line 1215, in _execute_commands\n    await session.send_keys(\n    ...<3 lines>...\n    )\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/tmux_session.py\", line 817, in send_keys\n    await self._send_non_blocking_keys(\n    ...<2 lines>...\n    )\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/tmux_session.py\", line 772, in _send_non_blocking_keys\n    await self._send_keys_to_session(keys, action=\"non-blocking\")\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/tmux_session.py\", line 745, in _send_keys_to_session\n    await _flush()\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/tmux_session.py\", line 735, in _flush\n    await self._send_key_batches(batch, action)\n  File \"/Users/stevend/.local/share/uv/tools/harbor/lib/python3.13/site-packages/harbor/agents/terminus_2/tmux_session.py\", line 722, in _send_key_batches\n    raise self._send_keys_error(action, command, result)\nRuntimeError: harbor_task__V3SqpCn__env: failed to send non-blocking keys: command=\"tmux send-keys -t terminus-2 -- 'echo SHELL_OK\\n'\", return_code=1, stderr=None, stdout='no server running on /tmp/tmux-0/default\\n'\n",
+        "occurred_at": "2026-09-16T22:30:27.332555Z"
+    },
+    "started_at": "2026-09-16T22:04:42.806287Z",
+    "finished_at": "2026-09-16T22:30:39.015117Z",
+    "environment_setup": {
+        "started_at": "2026-09-16T22:04:42.871040Z",
+        "finished_at": "2026-09-16T22:04:47.530881Z"
+    },
+    "agent_setup": {
+        "started_at": "2026-09-16T22:04:47.531030Z",
+        "finished_at": "2026-09-16T22:04:55.695208Z"
+    },
+    "agent_execution": {
+        "started_at": "2026-09-16T22:04:55.695460Z",
+        "finished_at": "2026-09-16T22:30:26.794095Z"
+    },
+    "verifier": null,
+    "step_results": null
+}

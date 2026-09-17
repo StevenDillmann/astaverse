@@ -1,0 +1,15 @@
+[2026-09-16T23:03:32+00:00] study: profiled /Users/stevend/Desktop/Asta/astaverse/data/datasets/silberzahn-red-cards/data.csv (146028 rows, 28 columns)
+[2026-09-16T23:03:33+00:00] run-all: starting decisions
+[2026-09-16T23:31:52+00:00] decisions: mode=direct models=openai/gpt-5.6-luna -> 5 execution decisions
+[2026-09-16T23:31:52+00:00] run-all: starting universes
+[2026-09-16T23:31:52+00:00] universes: 112 universes to execute (grid 192, 80 dropped by constraints); x3 post-hoc verdict rules = 336 analysed
+[2026-09-16T23:31:52+00:00] run-all: starting task
+[2026-09-16T23:31:52+00:00] task: emitted Harbor task with 122 files at /Users/stevend/Desktop/Asta/astaverse/runs/20260916-230332__among-players-in-the-dataset-the-exposur/harbor_task
+[2026-09-16T23:31:52+00:00] run-all: starting execute
+[2026-09-16T23:31:52+00:00] execute: running: harbor run --yes -p /Users/stevend/Desktop/Asta/astaverse/runs/20260916-230332__among-players-in-the-dataset-the-exposur/harbor_task -a terminus-2 -o /Users/stevend/Desktop/Asta/astaverse/runs/20260916-230332__among-players-in-the-dataset-the-exposur/jobs --job-name 20260916-230332__among-players-in-the-dataset-the-exposur__terminus-2-openai_gpt-5.6-luna -m openai/gpt-5.6-luna --artifact /app/universes.jsonl --artifact /app/results.md --artifact /app/analysis.py
+[2026-09-16T23:46:50+00:00] run-all: starting verdicts
+[2026-09-16T23:46:50+00:00] verdicts: 336 results from 1 source(s) x 3 verdict rule(s)
+[2026-09-16T23:46:50+00:00] run-all: starting conclusion
+[2026-09-16T23:47:05+00:00] conclusion: inconclusive + requires refinement
+[2026-09-16T23:47:05+00:00] run-all: starting refinement
+[2026-09-16T23:47:28+00:00] refinement: 4 successor hypotheses proposed

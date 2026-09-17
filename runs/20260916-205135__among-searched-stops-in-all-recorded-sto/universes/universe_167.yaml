@@ -1,0 +1,14 @@
+id: universe_167
+decisions:
+- decision_id: contraband_hit_coding
+  option_id: drug_or_weapon_union
+- decision_id: date_scope
+  option_id: all_supplied_rows
+- decision_id: dependence_and_uncertainty
+  option_id: cluster_department
+- decision_id: race_analytic_sample
+  option_id: include_unknown_as_nonwhite
+- decision_id: race_comparison_model
+  option_id: race_only_logistic
+- decision_id: searched_stop_definition
+  option_id: any_search_related_action

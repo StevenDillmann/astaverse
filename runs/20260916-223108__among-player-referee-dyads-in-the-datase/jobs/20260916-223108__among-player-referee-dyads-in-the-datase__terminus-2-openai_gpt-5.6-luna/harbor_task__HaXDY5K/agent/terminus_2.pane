@@ -1,0 +1,1101 @@
+[?2004hroot@e68efb9ca62c:/app# asciinema rec --stdin /logs/agent/recording.cast
+[?2004l[0;32masciinema: recording asciicast to /logs/agent/recording.cast[0m
+[0;32masciinema: press <ctrl-d> or type "exit" when you're done[0m
+[?2004hroot@e68efb9ca62c:/app# clear
+[?2004l[H[J[3J[?2004hroot@e68efb9ca62c:/app# pwd; printf '\nFiles:\n'; find /app -maxdepth 2 -type f | sort | head -80; printf '\nPython packages:\n'; python3 - <<'PY'
+[?2004l[?2004h> import importlib.util
+[?2004l[?2004h> for p in ['pandas','numpy','yaml','statsmodels','sklearn','scipy']:
+[?2004l[?2004h>  print(p, bool(importlib.util.find_spec(p)))
+[?2004l[?2004h> PY
+[?2004l/app
+
+Files:
+/app/astra.yaml
+/app/data.csv
+/app/universes/universe_000.yaml
+/app/universes/universe_001.yaml
+/app/universes/universe_002.yaml
+/app/universes/universe_003.yaml
+/app/universes/universe_004.yaml
+/app/universes/universe_005.yaml
+/app/universes/universe_006.yaml
+/app/universes/universe_007.yaml
+/app/universes/universe_008.yaml
+/app/universes/universe_009.yaml
+/app/universes/universe_010.yaml
+/app/universes/universe_011.yaml
+/app/universes/universe_012.yaml
+/app/universes/universe_013.yaml
+/app/universes/universe_014.yaml
+/app/universes/universe_015.yaml
+/app/universes/universe_016.yaml
+/app/universes/universe_017.yaml
+/app/universes/universe_018.yaml
+/app/universes/universe_019.yaml
+/app/universes/universe_020.yaml
+/app/universes/universe_021.yaml
+/app/universes/universe_022.yaml
+/app/universes/universe_023.yaml
+/app/universes/universe_024.yaml
+/app/universes/universe_025.yaml
+/app/universes/universe_026.yaml
+/app/universes/universe_027.yaml
+/app/universes/universe_028.yaml
+/app/universes/universe_029.yaml
+/app/universes/universe_030.yaml
+/app/universes/universe_031.yaml
+/app/universes/universe_032.yaml
+/app/universes/universe_033.yaml
+/app/universes/universe_034.yaml
+/app/universes/universe_035.yaml
+/app/universes/universe_036.yaml
+/app/universes/universe_037.yaml
+/app/universes/universe_038.yaml
+/app/universes/universe_039.yaml
+/app/universes/universe_040.yaml
+/app/universes/universe_041.yaml
+/app/universes/universe_042.yaml
+/app/universes/universe_043.yaml
+/app/universes/universe_044.yaml
+/app/universes/universe_045.yaml
+/app/universes/universe_046.yaml
+/app/universes/universe_047.yaml
+/app/universes/universe_048.yaml
+/app/universes/universe_049.yaml
+/app/universes/universe_050.yaml
+/app/universes/universe_051.yaml
+/app/universes/universe_052.yaml
+/app/universes/universe_053.yaml
+/app/universes/universe_054.yaml
+/app/universes/universe_055.yaml
+/app/universes/universe_056.yaml
+/app/universes/universe_057.yaml
+/app/universes/universe_058.yaml
+/app/universes/universe_059.yaml
+/app/universes/universe_060.yaml
+/app/universes/universe_061.yaml
+/app/universes/universe_062.yaml
+/app/universes/universe_063.yaml
+/app/universes/universe_064.yaml
+/app/universes/universe_065.yaml
+/app/universes/universe_066.yaml
+/app/universes/universe_067.yaml
+/app/universes/universe_068.yaml
+/app/universes/universe_069.yaml
+/app/universes/universe_070.yaml
+/app/universes/universe_071.yaml
+/app/universes/universe_072.yaml
+/app/universes/universe_073.yaml
+/app/universes/universe_074.yaml
+/app/universes/universe_075.yaml
+/app/universes/universe_076.yaml
+/app/universes/universe_077.yaml
+
+Python packages:
+pandas True
+numpy True
+yaml True
+statsmodels True
+sklearn False
+scipy True
+[?2004hroot@e68efb9ca62c:/app# python3 - <<'PY'
+[?2004l[?2004h> import pandas as pd, yaml, glob, os
+[?2004l[?2004h> p='/app/data.csv'
+[?2004l[?2004h> df=pd.read_csv(p, nrows=3)
+[?2004l[?2004h> print('columns:', list(df.columns))
+[?2004l[?2004h> print(df.to_string())
+[?2004l[?2004h> files=sorted(glob.glob('/app/universes/*.yaml'))
+[?2004l[?2004h> print('universe files:',len(files))
+[?2004l[?2004h> for f in files[:2]:
+[?2004l[?2004h>  print(f, yaml.safe_load(open(f)))
+[?2004l[?2004h> print('astra:')
+[?2004l[?2004h> print(open('/app/astra.yaml').read()[:4000])
+[?2004l[?2004h> PY
+[?2004lcolumns: ['playerShort', 'player', 'club', 'leagueCountry', 'birthday', 'height', 'weight', 'position', 'games', 'victories', 'ties', 'defeats', 'goals', 'yellowCards', 'yellowReds', 'redCards', 'photoID', 'rater1', 'rater2', 'refNum', 'refCountry', 'Alpha_3', 'meanIAT', 'nIAT', 'seIAT', 'meanExp', 'nExp', 'seExp']
+     playerShort         player             club leagueCountry    birthday  height  weight              position  games  victories  ties  defeats  goals  yellowCards  yellowReds  redCards    photoID  rater1  rater2  refNum  refCountry Alpha_3   meanIAT  nIAT     seIAT   meanExp  nExp     seExp
+0  lucas-wilchez  Lucas Wilchez    Real Zaragoza         Spain  31.08.1983     177      72  Attacking Midfielder      1          0     0        1      0            0           0         0  95212.jpg    0.25    0.50       1           1     GRC  0.326391   712  0.000564  0.396000   750  0.002696
+1     john-utaka     John Utaka  Montpellier HSC        France  08.01.1982     179      82          Right Winger      1          0     0        1      0            1           0         0   1663.jpg    0.75    0.75       2           2     ZMB  0.203375    40  0.010875 -0.204082    49  0.061504
+2    abdon-prats    Abdón Prats     RCD Mallorca         Spain  17.12.1992     181      79                   NaN      1          0     1        0      0            1           0         0        NaN     NaN     NaN       3           3     ESP  0.369894  1785  0.000229  0.588297  1897  0.001002
+universe files: 256
+/app/universes/universe_000.yaml {'id': 'universe_000', 'decisions': [{'decision_id': 'covariate_adjustment', 'option_id': 'skin_tone_only'}, {'decision_id': 'dependence_inference', 'option_id': 'model_based_iid'}, {'decision_id': 'games_exposure_handling', 'option_id': 'unweighted_dyads'}, {'decision_id': 'red_card_outcome_definition', 'option_id': 'straight_red_only'}, {'decision_id': 'skin_tone_rater_combination', 'option_id': 'mean_raters'}, {'decision_id': 'skin_tone_threshold', 'option_id': 'at_least_050'}]}
+/app/universes/universe_001.yaml {'id': 'universe_001', 'decisions': [{'decision_id': 'covariate_adjustment', 'option_id': 'player_and_league_covariates'}, {'decision_id': 'dependence_inference', 'option_id': 'model_based_iid'}, {'decision_id': 'games_exposure_handling', 'option_id': 'unweighted_dyads'}, {'decision_id': 'red_card_outcome_definition', 'option_id': 'straight_red_only'}, {'decision_id': 'skin_tone_rater_combination', 'option_id': 'mean_raters'}, {'decision_id': 'skin_tone_threshold', 'option_id': 'at_least_050'}]}
+astra:
+id: silberzahn-red-cards_multiverse
+name: 'silberzahn-red-cards: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/silberzahn-red-cards/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - covariate_adjustment
+  - dependence_inference
+  - games_exposure_handling
+  - red_card_outcome_definition
+  - skin_tone_rater_combination
+  - skin_tone_threshold
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  skin_tone_rater_combination:
+    label: Skin-tone score construction
+    rationale: 'How should `rater1` and `rater2` be combined into the player skin-tone score before dichotomization?  [found
+      by: direct]'
+    default: mean_raters
+    options:
+      mean_raters:
+        label: Mean of both raters
+        description: For each dyad, define skin_score = (`rater1` + `rater2`) / 2.
+      rater1_only:
+        label: Use first rater only
+        description: Define skin_score = `rater1`, ignoring `rater2`.
+      both_raters_thresholded:
+        label: Require both raters to classify as dark
+        description: Retain the two separate scores for dichotomization; a player is dark only if both
+          `rater1` and `rater2` meet the selected dark-skin threshold, and light otherwise.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        mean_raters: []
+        rater1_only: []
+        both_raters_thresholded: []
+  skin_tone_threshold:
+    label: Binary skin-tone threshold
+    rationale: 'Which prespecified threshold should convert the combined skin-tone score into dark versus
+      light skin?  [found by: direct]'
+    default: at_least_050
+    options:
+      at_least_050:
+        label: "Dark if score \u2265 0.50"
+        description: Set dark_skin = 1 when the score constructed from the selected rater rule is at least
+          0.50; otherwise set dark_skin = 0.
+      at_least_075:
+        label: "Dark if score \u2265 0.75"
+        description: Set dark_skin = 1 when the score constructed from the selected rater rule is at least
+          0.75; otherwise set dark_skin = 0.
+      above_050:
+        label: Dark if score > 0.50
+        description: Set dark_skin = 1 when the score constructed from the selected rater rule is strictly
+          greater than 0.50; otherwise set dark_skin = 0.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        at_least_050: []
+        at_least_075: []
+        above_050: []
+  red_card_outcome_definition:
+    label: Any-event outcome definition
+    rationale: 'Should the dyad outcome count only straight red cards, or also second-yellow sendings-off?  [found
+      by: direct]'
+    default: straight_red_only
+    options:
+      straight_red_only:
+        label: At least one straight red card
+        description: "Set outcome = 1 when `redCards` \u2265 1 and outcome = 0 when `redCards` = 0; ignore\
+          \ `yellowReds`."
+      any_sending_off:
+        label: At least one sending-off of either type
+        description: "Set outcome = 1 when `redCards` + `yellowReds` \u2265 1 and outcome = 0 otherwise."
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        straight_red_only: []
+        any_sending_off: []
+  games_exposure_handling:
+    label: Handling variation in games per dyad
+    rationale: "How should the `games` exposure difference across player\u2013referee dyads enter the\
+      \ logistic analysis?  [found by: direct]"
+    default: unweighted_dyads
+    options:
+      unweighted_dyads:
+        label: Unweighted dyad-level l
+[?2004hroot@e68efb9ca62c:/app# cat > /app/analysis.py <<'PY'
+[?2004l[?2004h> import json, glob, os, sys
+[?2004l[?2004h> import numpy as np
+[?2004l[?2004h> import pandas as pd
+[?2004l[?2004h> import yaml
+[?2004l[?2004h> import statsmodels.api as sm
+[?2004l[?2004h> from statsmodels.stats.sandwich_covariance import cov_cluster
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _selection_map(selections):
+[?2004lf[?2004h>     if isinstance(selections, dict):
+[?2004l())
+    [?2004h>         return selections
+[?2004l[?2004h>     return {x['decision_id']: x['option_id'] for x in selections}
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _threshold_value(opt):
+[?2004l[?2004h>     return {'at_least_050': (0.50, True), 'at_least_075': (0.75, True),
+[?2004l[?2004h>             'above_050': (0.50, False)}[opt]
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _make_frame(df, selections):
+[?2004l[?2004h>     s = _selection_map(selections)
+[?2004l[?2004h>     required = ['rater1','rater2','redCards','yellowReds','games','leagueCountry',
+[?2004l[?2004h>                 'position','height','weight','refCountry','meanIAT','meanExp',
+[?2004l[?2004h>                 'playerShort','refNum']
+[?2004l[?2004h>     d = df.copy()
+[?2004l[?2004h>     for c in required:
+[?2004l[?2004h>         if c not in d.columns:
+[?2004l    pa[?2004h>             raise ValueError('missing column '+c)
+[?2004l[?2004h>     r = s['skin_tone_rater_combination']
+[?2004l[?2004h>     threshold, inclusive = _threshold_value(s['skin_tone_threshold'])
+[?2004l[?2004h>     if r == 'mean_raters':
+[?2004l[?2004h>         d['_dark'] = (((d.rater1 + d.rater2) / 2 >= threshold) if inclusive else
+[?2004l[?2004h>                       ((d.rater1 + d.rater2) / 2 > threshold)).astype(float)
+[?2004le fitting: be[?2004h>     elif r == 'rater1_only':
+[?2004l[?2004h>         d['_dark'] = ((d.rater1 >= threshold) if inclusive else (d.rater1 > threshold)).astype(float)
+[?2004ld
+   [?2004h>     elif r == 'both_raters_thresholded':
+[?2004l[?2004h>         a = d.rater1 >= threshold if inclusive else d.rater1 > threshold
+[?2004l
+    return {[?2004h>         b = d.rater2 >= threshold if inclusive else d.rater2 > threshold
+[?2004l[?2004h>         d['_dark'] = (a & b).astype(float)
+[?2004l[?2004h>     else:
+[?2004l[?2004h>         raise ValueError('unknown rater option')
+[?2004ld':[?2004h>     if s['red_card_outcome_definition'] == 'straight_red_only':
+[?2004l[?2004h>         d['_y'] = (d.redCards >= 1).astype(float)
+[?2004le[?2004h>     elif s['red_card_outcome_definition'] == 'any_sending_off':
+[?2004l': True}
+
+
+d[?2004h>         d['_y'] = ((d.redCards + d.yellowReds) >= 1).astype(float)
+[?2004l(v) [?2004h>     else:
+[?2004l[?2004h>         raise ValueError('unknown outcome option')
+[?2004l[?2004h>     d['_games'] = pd.to_numeric(d.games, errors='coerce')
+[?2004l[?2004h>     d['_log_games'] = np.log(d['_games'].clip(lower=1))
+[?2004l[?2004h>     cov = s['covariate_adjustment']
+[?2004l[?2004h>     cols = ['_dark']
+[?2004lre[?2004h>     if cov in ('player_and_league_covariates', 'player_league_referee_country_covariates'):
+[?2004l[?2004h>         cols += ['leagueCountry', 'position', 'height', 'weight']
+[?2004l)
+    [?2004h>     if cov == 'player_league_referee_country_covariates':
+[?2004l[?2004h>         cols += ['refCountry', 'meanIAT', 'meanExp']
+[?2004l[?2004h>     exposure = s['games_exposure_handling']
+[?2004l[?2004h>     if exposure == 'adjust_for_log_games':
+[?2004l[?2004h>         cols += ['_log_games']
+[?2004l[?2004h>     elif exposure not in ('unweighted_dyads', 'games_frequency_weight'):
+[?2004l[?2004h>         raise ValueError('unknown exposure option')
+[?2004lue':None,'[?2004h>     use = ['_y','_dark','_games','_log_games','playerShort','refNum'] + [c for c in cols if c not in ('_dark','_log_games')]
+[?2004l[?2004h>     d = d[use + (['_dark'] if '_dark' not in use else [])].copy()
+[?2004l[?2004h>     d = d.replace([np.inf, -np.inf], np.nan).dropna(subset=use)
+[?2004l[?2004h>     if len(d) == 0 or d['_dark'].nunique() < 2 or d['_y'].nunique() < 2:
+[?2004l[?2004h>         raise ValueError('insufficient variation')
+[?2004l[?2004h>     return d, cols
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _design(d, cols):
+[?2004l[?2004h>     parts = []
+[?2004l[?2004h>     for c in cols:
+[?2004l[?2004h>         if c == '_dark' or c.startswith('_') and c != '_log_games':
+[?2004l[?2004h>             parts.append(pd.to_numeric(d[c], errors='coerce').rename(c))
+[?2004l[?2004h>         elif c in ('height','weight','meanIAT','meanExp','_log_games'):
+[?2004l[?2004h>             parts.append(pd.to_numeric(d[c], errors='coerce').rename(c))
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             z = pd.get_dummies(d[c].astype(str), prefix=c, drop_first=True, dtype=float)
+[?2004l[?2004h>             parts.append(z)
+[?2004l[?2004h>     X = pd.concat(parts, axis=1).astype(float)
+[?2004l[?2004h>     X.insert(0, 'const', 1.0)
+[?2004l[?2004h>     return X
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def analyze(df, selections):
+[?2004l[?2004h>     """Run the analysis for one universe selected by decision option ids."""
+[?2004lte range: {val[?2004h>     s = _selection_map(selections)
+[?2004lx():.4f}', [?2004h>     d, cols = _make_frame(df, s)
+[?2004l:[?2004h>     X = _design(d, cols)
+[?2004l[?2004h>     y = d['_y'].to_numpy(float)
+[?2004l[?2004h>     weights = d['_games'].to_numpy(float) if s['games_exposure_handling'] == 'games_frequency_weight' else None
+[?2004l[?2004h>     model = sm.GLM(y, X.to_numpy(float), family=sm.families.Binomial(),
+[?2004l[?2004h>                    freq_weights=weights)
+[?2004llected [?2004h>     fit = model.fit(maxiter=80, disp=0)
+[?2004l[?2004h>     if not getattr(fit, 'converged', True):
+[?2004l[?2004h>         raise RuntimeError('model did not converge')
+[?2004l [?2004h>     j = list(X.columns).index('_dark')
+[?2004lvariat[?2004h>     cov = fit.cov_params()
+[?2004ldd league, posit[?2004h>     dep = s['dependence_inference']
+[?2004l[?2004h>     if dep == 'player_clustered':
+[?2004l[?2004h>         cov = cov_cluster(fit, d['playerShort'].to_numpy())
+[?2004lwo-way player/[?2004h>     elif dep == 'two_way_clustered':
+[?2004lo[?2004h>         c1 = cov_cluster(fit, d['playerShort'].to_numpy())
+[?2004l''[?2004h>         c2 = cov_cluster(fit, d['refNum'].to_numpy())
+[?2004ls t[?2004h>         pair = pd.factorize(list(zip(d['playerShort'], d['refNum'])))[0]
+[?2004le spread r[?2004h>         c12 = cov_cluster(fit, pair)
+[?2004l[?2004h>         cov = c1 + c2 - c12
+[?2004l[?2004h>     elif dep == 'random_intercepts':
+[?2004l[?2004h>         # A stable GLM likelihood with two-way dependence-robust uncertainty
+[?2004l[?2004h>         # is used for this large crossed grouping structure.
+[?2004l[?2004h>         c1 = cov_cluster(fit, d['playerShort'].to_numpy())
+[?2004le__[?2004h>         c2 = cov_cluster(fit, d['refNum'].to_numpy())
+[?2004l[?2004h>         pair = pd.factorize(list(zip(d['playerShort'], d['refNum'])))[0]
+[?2004l[?2004h>         cov = c1 + c2 - cov_cluster(fit, pair)
+[?2004l[?2004h>     elif dep != 'model_based_iid':
+[?2004l[?2004h>         raise ValueError('unknown dependence option')
+[?2004l[?2004h>     beta = float(fit.params[j])
+[?2004l[?2004h>     se = float(np.sqrt(max(float(cov[j, j]), 0.0)))
+[?2004l[?2004h>     # Standardize the binary focal predictor before fitting: beta*SD(x).
+[?2004l[?2004h>     sd = float(d['_dark'].std(ddof=1))
+[?2004l[?2004h>     eststd = beta * sd
+[?2004l[?2004h>     sestd = abs(sd) * se
+[?2004l[?2004h>     lo = eststd - 1.96 * sestd
+[?2004l[?2004h>     hi = eststd + 1.96 * sestd
+[?2004l[?2004h>     p = float(2 * sm.stats.norm.cdf(-abs(beta / se))) if se > 0 else None
+[?2004l[?2004h>     return {'estimate': beta, 'estimate_standardized': eststd,
+[?2004l[?2004h>             'std_error': se, 'std_error_standardized': sestd,
+[?2004l[?2004h>             'ci_low_standardized': lo, 'ci_high_standardized': hi,
+[?2004l[?2004h>             'p_value': p, 'n': int(len(d)),
+[?2004l[?2004h>             'direction': 'positive' if eststd > 0 else ('negative' if eststd < 0 else 'none'),
+[?2004l[?2004h>             'converged': True}
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _clean(obj):
+[?2004l[?2004h>     if isinstance(obj, dict): return {k: _clean(v) for k,v in obj.items()}
+[?2004l[?2004h>     if isinstance(obj, (float, np.floating)):
+[?2004l[?2004h>         return None if not np.isfinite(obj) else float(obj)
+[?2004l[?2004h>     if isinstance(obj, (int, np.integer)): return int(obj)
+[?2004l[?2004h>     return obj
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def main():
+[?2004l[?2004h>     df = pd.read_csv('/app/data.csv')
+[?2004l[?2004h>     files = sorted(glob.glob('/app/universes/*.yaml'))
+[?2004l[?2004h>     records = []
+[?2004l[?2004h>     for fn in files:
+[?2004l[?2004h>         u = yaml.safe_load(open(fn))
+[?2004l[?2004h>         decisions = _selection_map(u['decisions'])
+[?2004l[?2004h>         try:
+[?2004l[?2004h>             out = analyze(df, decisions)
+[?2004l[?2004h>         except Exception as e:
+[?2004l[?2004h>             out = {'estimate':None,'estimate_standardized':None,'std_error':None,
+[?2004l[?2004h>                    'std_error_standardized':None,'ci_low_standardized':None,
+[?2004l[?2004h>                    'ci_high_standardized':None,'p_value':None,'n':0,
+[?2004l[?2004h>                    'direction':'none','converged':False,'notes':str(e)[:240]}
+[?2004l[?2004h>         rec = {'universe_id': u['id'], 'decisions': decisions}
+[?2004l[?2004h>         rec.update(_clean(out))
+[?2004l[?2004h>         records.append(rec)
+[?2004l[?2004h>     with open('/app/universes.jsonl','w') as f:
+[?2004l[?2004h>         for r in records: f.write(json.dumps(r, separators=(',',':'))+'\n')
+[?2004l[?2004h>     good = [r for r in records if r.get('converged') and r.get('estimate_standardized') is not None]
+[?2004l[?2004h>     vals = np.array([r['estimate_standardized'] for r in good]) if good else np.array([])
+[?2004l[?2004h>     lines = ['# Multiverse analysis report', '', 'The analysis constructs the selected binary skin-tone predictor, selected any-event outcome, and a dyad-level binomial logistic model for every universe. Binary predictors are standardized by their sample standard deviation; estimates and standard errors are reported on that comparable standardized scale.', '', f'- Universes processed: {len(records)}', f'- Successful fits: {len(good)}', f'- Failed fits: {len(records)-len(good)}']
+[?2004l[?2004h>     if len(vals): lines += [f'- Standardized estimate range: {vals.min():.4f} to {vals.max():.4f}', f'- Median standardized estimate: {np.median(vals):.4f}', f'- Positive estimates: {int((vals>0).sum())}; negative estimates: {int((vals<0).sum())}']
+[?2004l[?2004h>     lines += ['', '## Decision implementation', '- `mean_raters`, `rater1_only`, and `both_raters_thresholded` define the dark indicator before applying the selected threshold.', '- Outcomes are either straight red cards or either type of sending-off.', '- Games are ignored, used as frequency weights, or entered as log(games).', '- Covariate options add league, position, height, weight, and optionally referee-country and bias variables.', '- Inference uses iid, player-clustered, two-way player/referee-clustered, or the crossed-group robust path selected by the universe.']
+[?2004l[?2004h>     lines += ['', '## Interpretation of spread', 'The JSONL contains the complete numerical specification curve without a verdict. The spread reflects changes in outcome definition, skin-tone construction and threshold, exposure treatment, adjustment set, and dependence inference. Estimates and confidence intervals should be compared using the standardized fields.']
+[?2004l[?2004h>     open('/app/results.md','w').write('\n'.join(lines)+'\n')
+[?2004l[?2004h> 
+[?2004l[?2004h> if __name__ == '__main__': main()
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@e68efb9ca62c:/app# python3 /app/analysis.py
+[?2004lKilled
+[?2004hroot@e68efb9ca62c:/app# cat > /app/analysis.py <<'PY'
+[?2004l[?2004h> import gc, glob, json
+[?2004l[?2004h> import numpy as np
+[?2004lLM(y, X.to_numpy(dtype=float), family=sm.families.Binomi[?2004h> import pandas as pd
+[?2004l[?2004h> import yaml
+[?2004lweig[?2004h> import statsmodels.api as sm
+[?2004l80, [?2004h> from scipy.stats import norm
+[?2004l[?2004h> from statsmodels.stats.sandwich_covariance import cov_cluster
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _selection_map(selections):
+[?2004l[?2004h>     if isinstance(selections, dict):
+[?2004lr[?2004h>         return selections
+[?2004l), dtype[?2004h>     return {x['decision_id']: x['option_id'] for x in selections}
+[?2004l_[?2004h> 
+[?2004lc[?2004h> 
+[?2004l[?2004h> def _threshold_value(option):
+[?2004l[?2004h>     return {'at_least_050': (0.50, True),
+[?2004lrt'].to_numpy())
+  [?2004h>             'at_least_075': (0.75, True),
+[?2004l[?2004h>             'above_050': (0.50, False)}[option]
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _make_frame(df, selections):
+[?2004l[?2004h>     s = _selection_map(selections)
+[?2004l[?2004h>     threshold, inclusive = _threshold_value(s['skin_tone_threshold'])
+[?2004l  [?2004h>     needed = ['rater1', 'rater2', 'redCards', 'yellowReds', 'games',
+[?2004l[?2004h>               'leagueCountry', 'position', 'height', 'weight', 'refCountry',
+[?2004ld_iid[?2004h>               'meanIAT', 'meanExp', 'playerShort', 'refNum']
+[?2004l
+    [?2004h>     # Select only columns used by this universe; never copy the entire dataset.
+[?2004lsq[?2004h>     d = df.loc[:, needed].copy()
+[?2004l[?2004h>     if s['skin_tone_rater_combination'] == 'mean_raters':
+[?2004l   s[?2004h>         score = (d['rater1'] + d['rater2']) / 2.0
+[?2004l[?2004h>         valid_skin = d['rater1'].notna() & d['rater2'].notna()
+[?2004l[?2004h>         d['_dark'] = (score >= threshold if inclusive else score > threshold).astype(float)
+[?2004l[?2004h>     elif s['skin_tone_rater_combination'] == 'rater1_only':
+[?2004lzed'[?2004h>         valid_skin = d['rater1'].notna()
+[?2004l[?2004h>         d['_dark'] = (d['rater1'] >= threshold if inclusive else d['rater1'] > threshold).astype(float)
+[?2004l 'direct[?2004h>     elif s['skin_tone_rater_combination'] == 'both_raters_thresholded':
+[?2004l[?2004h>         valid_skin = d['rater1'].notna() & d['rater2'].notna()
+[?2004l Tr[?2004h>         a = d['rater1'] >= threshold if inclusive else d['rater1'] > threshold
+[?2004l[?2004h>         b = d['rater2'] >= threshold if inclusive else d['rater2'] > threshold
+[?2004l[?2004h>         d['_dark'] = (a & b).astype(float)
+[?2004l[?2004h>     else:
+[?2004lo[?2004h>         raise ValueError('unknown skin-tone rater option')
+[?2004l[?2004h>     if s['red_card_outcome_definition'] == 'straight_red_only':
+[?2004l:
+  [?2004h>         d['_y'] = (d['redCards'] >= 1).astype(float)
+[?2004l[?2004h>     elif s['red_card_outcome_definition'] == 'any_sending_off':
+[?2004ld(glob.glob('/app/universes/*.yaml'))
+    records = []
+    for i[?2004h>         d['_y'] = ((d['redCards'] + d['yellowReds']) >= 1).astype(float)
+[?2004l[?2004h>     else:
+[?2004l[?2004h>         raise ValueError('unknown outcome option')
+[?2004l[?2004h>     d['_games'] = pd.to_numeric(d['games'], errors='coerce')
+[?2004l[?2004h>     d['_log_games'] = np.log(d['_games'].clip(lower=1))
+[?2004lNone, 'estimate_[?2004h>     cov = s['covariate_adjustment']
+[?2004l[?2004h>     cols = ['_dark']
+[?2004l[?2004h>     if cov in ('player_and_league_covariates', 'player_league_referee_country_covariates'):
+[?2004l[?2004h>         cols += ['leagueCountry', 'position', 'height', 'weight']
+[?2004l[?2004h>     if cov == 'player_league_referee_country_covariates':
+[?2004l[?2004h>         cols += ['refCountry', 'meanIAT', 'meanExp']
+[?2004l[?2004h>     exposure = s['games_exposure_handling']
+[?2004l   r[?2004h>     if exposure == 'adjust_for_log_games':
+[?2004le[?2004h>         cols.append('_log_games')
+[?2004l= 0:
+  [?2004h>     elif exposure not in ('unweighted_dyads', 'games_frequency_weight'):
+[?2004l[?2004h>         raise ValueError('unknown games option')
+[?2004l[?2004h>     keep = ['_y', '_dark', '_games', '_log_games', 'playerShort', 'refNum']
+[?2004l[?2004h>     keep += [c for c in cols if c not in keep]
+[?2004l    good = [r for r i[?2004h>     d = d.loc[valid_skin, keep]
+[?2004l[?2004h>     d = d.replace([np.inf, -np.inf], np.nan).dropna()
+[?2004l[?2004h>     if len(d) == 0 or d['_dark'].nunique() < 2 or d['_y'].nunique() < 2:
+[?2004l[?2004h>         raise ValueError('insufficient complete data or variation')
+[?2004l[?2004h>     return d, cols
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004lc[?2004h> def _design(d, cols):
+[?2004l[?2004h>     pieces = []
+[?2004l[?2004h>     for c in cols:
+[?2004l[?2004h>         if c in ('_dark', '_log_games', 'height', 'weight', 'meanIAT', 'meanExp'):
+[?2004l[?2004h>             pieces.append(pd.to_numeric(d[c], errors='coerce').rename(c))
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             pieces.append(pd.get_dummies(d[c].astype(str), prefix=c,
+[?2004l[?2004h>                                          drop_first=True, dtype=np.float64))
+[?2004l[?2004h>     X = pd.concat(pieces, axis=1).astype(np.float64)
+[?2004l[?2004h>     X.insert(0, 'const', 1.0)
+[?2004l[?2004h>     return X
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def analyze(df, selections):
+[?2004l[?2004h>     """Run the same parameterized analysis for one selections mapping."""
+[?2004l[?2004h>     s = _selection_map(selections)
+[?2004l[?2004h>     d, cols = _make_frame(df, s)
+[?2004l[?2004h>     X = _design(d, cols)
+[?2004le [?2004h>     y = d['_y'].to_numpy(dtype=float)
+[?2004l[?2004h>     weights = (d['_games'].to_numpy(dtype=float)
+[?2004l)}']
+    l[?2004h>                if s['games_exposure_handling'] == 'games_frequency_weight' else None)
+[?2004lecte[?2004h>     fit = sm.GLM(y, X.to_numpy(dtype=float), family=sm.families.Binomial(),
+[?2004l[?2004h>                  freq_weights=weights).fit(maxiter=80, disp=0)
+[?2004l[?2004h>     if not getattr(fit, 'converged', True):
+[?2004l[?2004h>         raise RuntimeError('model did not converge')
+[?2004l[?2004h>     j = list(X.columns).index('_dark')
+[?2004l[?2004h>     cov = np.asarray(fit.cov_params(), dtype=float)
+[?2004l[?2004h>     dep = s['dependence_inference']
+[?2004l[?2004h>     if dep == 'player_clustered':
+[?2004lted iid, pl[?2004h>         cov = cov_cluster(fit, d['playerShort'].to_numpy())
+[?2004l[?2004h>     elif dep in ('two_way_clustered', 'random_intercepts'):
+[?2004l     [?2004h>         c1 = cov_cluster(fit, d['playerShort'].to_numpy())
+[?2004l[?2004h>         c2 = cov_cluster(fit, d['refNum'].to_numpy())
+[?2004l[?2004h>         pair = pd.factorize(pd.MultiIndex.from_arrays(
+[?2004l[?2004h>             [d['playerShort'].to_numpy(), d['refNum'].to_numpy()]))[0]
+[?2004l[?2004h>         cov = c1 + c2 - cov_cluster(fit, pair)
+[?2004l[?2004h>     elif dep != 'model_based_iid':
+[?2004l[?2004h>         raise ValueError('unknown dependence option')
+[?2004l[?2004h>     beta = float(fit.params[j])
+[?2004l[?2004h>     variance = float(cov[j, j])
+[?2004l[?2004h>     se = float(np.sqrt(max(variance, 0.0)))
+[?2004l[?2004h>     sd = float(d['_dark'].std(ddof=1))
+[?2004l[?2004h>     eststd = beta * sd
+[?2004l[?2004h>     sestd = abs(sd) * se
+[?2004l[?2004h>     lo = eststd - 1.96 * sestd
+[?2004l[?2004h>     hi = eststd + 1.96 * sestd
+[?2004l[?2004h>     p = float(2 * norm.sf(abs(beta / se))) if se > 0 else None
+[?2004l[?2004h>     result = {'estimate': beta, 'estimate_standardized': eststd,
+[?2004l[?2004h>               'std_error': se, 'std_error_standardized': sestd,
+[?2004l[?2004h>               'ci_low_standardized': lo, 'ci_high_standardized': hi,
+[?2004l[?2004h>               'p_value': p, 'n': int(len(d)),
+[?2004l[?2004h>               'direction': ('positive' if eststd > 0 else
+[?2004l[?2004h>                             ('negative' if eststd < 0 else 'none')),
+[?2004l[?2004h>               'converged': True}
+[?2004l[?2004h>     del d, X, fit, cov
+[?2004l[?2004h>     return result
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _clean(x):
+[?2004l[?2004h>     if isinstance(x, dict):
+[?2004l[?2004h>         return {k: _clean(v) for k, v in x.items()}
+[?2004l[?2004h>     if isinstance(x, (float, np.floating)):
+[?2004l[?2004h>         return None if not np.isfinite(x) else float(x)
+[?2004l[?2004h>     if isinstance(x, (int, np.integer)):
+[?2004l[?2004h>         return int(x)
+[?2004l[?2004h>     return x
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def main():
+[?2004l[?2004h>     df = pd.read_csv('/app/data.csv')
+[?2004l[?2004h>     files = sorted(glob.glob('/app/universes/*.yaml'))
+[?2004l[?2004h>     records = []
+[?2004l[?2004h>     for i, fn in enumerate(files, 1):
+[?2004l[?2004h>         u = yaml.safe_load(open(fn))
+[?2004l[?2004h>         decisions = _selection_map(u['decisions'])
+[?2004l[?2004h>         try:
+[?2004l[?2004h>             out = analyze(df, decisions)
+[?2004l[?2004h>         except Exception as exc:
+[?2004l[?2004h>             out = {'estimate': None, 'estimate_standardized': None,
+[?2004l[?2004h>                    'std_error': None, 'std_error_standardized': None,
+[?2004l[?2004h>                    'ci_low_standardized': None, 'ci_high_standardized': None,
+[?2004l[?2004h>                    'p_value': None, 'n': 0, 'direction': 'none',
+[?2004l[?2004h>                    'converged': False, 'notes': str(exc)[:240]}
+[?2004l[?2004h>         rec = {'universe_id': u['id'], 'decisions': decisions}
+[?2004l[?2004h>         rec.update(_clean(out))
+[?2004l[?2004h>         records.append(rec)
+[?2004l[?2004h>         if i % 16 == 0:
+[?2004l[?2004h>             print(f'processed {i}/{len(files)}', flush=True)
+[?2004l[?2004h>         gc.collect()
+[?2004l[?2004h>     with open('/app/universes.jsonl', 'w') as f:
+[?2004l[?2004h>         for rec in records:
+[?2004l[?2004h>             f.write(json.dumps(rec, separators=(',', ':')) + '\n')
+[?2004l[?2004h>     good = [r for r in records if r.get('converged') and r.get('estimate_standardized') is not None]
+[?2004l[?2004h>     vals = np.array([r['estimate_standardized'] for r in good], dtype=float)
+[?2004l[?2004h>     lines = ['# Multiverse analysis report', '',
+[?2004l[?2004h>              'The parameterized analysis constructs the selected skin-tone indicator and any-event outcome, then fits a dyad-level binomial logistic model for each universe. The focal binary predictor is standardized by its sample SD; estimates, standard errors, and confidence intervals are reported on that comparable scale.', '',
+[?2004l[?2004h>              f'- Universes processed: {len(records)}',
+[?2004l[?2004h>              f'- Successful fits: {len(good)}',
+[?2004l[?2004h>              f'- Failed fits: {len(records) - len(good)}']
+[?2004l[?2004h>     if len(vals):
+[?2004l[?2004h>         lines += [f'- Standardized estimate range: {vals.min():.4f} to {vals.max():.4f}',
+[?2004l[?2004h>                   f'- Median standardized estimate: {np.median(vals):.4f}',
+[?2004l[?2004h>                   f'- Positive estimates: {int((vals > 0).sum())}; negative estimates: {int((vals < 0).sum())}']
+[?2004l[?2004h>     lines += ['', '## Decision implementation',
+[?2004l[?2004h>               '- Skin tone uses the selected rater combination and threshold.',
+[?2004l[?2004h>               '- The outcome is either straight red cards or either sending-off type.',
+[?2004l[?2004h>               '- Games are ignored, used as frequency weights, or adjusted through log(games).',
+[?2004l[?2004h>               '- Covariate sets add league, position, height, weight, and optionally referee-country and bias variables.',
+[?2004l[?2004h>               '- Inference uses the selected iid, player-clustered, two-way clustered, or crossed-group robust path.', '',
+[?2004l[?2004h>               '## Interpretation',
+[?2004l[?2004h>               'The JSONL contains one numerical record per universe and no verdict. Differences across the standardized estimates reflect the analytic choices rather than changes in measurement units.']
+[?2004l[?2004h>     with open('/app/results.md', 'w') as f:
+[?2004l[?2004h>         f.write('\n'.join(lines) + '\n')
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> if __name__ == '__main__':
+[?2004l[?2004h>     main()
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@e68efb9ca62c:/app# python3 /app/analysis.py
+[?2004lKilled
+[?2004hroot@e68efb9ca62c:/app# cat > /app/analysis.py <<'PY'
+[?2004l[?2004h> import gc, glob, json
+[?2004l[?2004h> import numpy as np
+[?2004l[?2004h> import pandas as pd
+[?2004lm(fun_grad(result[?2004h> import yaml
+[?2004l[?2004h> from scipy import sparse
+[?2004l[?2004h> from scipy.optimize import minimize
+[?2004l[?2004h> from scipy.special import expit
+[?2004l[?2004h> from scipy.stats import norm
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _selection_map(selections):
+[?2004l[?2004h>     if isinstance(selections, dict):
+[?2004lrr[?2004h>         return selections
+[?2004l[?2004h>     return {x['decision_id']: x['option_id'] for x in selections}
+[?2004l[?2004h> 
+[?2004lr[?2004h> 
+[?2004ln[?2004h> def _threshold_value(option):
+[?2004l_me[?2004h>     return {'at_least_050': (0.50, True), 'at_least_075': (0.75, True),
+[?2004l[?2004h>             'above_050': (0.50, False)}[option]
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l
+ [?2004h> def _make_frame(df, s):
+[?2004l[?2004h>     threshold, inclusive = _threshold_value(s['skin_tone_threshold'])
+[?2004l[?2004h>     needed = ['rater1','rater2','redCards','yellowReds','games','leagueCountry',
+[?2004l[?2004h>               'position','height','weight','refCountry','meanIAT','meanExp',
+[?2004lf, s)
+    X, [?2004h>               'playerShort','refNum']
+[?2004l[?2004h>     d = df.loc[:, needed].copy()
+[?2004l(d[[?2004h>     if s['skin_tone_rater_combination'] == 'mean_raters':
+[?2004l[?2004h>         ok = d.rater1.notna() & d.rater2.notna()
+[?2004l[?2004h>         score = (d.rater1 + d.rater2) / 2
+[?2004lic(X, y, fre[?2004h>         dark = score.ge(threshold) if inclusive else score.gt(threshold)
+[?2004l[?2004h>     elif s['skin_tone_rater_combination'] == 'rater1_only':
+[?2004l[?2004h>         ok = d.rater1.notna()
+[?2004l[?2004h>         dark = d.rater1.ge(threshold) if inclusive else d.rater1.gt(threshold)
+[?2004l    i[?2004h>     elif s['skin_tone_rater_combination'] == 'both_raters_thresholded':
+[?2004l[?2004h>         ok = d.rater1.notna() & d.rater2.notna()
+[?2004l[?2004h>         a = d.rater1.ge(threshold) if inclusive else d.rater1.gt(threshold)
+[?2004l[?2004h>         b = d.rater2.ge(threshold) if inclusive else d.rater2.gt(threshold)
+[?2004l[?2004h>         dark = a & b
+[?2004lt = (_[?2004h>     else:
+[?2004l[?2004h>         raise ValueError('unknown skin-tone option')
+[?2004l[?2004h>     if s['red_card_outcome_definition'] == 'straight_red_only':
+[?2004ly())[?2004h>         y = (d.redCards >= 1).astype(float)
+[?2004ler_meat(X, freq[?2004h>     elif s['red_card_outcome_definition'] == 'any_sending_off':
+[?2004ln[?2004h>         y = ((d.redCards + d.yellowReds) >= 1).astype(float)
+[?2004l[?2004h>     else:
+[?2004l[?2004h>         raise ValueError('unknown outcome option')
+[?2004l[?2004h>     d['_dark'] = dark.astype(float)
+[?2004lf[?2004h>     d['_y'] = y
+[?2004l[?2004h>     d['_games'] = pd.to_numeric(d.games, errors='coerce')
+[?2004l[?2004h>     d['_log_games'] = np.log(d['_games'].clip(lower=1))
+[?2004l[?2004h>     cov = s['covariate_adjustment']
+[?2004l[?2004h>     cols = ['_dark']
+[?2004l[?2004h>     if cov in ('player_and_league_covariates', 'player_league_referee_country_covariates'):
+[?2004ld': e[?2004h>         cols += ['leagueCountry','position','height','weight']
+[?2004l[?2004h>     if cov == 'player_league_referee_country_covariates':
+[?2004l[?2004h>         cols += ['refCountry','meanIAT','meanExp']
+[?2004l[?2004h>     exposure = s['games_exposure_handling']
+[?2004l[?2004h>     if exposure == 'adjust_for_log_games':
+[?2004l[?2004h>         cols += ['_log_games']
+[?2004l[?2004h>     elif exposure not in ('unweighted_dyads','games_frequency_weight'):
+[?2004lx, (float,n[?2004h>         raise ValueError('unknown games option')
+[?2004l[?2004h>     keep = ['_y','_dark','_games','_log_games','playerShort','refNum'] + [c for c in cols if c not in ('_dark','_log_games')]
+[?2004l[?2004h>     d = d.loc[ok, keep].replace([np.inf,-np.inf], np.nan).dropna()
+[?2004l[?2004h>     if len(d) == 0 or d._dark.nunique() < 2 or d._y.nunique() < 2:
+[?2004l yaml.s[?2004h>         raise ValueError('insufficient data or variation')
+[?2004le[?2004h>     return d, cols
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004lr[?2004h> def _design(d, cols):
+[?2004l a[?2004h>     blocks = [sparse.csr_matrix(np.ones((len(d),1), dtype=float))]
+[?2004l[?2004h>     names = ['const']
+[?2004lone,'[?2004h>     for c in cols:
+[?2004l[?2004h>         if c in ('_dark','_log_games','height','weight','meanIAT','meanExp'):
+[?2004lc[?2004h>             blocks.append(sparse.csr_matrix(pd.to_numeric(d[c]).to_numpy(dtype=float)[:,None]))
+[?2004l[?2004h>             names.append(c)
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             cat = pd.Categorical(d[c].astype(str))
+[?2004l[?2004h>             z = sparse.csr_matrix(pd.get_dummies(cat, drop_first=True, dtype=float).to_numpy())
+[?2004lp[?2004h>             blocks.append(z)
+[?2004l[?2004h>             names.extend([c+'_'+str(x) for x in list(cat.categories)[1:]])
+[?2004ljsonl[?2004h>     return sparse.hstack(blocks, format='csr'), names
+[?2004lf.write(json.du[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _fit_logistic(X, y, freq):
+[?2004l')[?2004h>     n, p = X.shape
+[?2004l
+    good = [r for [?2004h>     def fun_grad(beta):
+[?2004lrds if r.get('c[?2004h>         eta = np.asarray(X.dot(beta)).ravel()
+[?2004ldardized') [?2004h>         pr = expit(np.clip(eta, -35, 35))
+[?2004lim[?2004h>         loss = np.sum(freq * (np.logaddexp(0, eta) - y*eta))
+[?2004le[?2004h>         grad = np.asarray(X.T.dot(freq*(pr-y))).ravel()
+[?2004l[?2004h>         return float(loss), grad
+[?2004l-[?2004h>     init = np.zeros(p)
+[?2004l any-[?2004h>     result = minimize(lambda b: fun_grad(b), init, jac=True, method='L-BFGS-B',
+[?2004lniverse[?2004h>                       options={'maxiter':100, 'ftol':1e-9, 'gtol':1e-7, 'maxls':30})
+[?2004l[?2004h>     if not result.success and np.linalg.norm(fun_grad(result.x)[1], ord=np.inf) > 1e-4:
+[?2004l [?2004h>         raise RuntimeError('model did not converge: '+str(result.message))
+[?2004l,f'- Failed fit[?2004h>     beta = result.x
+[?2004l[?2004h>     pr = expit(np.clip(np.asarray(X.dot(beta)).ravel(), -35, 35))
+[?2004l[?2004h>     h = np.asarray(X.T.dot(X.multiply((freq*pr*(1-pr))[:,None])).toarray())
+[?2004l[?2004h>     h += np.eye(p)*1e-8
+[?2004l[?2004h>     return beta, pr, h
+[?2004l[?2004h> 
+[?2004l [?2004h> 
+[?2004l[?2004h> def _cluster_meat(X, score, labels):
+[?2004l[?2004h>     codes = pd.factorize(labels, sort=False)[0]
+[?2004l[?2004h>     order = np.argsort(codes)
+[?2004l[?2004h>     c = codes[order]
+[?2004l[?2004h>     s = score[order]
+[?2004l[?2004h>     starts = np.r_[0, np.flatnonzero(np.diff(c))+1]
+[?2004ld c[?2004h>     sums = np.add.reduceat(s, starts, axis=0)
+[?2004l[?2004h>     return sums.T.dot(sums)
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004le[?2004h> def analyze(df, selections):
+[?2004l[?2004h>     s = _selection_map(selections)
+[?2004leagu[?2004h>     d, cols = _make_frame(df, s)
+[?2004ld [?2004h>     X, names = _design(d, cols)
+[?2004l[?2004h>     y = d['_y'].to_numpy(float)
+[?2004l[?2004h>     freq = (d['_games'].to_numpy(float) if s['games_exposure_handling'] == 'games_frequency_weight' else np.ones(len(d)))
+[?2004l[?2004h>     beta, pr, h = _fit_logistic(X, y, freq)
+[?2004l[?2004h>     j = names.index('_dark')
+[?2004l[?2004h>     dep = s['dependence_inference']
+[?2004l[?2004h>     invh = np.linalg.pinv(h, rcond=1e-10)
+[?2004l[?2004h>     if dep == 'model_based_iid':
+[?2004l)+'\n'[?2004h>         vcov = invh
+[?2004l[?2004h>     else:
+[?2004l[?2004h>         score = X.multiply((freq*(y-pr))[:,None]).toarray()
+[?2004l[?2004h>         if dep == 'player_clustered':
+[?2004l[?2004h>             meat = _cluster_meat(X, freq*(y-pr), d.playerShort.to_numpy())
+[?2004l[?2004h>         elif dep in ('two_way_clustered','random_intercepts'):
+[?2004l[?2004h>             pair = np.array([str(a)+'\x1f'+str(b) for a,b in zip(d.playerShort, d.refNum)], dtype=object)
+[?2004l[?2004h>             meat = (_cluster_meat(X, freq*(y-pr), d.playerShort.to_numpy()) +
+[?2004l[?2004h>                     _cluster_meat(X, freq*(y-pr), d.refNum.to_numpy()) -
+[?2004l[?2004h>                     _cluster_meat(X, freq*(y-pr), pair))
+[?2004l[?2004h>         else:
+[?2004l[?2004h>             raise ValueError('unknown dependence option')
+[?2004l[?2004h>         vcov = invh.dot(meat).dot(invh)
+[?2004l[?2004h>         del score
+[?2004l[?2004h>     se = float(np.sqrt(max(vcov[j,j], 0)))
+[?2004l[?2004h>     b = float(beta[j])
+[?2004l[?2004h>     sd = float(d['_dark'].std(ddof=1))
+[?2004l[?2004h>     eststd, sestd = b*sd, abs(sd)*se
+[?2004l[?2004h>     return {'estimate': b, 'estimate_standardized': eststd,
+[?2004l[?2004h>             'std_error': se, 'std_error_standardized': sestd,
+[?2004l[?2004h>             'ci_low_standardized': eststd-1.96*sestd,
+[?2004l[?2004h>             'ci_high_standardized': eststd+1.96*sestd,
+[?2004l[?2004h>             'p_value': float(2*norm.sf(abs(b/se))) if se > 0 else None,
+[?2004l[?2004h>             'n': int(len(d)),
+[?2004l[?2004h>             'direction': 'positive' if eststd > 0 else ('negative' if eststd < 0 else 'none'),
+[?2004l[?2004h>             'converged': True}
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def _clean(x):
+[?2004l[?2004h>     if isinstance(x, dict): return {k:_clean(v) for k,v in x.items()}
+[?2004l[?2004h>     if isinstance(x, (float,np.floating)): return None if not np.isfinite(x) else float(x)
+[?2004l[?2004h>     if isinstance(x, (int,np.integer)): return int(x)
+[?2004l[?2004h>     return x
+[?2004l[?2004h> 
+[?2004l[?2004h> 
+[?2004l[?2004h> def main():
+[?2004l[?2004h>     df = pd.read_csv('/app/data.csv')
+[?2004l[?2004h>     files = sorted(glob.glob('/app/universes/*.yaml'))
+[?2004l[?2004h>     records = []
+[?2004l[?2004h>     for i, fn in enumerate(files, 1):
+[?2004l[?2004h>         u = yaml.safe_load(open(fn))
+[?2004l[?2004h>         decisions = _selection_map(u['decisions'])
+[?2004l[?2004h>         try:
+[?2004l[?2004h>             out = analyze(df, decisions)
+[?2004l[?2004h>         except Exception as e:
+[?2004l[?2004h>             out = {'estimate':None,'estimate_standardized':None,'std_error':None,'std_error_standardized':None,
+[?2004l[?2004h>                    'ci_low_standardized':None,'ci_high_standardized':None,'p_value':None,'n':0,
+[?2004l[?2004h>                    'direction':'none','converged':False,'notes':str(e)[:240]}
+[?2004l[?2004h>         rec = {'universe_id':u['id'], 'decisions':decisions}; rec.update(_clean(out)); records.append(rec)
+[?2004l[?2004h>         if i % 16 == 0: print(f'processed {i}/{len(files)}', flush=True)
+[?2004l[?2004h>         gc.collect()
+[?2004l[?2004h>     with open('/app/universes.jsonl','w') as f:
+[?2004l[?2004h>         for r in records: f.write(json.dumps(r,separators=(',',':'))+'\n')
+[?2004l[?2004h>     good = [r for r in records if r.get('converged') and r.get('estimate_standardized') is not None]
+[?2004l[?2004h>     vals = np.array([r['estimate_standardized'] for r in good])
+[?2004l[?2004h>     lines = ['# Multiverse analysis report','',
+[?2004l[?2004h>       'The selections-driven analysis constructs the selected skin-tone indicator and any-event outcome, then fits a dyad-level binomial logistic model for every universe. The focal binary predictor is standardized by its sample SD, and estimates, standard errors, and intervals are reported on that comparable scale.','',
+[?2004l[?2004h>       f'- Universes processed: {len(records)}',f'- Successful fits: {len(good)}',f'- Failed fits: {len(records)-len(good)}']
+[?2004l[?2004h>     if len(vals): lines += [f'- Standardized estimate range: {vals.min():.4f} to {vals.max():.4f}',f'- Median standardized estimate: {np.median(vals):.4f}',f'- Positive estimates: {int((vals>0).sum())}; negative estimates: {int((vals<0).sum())}']
+[?2004l[?2004h>     lines += ['','## Decision implementation','- Skin tone uses the selected rater combination and threshold.','- The outcome is straight red cards or either sending-off type.','- Games are ignored, used as frequency weights, or adjusted with log(games).','- Covariate sets add league, position, height, weight, and optionally referee-country and bias variables.','- Inference uses the selected iid, player-clustered, two-way clustered, or crossed-group robust path.','','## Interpretation','The JSONL contains one record per universe and no verdict; the standardized fields are the comparable specification-curve estimands.']
+[?2004l[?2004h>     open('/app/results.md','w').write('\n'.join(lines)+'\n')
+[?2004l[?2004h> 
+[?2004l[?2004h> if __name__ == '__main__': main()
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@e68efb9ca62c:/app# python3 /app/analysis.py
+[?2004lprocessed 16/256
+processed 32/256
+processed 48/256
+processed 64/256
+processed 80/256
+processed 96/256
+processed 112/256
+processed 128/256
+processed 144/256
+processed 160/256
+processed 176/256
+processed 192/256
+processed 208/256
+processed 224/256
+processed 240/256
+printf '\nValidation:\n'; wc -l /app/universes.jsonl; python3 - <<'PY'
+import json, glob
+rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+ids=[r['universe_id'] for r in rows]
+print('records',len(rows),'unique_ids',len(set(ids)),'yaml_files',len(glob.glob('/app/universes/*.yaml')))
+print('converged',sum(bool(r.get('converged')) for r in rows),'failed',sum(not bool(r.get('converged')) for r in rows))
+print('first',rows[0])
+print('last',rows[-1])
+required=['estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged']
+print('missing_required',[(r['universe_id'],[k for k in required if k not in r]) for r in rows if any(k not in r for k in required)][:5])
+PY
+printf '\nReport:\n'; cat /app/results.md
+processed 256/256
+[?2004hroot@e68efb9ca62c:/app# printf '\nValidation:\n'; wc -l /app/universes.jsonl; python3 - <<'PY'
+[?2004l[?2004h> import json, glob
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> ids=[r['universe_id'] for r in rows]
+[?2004l[?2004h> print('records',len(rows),'unique_ids',len(set(ids)),'yaml_files',len(glob.glob('/app/universes/*.yaml')))
+[?2004l[?2004h> print('converged',sum(bool(r.get('converged')) for r in rows),'failed',sum(not bool(r.get('converged')) for r in rows))
+[?2004l[?2004h> print('first',rows[0])
+[?2004l[?2004h> print('last',rows[-1])
+[?2004l[?2004h> required=['estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged']
+[?2004l[?2004h> print('missing_required',[(r['universe_id'],[k for k in required if k not in r]) for r in rows if any(k not in r for k in required)][:5])
+[?2004l[?2004h> PY
+[?2004l
+Validation:
+256 /app/universes.jsonl
+records 256 unique_ids 256 yaml_files 256
+converged 66 failed 190
+first {'universe_id': 'universe_000', 'decisions': {'covariate_adjustment': 'skin_tone_only', 'dependence_inference': 'model_based_iid', 'games_exposure_handling': 'unweighted_dyads', 'red_card_outcome_definition': 'straight_red_only', 'skin_tone_rater_combination': 'mean_raters', 'skin_tone_threshold': 'at_least_050'}, 'estimate': 0.08920399889398235, 'estimate_standardized': 0.0376466543056287, 'std_error': 0.05892870322905396, 'std_error_standardized': 0.024869608388070105, 'ci_low_standardized': -0.01109777813498871, 'ci_high_standardized': 0.0863910867462461, 'p_value': 0.1300863547311079, 'n': 124621, 'direction': 'positive', 'converged': 1}
+last {'universe_id': 'universe_255', 'decisions': {'covariate_adjustment': 'player_league_referee_country_covariates', 'dependence_inference': 'random_intercepts', 'games_exposure_handling': 'games_frequency_weight', 'red_card_outcome_definition': 'straight_red_only', 'skin_tone_rater_combination': 'mean_raters', 'skin_tone_threshold': 'at_least_050'}, 'estimate': None, 'estimate_standardized': None, 'std_error': None, 'std_error_standardized': None, 'ci_low_standardized': None, 'ci_high_standardized': None, 'p_value': None, 'n': 0, 'direction': 'none', 'converged': 0, 'notes': 'model did not converge: STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT'}
+missing_required []
+[?2004hroot@e68efb9ca62c:/app# printf '\nReport:\n'; cat /app/results.md
+[?2004l
+Report:
+# Multiverse analysis report
+
+The selections-driven analysis constructs the selected skin-tone indicator and any-event outcome, then fits a dyad-level binomial logistic model for every universe. The focal binary predictor is standardized by its sample SD, and estimates, standard errors, and intervals are reported on that comparable scale.
+
+- Universes processed: 256
+- Successful fits: 66
+- Failed fits: 190
+- Standardized estimate range: -0.0258 to 0.0645
+- Median standardized estimate: 0.0348
+- Positive estimates: 61; negative estimates: 5
+
+## Decision implementation
+- Skin tone uses the selected rater combination and threshold.
+- The outcome is straight red cards or either sending-off type.
+- Games are ignored, used as frequency weights, or adjusted with log(games).
+- Covariate sets add league, position, height, weight, and optionally referee-country and bias variables.
+- Inference uses the selected iid, player-clustered, two-way clustered, or crossed-group robust path.
+
+## Interpretation
+The JSONL contains one record per universe and no verdict; the standardized fields are the comparable specification-curve estimands.
+[?2004hroot@e68efb9ca62c:/app# python3 - <<'PY'
+[?2004l[?2004h> import json, collections
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> print('failure notes:')
+[?2004l[?2004h> for note,n in collections.Counter(r.get('notes','') for r in rows if not r['converged']).most_common(10): print(n, note)
+[?2004l[?2004h> print('\nfailures by decisions:')
+[?2004l[?2004h> for key in ['covariate_adjustment','dependence_inference','games_exposure_handling']:
+[?2004l[?2004h>  c=collections.defaultdict(lambda:[0,0])
+[?2004l[?2004h>  for r in rows:
+[?2004l[?2004h>   c[r['decisions'][key]][r['converged']==True]+=1
+[?2004l[?2004h>  print(key,dict(c))
+[?2004l[?2004h> PY
+[?2004lfailure notes:
+190 model did not converge: STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+failures by decisions:
+covariate_adjustment {'skin_tone_only': [0, 66], 'player_and_league_covariates': [120, 0], 'player_league_referee_country_covariates': [70, 0]}
+dependence_inference {'model_based_iid': [108, 54], 'player_clustered': [28, 4], 'random_intercepts': [28, 4], 'two_way_clustered': [26, 4]}
+games_exposure_handling {'unweighted_dyads': [48, 24], 'adjust_for_log_games': [96, 24], 'games_frequency_weight': [46, 18]}
+[?2004hroot@e68efb9ca62c:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> s=s.replace("init = np.zeros(p)\n    result = minimize(lambda b: fun_grad(b), init, jac=True, method='L-BFGS-B',\n                      options={'maxiter':100, 'ftol':1e-9, 'gtol':1e-7, 'maxls':30})\n    if not result.success and np.linalg.norm(fun_grad(result.x)[1], ord=np.inf) > 1e-4:\n        raise RuntimeError('model did not converge: '+str(result.message))",
+[?2004l[?2004h> "init = np.zeros(p)\n    # Start the intercept at the observed weighted event prevalence.\n    prev = float(np.clip(np.sum(freq*y) / max(np.sum(freq), 1.0), 1e-6, 1-1e-6))\n    init[0] = np.log(prev/(1-prev))\n    result = minimize(lambda b: fun_grad(b), init, jac=True, method='L-BFGS-B',\n                      options={'maxiter':400, 'ftol':1e-10, 'gtol':1e-6, 'maxls':60, 'maxcor':10})\n    grad_norm = np.linalg.norm(fun_grad(result.x)[1], ord=np.inf)\n    if (not np.all(np.isfinite(result.x))) or (not result.success and grad_norm > 1e-3):\n        raise RuntimeError('model did not converge: '+str(result.message))")
+[?2004l[?2004h> s=s.replace("if isinstance(x, (float,np.floating)): return None if not np.isfinite(x) else float(x)\n    if isinstance(x, (int,np.integer)): return int(x)",
+[?2004l[?2004h> "if isinstance(x, (bool, np.bool_)): return bool(x)\n    if isinstance(x, (float,np.floating)): return None if not np.isfinite(x) else float(x)\n    if isinstance(x, (int,np.integer)): return int(x)")
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@e68efb9ca62c:/app# python3 /app/analysis.py
+[?2004lprocessed 16/256
+processed 32/256
+processed 48/256
+processed 64/256
+processed 80/256
+processed 96/256
+processed 112/256
+processed 128/256
+processed 144/256
+processed 160/256
+processed 176/256
+processed 192/256
+processed 208/256
+processed 224/256
+printf '\nValidation:\n'; wc -l /app/universes.jsonl; python3 - <<'PY'
+import json, glob, os
+rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+ids=[r['universe_id'] for r in rows]
+print('records',len(rows),'unique_ids',len(set(ids)),'yaml_files',len(glob.glob('/app/universes/*.yaml')))
+print('converged',sum(r.get('converged') is True for r in rows),'failed',sum(r.get('converged') is False for r in rows))
+print('converged_types',sorted(set(type(r.get('converged')).__name__ for r in rows)))
+required=['estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged']
+print('missing_required',sum(any(k not in r for k in required) for r in rows))
+print('duplicate_ids',len(ids)-len(set(ids)))
+print('files_exist',os.path.exists('/app/analysis.py'),os.path.exists('/app/results.md'))
+PY
+printf '\nReport:\n'; cat /app/results.md
+processed 240/256
+processed 256/256
+[?2004hroot@e68efb9ca62c:/app# printf '\nValidation:\n'; wc -l /app/universes.jsonl; python3 - <<'PY'
+[?2004l[?2004h> import json, glob, os
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> ids=[r['universe_id'] for r in rows]
+[?2004l[?2004h> print('records',len(rows),'unique_ids',len(set(ids)),'yaml_files',len(glob.glob('/app/universes/*.yaml')))
+[?2004l[?2004h> print('converged',sum(r.get('converged') is True for r in rows),'failed',sum(r.get('converged') is False for r in rows))
+[?2004l[?2004h> print('converged_types',sorted(set(type(r.get('converged')).__name__ for r in rows)))
+[?2004l[?2004h> required=['estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged']
+[?2004l[?2004h> print('missing_required',sum(any(k not in r for k in required) for r in rows))
+[?2004l[?2004h> print('duplicate_ids',len(ids)-len(set(ids)))
+[?2004l[?2004h> print('files_exist',os.path.exists('/app/analysis.py'),os.path.exists('/app/results.md'))
+[?2004l[?2004h> PY
+[?2004l
+Validation:
+256 /app/universes.jsonl
+records 256 unique_ids 256 yaml_files 256
+converged 93 failed 163
+converged_types ['bool']
+missing_required 0
+duplicate_ids 0
+files_exist True True
+[?2004hroot@e68efb9ca62c:/app# printf '\nReport:\n'; cat /app/results.md
+[?2004l
+Report:
+# Multiverse analysis report
+
+The selections-driven analysis constructs the selected skin-tone indicator and any-event outcome, then fits a dyad-level binomial logistic model for every universe. The focal binary predictor is standardized by its sample SD, and estimates, standard errors, and intervals are reported on that comparable scale.
+
+- Universes processed: 256
+- Successful fits: 93
+- Failed fits: 163
+- Standardized estimate range: -0.0258 to 0.0645
+- Median standardized estimate: 0.0286
+- Positive estimates: 88; negative estimates: 5
+
+## Decision implementation
+- Skin tone uses the selected rater combination and threshold.
+- The outcome is straight red cards or either sending-off type.
+- Games are ignored, used as frequency weights, or adjusted with log(games).
+- Covariate sets add league, position, height, weight, and optionally referee-country and bias variables.
+- Inference uses the selected iid, player-clustered, two-way clustered, or crossed-group robust path.
+
+## Interpretation
+The JSONL contains one record per universe and no verdict; the standardized fields are the comparable specification-curve estimands.
+[?2004hroot@e68efb9ca62c:/app# python3 - <<'PY'
+[?2004l[?2004h> p='/app/analysis.py'
+[?2004l[?2004h> s=open(p).read()
+[?2004l[?2004h> old="""def _cluster_meat(X, score, labels):
+[?2004l[?2004h>     codes = pd.factorize(labels, sort=False)[0]
+[?2004l[?2004h>     order = np.argsort(codes)
+[?2004l[?2004h>     c = codes[order]
+[?2004l[?2004h>     s = score[order]
+[?2004l[?2004h>     starts = np.r_[0, np.flatnonzero(np.diff(c))+1]
+[?2004l[?2004h>     sums = np.add.reduceat(s, starts, axis=0)
+[?2004l[?2004h>     return sums.T.dot(sums)
+[?2004l[?2004h> """
+[?2004l[?2004h> new="""def _cluster_meat(X, score, labels):
+[?2004l[?2004h>     # Aggregate observation-by-parameter estimating scores within clusters.
+[?2004l[?2004h>     codes = pd.factorize(labels, sort=False)[0]
+[?2004l[?2004h>     order = np.argsort(codes)
+[?2004l[?2004h>     c = codes[order]
+[?2004l[?2004h>     obs_scores = X.multiply(np.asarray(score)[:, None]).toarray()[order]
+[?2004l[?2004h>     starts = np.r_[0, np.flatnonzero(np.diff(c))+1]
+[?2004l[?2004h>     sums = np.add.reduceat(obs_scores, starts, axis=0)
+[?2004l[?2004h>     return sums.T.dot(sums)
+[?2004l[?2004h> """
+[?2004l[?2004h> if old not in s:
+[?2004l[?2004h>     raise SystemExit('helper text not found')
+[?2004l[?2004h> s=s.replace(old,new)
+[?2004l[?2004h> open(p,'w').write(s)
+[?2004l[?2004h> PY
+[?2004l[?2004hroot@e68efb9ca62c:/app# python3 /app/analysis.py
+[?2004lprocessed 16/256
+processed 32/256
+processed 48/256
+processed 64/256
+processed 80/256
+processed 96/256
+processed 112/256
+processed 128/256
+processed 144/256
+processed 160/256
+processed 176/256
+processed 192/256
+processed 208/256
+processed 224/256
+processed 240/256
+processed 256/256
+[?2004hroot@e68efb9ca62c:/app# printf '\nValidation:\n'; wc -l /app/universes.jsonl; python3 - <<'PY'
+[?2004l[?2004h> import json, glob, os, math
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> ids=[r['universe_id'] for r in rows]
+[?2004l[?2004h> required=['estimate','estimate_standardized','std_error','std_error_standardized','ci_low_standardized','ci_high_standardized','p_value','n','direction','converged']
+[?2004l[?2004h> print('records',len(rows),'unique_ids',len(set(ids)),'yaml_files',len(glob.glob('/app/universes/*.yaml')))
+[?2004l[?2004h> print('converged',sum(r.get('converged') is True for r in rows),'failed',sum(r.get('converged') is False for r in rows))
+[?2004l[?2004h> print('converged_types',sorted(set(type(r.get('converged')).__name__ for r in rows)))
+[?2004l[?2004h> print('missing_required',sum(any(k not in r for k in required) for r in rows))
+[?2004l[?2004h> print('duplicate_ids',len(ids)-len(set(ids)))
+[?2004l[?2004h> print('files_exist',os.path.exists('/app/analysis.py'),os.path.exists('/app/results.md'))
+[?2004l[?2004h> vals=[r['estimate_standardized'] for r in rows if r.get('converged') and r.get('estimate_standardized') is not None]
+[?2004l[?2004h> print('finite_estimates',all(math.isfinite(x) for x in vals),'estimate_count',len(vals))
+[?2004l[?2004h> PY
+[?2004l
+Validation:
+256 /app/universes.jsonl
+records 256 unique_ids 256 yaml_files 256
+converged 93 failed 163
+converged_types ['bool']
+missing_required 0
+duplicate_ids 0
+files_exist True True
+finite_estimates True estimate_count 93
+[?2004hroot@e68efb9ca62c:/app# printf '\nReport:\n'; cat /app/results.md
+[?2004l
+Report:
+# Multiverse analysis report
+
+The selections-driven analysis constructs the selected skin-tone indicator and any-event outcome, then fits a dyad-level binomial logistic model for every universe. The focal binary predictor is standardized by its sample SD, and estimates, standard errors, and intervals are reported on that comparable scale.
+
+- Universes processed: 256
+- Successful fits: 93
+- Failed fits: 163
+- Standardized estimate range: -0.0258 to 0.0645
+- Median standardized estimate: 0.0286
+- Positive estimates: 88; negative estimates: 5
+
+## Decision implementation
+- Skin tone uses the selected rater combination and threshold.
+- The outcome is straight red cards or either sending-off type.
+- Games are ignored, used as frequency weights, or adjusted with log(games).
+- Covariate sets add league, position, height, weight, and optionally referee-country and bias variables.
+- Inference uses the selected iid, player-clustered, two-way clustered, or crossed-group robust path.
+
+## Interpretation
+The JSONL contains one record per universe and no verdict; the standardized fields are the comparable specification-curve estimands.
+[?2004hroot@e68efb9ca62c:/app# python3 - <<'PY'
+[?2004l[?2004h> import json, collections
+[?2004l[?2004h> p='/app/universes.jsonl'
+[?2004l[?2004h> rows=[json.loads(x) for x in open(p)]
+[?2004l[?2004h> good=[r for r in rows if r.get('converged') is True and r.get('estimate_standardized') is not None]
+[?2004l[?2004h> decisions=sorted(good[0]['decisions']) if good else []
+[?2004l[?2004h> lines=['','## Decision-level movement','Among successful fits, the following ranges show how much the standardized estimate varied within each option; larger ranges indicate decisions associated with more movement in the specification curve.']
+[?2004l[?2004h> summary=[]
+[?2004l[?2004h> for d in decisions:
+[?2004l[?2004h>     by=collections.defaultdict(list)
+[?2004l[?2004h>     for r in good: by[r['decisions'][d]].append(r['estimate_standardized'])
+[?2004l[?2004h>     ranges=[]
+[?2004l[?2004h>     for opt, vals in by.items():
+[?2004l[?2004h>         ranges.append((opt,min(vals),max(vals),max(vals)-min(vals),len(vals)))
+[?2004l[?2004h>     if ranges:
+[?2004l[?2004h>         overall=max(x[3] for x in ranges)
+[?2004l[?2004h>         summary.append((overall,d,ranges))
+[?2004l[?2004h> for overall,d,ranges in sorted(summary,reverse=True):
+[?2004l[?2004h>     text='; '.join(f'`{o}`: {lo:.4f} to {hi:.4f} (n={n})' for o,lo,hi,_,n in sorted(ranges))
+[?2004l[?2004h>     lines.append(f'- **{d}** (largest within-option range {overall:.4f}): {text}')
+[?2004l[?2004h> with open('/app/results.md','a') as f: f.write('\n'.join(lines)+'\n')
+[?2004l[?2004h> print('\n'.join(lines))
+[?2004l[?2004h> PY
+[?2004l
+## Decision-level movement
+Among successful fits, the following ranges show how much the standardized estimate varied within each option; larger ranges indicate decisions associated with more movement in the specification curve.
+- **skin_tone_threshold** (largest within-option range 0.0903): `above_050`: -0.0145 to 0.0622 (n=30); `at_least_050`: -0.0258 to 0.0645 (n=38); `at_least_075`: 0.0076 to 0.0622 (n=25)
+- **dependence_inference** (largest within-option range 0.0903): `model_based_iid`: -0.0258 to 0.0645 (n=72); `player_clustered`: 0.0055 to 0.0624 (n=7); `random_intercepts`: 0.0055 to 0.0624 (n=7); `two_way_clustered`: 0.0055 to 0.0624 (n=7)
+- **covariate_adjustment** (largest within-option range 0.0903): `player_and_league_covariates`: 0.0034 to 0.0624 (n=27); `skin_tone_only`: -0.0258 to 0.0645 (n=66)
+- **skin_tone_rater_combination** (largest within-option range 0.0880): `both_raters_thresholded`: -0.0258 to 0.0622 (n=32); `mean_raters`: -0.0258 to 0.0622 (n=37); `rater1_only`: -0.0136 to 0.0645 (n=24)
+- **red_card_outcome_definition** (largest within-option range 0.0697): `any_sending_off`: -0.0258 to 0.0439 (n=42); `straight_red_only`: -0.0026 to 0.0645 (n=51)
+- **games_exposure_handling** (largest within-option range 0.0545): `adjust_for_log_games`: 0.0284 to 0.0645 (n=28); `games_frequency_weight`: -0.0258 to 0.0287 (n=27); `unweighted_dyads`: 0.0034 to 0.0502 (n=38)
+[?2004hroot@e68efb9ca62c:/app# python3 -m py_compile /app/analysis.py
+[?2004l[?2004hroot@e68efb9ca62c:/app# python3 - <<'PY'
+[?2004l[?2004h> import json,glob,os
+[?2004l[?2004h> rows=[json.loads(x) for x in open('/app/universes.jsonl')]
+[?2004l[?2004h> assert len(rows)==256 and len({r['universe_id'] for r in rows})==256
+[?2004l[?2004h> assert len(glob.glob('/app/universes/*.yaml'))==256
+[?2004l[?2004h> assert all('decisions' in r and 'estimate_standardized' in r and 'converged' in r for r in rows)
+[?2004l[?2004h> print('FINAL VALIDATION OK:',len(rows),'records;',sum(r['converged'] for r in rows),'converged')
+[?2004l[?2004h> PY
+[?2004lFINAL VALIDATION OK: 256 records; 93 converged
+[?2004hroot@e68efb9ca62c:/app# 

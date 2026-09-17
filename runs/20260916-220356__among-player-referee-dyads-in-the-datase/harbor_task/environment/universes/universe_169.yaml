@@ -1,0 +1,14 @@
+id: universe_169
+decisions:
+- decision_id: games_exposure_handling
+  option_id: games_frequency_weights
+- decision_id: logistic_model_specification
+  option_id: adjusted_player_league_logistic
+- decision_id: sending_off_outcome
+  option_id: straight_red_only
+- decision_id: skin_tone_combination
+  option_id: rater2_only
+- decision_id: skin_tone_threshold
+  option_id: dark_at_least_half
+- decision_id: uncertainty_estimation
+  option_id: cluster_bootstrap

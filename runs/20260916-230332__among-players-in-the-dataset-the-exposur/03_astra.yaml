@@ -1,0 +1,198 @@
+id: silberzahn-red-cards_multiverse
+name: 'silberzahn-red-cards: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/silberzahn-red-cards/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - analysis_unit
+  - poisson_mean_structure
+  - sending_off_definition
+  - skin_tone_binary_rule
+  - standard_error_method
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  sending_off_definition:
+    label: Definition of all sendings-off
+    rationale: 'Should the outcome count only straight red cards, or both straight reds and second-yellow
+      sendings-off?  [found by: direct]'
+    default: straight_and_second_yellow
+    options:
+      straight_reds_only:
+        label: Straight red cards only
+        description: For each player-referee row, use `redCards` as the Poisson count and exclude `yellowReds`.
+      straight_and_second_yellow:
+        label: Straight reds plus second yellows
+        description: For each player-referee row, use `redCards + yellowReds` as the Poisson count.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        straight_reds_only: []
+        straight_and_second_yellow: []
+  skin_tone_binary_rule:
+    label: Binary skin-tone classification
+    rationale: 'How should `rater1` and `rater2` be combined and thresholded to define dark-skinned players?  [found
+      by: direct]'
+    default: mean_at_least_050
+    options:
+      mean_at_least_050:
+        label: Mean rating at least 0.50
+        description: Compute (`rater1` + `rater2`) / 2 for each player and classify the player as dark-skinned
+          when this mean is greater than or equal to 0.50; otherwise classify as light-skinned.
+      mean_at_least_075:
+        label: Mean rating at least 0.75
+        description: Compute (`rater1` + `rater2`) / 2 for each player and classify the player as dark-skinned
+          when this mean is greater than or equal to 0.75; otherwise classify as light-skinned.
+      both_at_least_050:
+        label: Both raters at least 0.50
+        description: Classify a player as dark-skinned only when both `rater1` and `rater2` are greater
+          than or equal to 0.50; otherwise classify as light-skinned.
+      either_at_least_050:
+        label: Either rater at least 0.50
+        description: Classify a player as dark-skinned when either `rater1` or `rater2` is greater than
+          or equal to 0.50; classify as light-skinned only when both are below 0.50.
+    x_astaverse:
+      kind: variable_choice
+      post_hoc: false
+      option_support:
+        mean_at_least_050: []
+        mean_at_least_075: []
+        both_at_least_050: []
+        either_at_least_050: []
+  analysis_unit:
+    label: Poisson analysis unit
+    rationale: 'Should the Poisson count and exposure be modeled for each player-referee dyad or after
+      aggregating over players?  [found by: direct]'
+    default: player_referee_dyad
+    options:
+      player_referee_dyad:
+        label: Player-referee dyads
+        description: Retain one observation per row, using the row-level sending-off count and `log(games)`
+          as the offset; repeated observations for the same `playerShort` and `refNum` structure remain
+          in the data.
+      player_aggregate:
+        label: Player-level aggregation
+        description: Group rows by `playerShort`, sum the sending-off count and `games`, retain one skin-tone
+          classification per player, and use `log(sum(games))` as the offset; do not retain referee-specific
+          row variables in the outcome model.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        player_referee_dyad: []
+        player_aggregate: []
+  poisson_mean_structure:
+    label: Poisson mean-model specification
+    rationale: 'Which predictors and heterogeneity structure should enter the Poisson exposure model?  [found
+      by: direct]'
+    default: player_and_league_adjusted
+    options:
+      exposure_only:
+        label: Exposure-only model
+        description: Fit a Poisson regression with the binary skin-tone indicator as the sole predictor
+          and `log(games)` as an offset; include no `leagueCountry`, `position`, `height`, `weight`, or
+          referee variables.
+      player_and_league_adjusted:
+        label: Player and league adjustment
+        description: Fit a Poisson regression with the binary skin-tone indicator, categorical `leagueCountry`,
+          categorical `position`, numeric `height`, and numeric `weight`, with `log(games)` as an offset;
+          include no referee random or fixed effects.
+      player_referee_random_effects:
+        label: Player and referee random intercepts
+        description: At the dyad level, fit a Poisson mixed model with the binary skin-tone indicator,
+          categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight`
+          as fixed effects, `log(games)` as an offset, and random intercepts for `playerShort` and `refNum`.
+        requires:
+        - analysis_unit.player_referee_dyad
+      referee_fixed_effects:
+        label: Referee fixed effects
+        description: At the dyad level, fit a Poisson regression with the binary skin-tone indicator,
+          categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight`,
+          a separate indicator for each `refNum` except the reference referee, and `log(games)` as an
+          offset.
+        requires:
+        - analysis_unit.player_referee_dyad
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        exposure_only: []
+        player_and_league_adjusted: []
+        player_referee_random_effects: []
+        referee_fixed_effects: []
+  standard_error_method:
+    label: Inference and dependence adjustment
+    rationale: 'How should uncertainty in the Poisson rate-ratio estimate be calculated given repeated
+      players and referees?  [found by: direct]'
+    default: model_based
+    options:
+      model_based:
+        label: Model-based standard errors
+        description: Use the standard errors implied by the fitted Poisson regression or Poisson mixed
+          model, without a sandwich correction; report the skin-tone rate ratio and its model-based confidence
+          interval.
+      player_cluster_robust:
+        label: Player-clustered robust standard errors
+        description: Use a sandwich variance estimator clustered by `playerShort`; for dyad-level data,
+          allow arbitrary dependence among rows for the same player.
+        requires:
+        - analysis_unit.player_referee_dyad
+      two_way_cluster_robust:
+        label: Player-and-referee two-way clustered errors
+        description: For dyad-level data, use a two-way cluster-robust sandwich variance estimator with
+          clustering dimensions `playerShort` and `refNum`, accounting for dependence shared by either
+          players or referees.
+        requires:
+        - analysis_unit.player_referee_dyad
+    x_astaverse:
+      kind: inference
+      post_hoc: false
+      option_support:
+        model_based: []
+        player_cluster_robust: []
+        two_way_cluster_robust: []
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: How the reported statistics become a supported / not-supported verdict. Left implicit by
+      every plan, and consequential on its own.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+        description: Conventional two-sided test at the 5% level.
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+        description: Stricter two-sided threshold at the 1% level.
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+        description: Significant at 5% AND the estimate points the way the hypothesis predicts; a significant
+          effect the other way counts as not supported.
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+      option_support:
+        alpha_05_two_sided: []
+        alpha_01_two_sided: []
+        alpha_05_directional: []
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: Among players in the dataset, the exposure-adjusted rate of all sendings-off is higher for
+      dark-skinned than for light-skinned players, using a prespecified binary skin-tone threshold and
+      a Poisson exposure model.
+x_astaverse:
+  astra_schema_shape: 0.0.13
+  note: ASTRA-shaped, emitted by astaverse without astra-tools. Run `astra validate` to check conformance.

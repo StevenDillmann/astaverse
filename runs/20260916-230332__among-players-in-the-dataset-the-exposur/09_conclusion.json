@@ -1,0 +1,444 @@
+{
+  "evidence_status": "inconclusive",
+  "requires_refinement": true,
+  "answer": "The multiverse generally favors a higher exposure-adjusted sending-off rate for dark-skinned players: 84 of 112 estimates are significantly positive, compared with 8 significantly negative and 20 indeterminate estimates. However, the conclusion is not defensible for the broad hypothesis because results depend strongly on the analysis unit and Poisson mean structure, with inference flip rates of 0.50 and 0.408, respectively.",
+  "rationale": "Positive evidence is common, but consequential specification choices produce substantial changes in effect size, sign, and statistical inference. This is more than ordinary estimator or standard-error sensitivity: player aggregation versus player-referee dyads and different adjustment structures represent substantively distinct analyses.",
+  "key_evidence": [
+    "Across 112 estimates, 84 are significantly positive, 8 significantly negative, and 20 are indeterminate; all 112 have confidence intervals.",
+    "Changing the analysis unit has an inference flip rate of 0.50 and a sign-reversal rate of 0.375; the option medians are 0.057 for player aggregation and 0.429 for player-referee dyads.",
+    "Changing the Poisson mean structure has an inference flip rate of 0.408 and a sign-reversal rate of 0.053; option medians range from 0.063 for exposure-only to 1.795 for player-and-league adjustment.",
+    "The binary skin-tone rule is comparatively stable: its inference flip rate is 0.071 and its sign-reversal rate is 0.0."
+  ],
+  "refinement_reason": "The hypothesis combines distinct claims about the observational unit and the covariate or heterogeneity structure of the Poisson model, and these choices materially alter the estimated effect and inference.",
+  "refinement_dimensions": [
+    "analysis unit",
+    "Poisson mean-model adjustment and heterogeneity structure"
+  ],
+  "suggested_hypotheses": [
+    "Among player-level aggregates, dark-skinned players have a higher exposure-adjusted rate of all sendings-off than light-skinned players under the prespecified binary skin-tone threshold and a Poisson model.",
+    "Among player-referee dyads, dark-skinned players have a higher exposure-adjusted rate of all sendings-off than light-skinned players under the prespecified binary skin-tone threshold and a Poisson model.",
+    "Conditional on league, position, height, weight, and referee heterogeneity, dark-skinned players have a higher exposure-adjusted rate of all sendings-off than light-skinned players."
+  ],
+  "caveats": [
+    "The supplied evidence does not identify one uniquely prespecified analysis-unit or mean-structure specification as the target estimate.",
+    "The standardized effect scale is reported, but no direct rate-ratio interpretation or common practical-effect threshold is supplied.",
+    "Non-significant or indeterminate estimates should not be interpreted as evidence of no effect."
+  ],
+  "model": "openai/gpt-5.6-luna",
+  "generated_at": "2026-09-16T23:47:05+00:00",
+  "evidence_snapshot": {
+    "curve_summary": {
+      "scale": "standardized",
+      "n_universes": 112,
+      "n_estimates": 112,
+      "n_with_ci": 112,
+      "minimum": -0.012920746759206249,
+      "q25": 0.08689330252662437,
+      "median": 0.3160361087296222,
+      "q75": 0.5974799020114971,
+      "maximum": 3.130331830253432,
+      "n_significant_positive": 84,
+      "n_significant_negative": 8,
+      "n_indeterminate": 20,
+      "n_unavailable": 0
+    },
+    "decision_sensitivity": [
+      {
+        "decision_id": "analysis_unit",
+        "scale": "standardized",
+        "n_pairs": 16,
+        "n_effect_pairs": 16,
+        "n_inference_pairs": 16,
+        "median_abs_effect_change": 0.8781258629809404,
+        "normalized_effect_change": 1.719837269264167,
+        "normalized_ci_low": 0.16443537310100106,
+        "normalized_ci_high": 3.510575111186317,
+        "effect_change_p90": 2.620464304930585,
+        "effect_change_max": 2.854271815128621,
+        "median_abs_log10p_change": 15.474976974752344,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.5,
+        "sign_reversal_rate": 0.375,
+        "option_medians": {
+          "player_referee_dyad": 0.42872599595334626,
+          "player_aggregate": 0.05686971921995614
+        },
+        "option_pairs": [
+          {
+            "option_a": "player_aggregate",
+            "option_b": "player_referee_dyad",
+            "n_pairs": 16,
+            "n_effect_pairs": 16,
+            "median_abs_change": 0.8781258629809404,
+            "median_shift": 0.8781258629809404,
+            "normalized_shift": 1.719837269264167,
+            "inference_flip_rate": 0.5
+          }
+        ]
+      },
+      {
+        "decision_id": "poisson_mean_structure",
+        "scale": "standardized",
+        "n_pairs": 152,
+        "n_effect_pairs": 152,
+        "n_inference_pairs": 152,
+        "median_abs_effect_change": 0.5816243727256505,
+        "normalized_effect_change": 1.1391297251287975,
+        "normalized_ci_low": 0.812743953840255,
+        "normalized_ci_high": 2.895753113208238,
+        "effect_change_p90": 2.532851928241935,
+        "effect_change_max": 3.1144763009675853,
+        "median_abs_log10p_change": 1.2130516957117363,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.40789473684210525,
+        "sign_reversal_rate": 0.05263157894736842,
+        "option_medians": {
+          "player_and_league_adjusted": 1.79456884375035,
+          "exposure_only": 0.06250517230003126,
+          "player_referee_random_effects": 0.42872599595334626,
+          "referee_fixed_effects": 0.42872599595334626
+        },
+        "option_pairs": [
+          {
+            "option_a": "exposure_only",
+            "option_b": "player_and_league_adjusted",
+            "n_pairs": 32,
+            "n_effect_pairs": 32,
+            "median_abs_change": 1.7320636714503188,
+            "median_shift": 1.7320636714503188,
+            "normalized_shift": 3.392301468933548,
+            "inference_flip_rate": 0.8125
+          },
+          {
+            "option_a": "exposure_only",
+            "option_b": "player_referee_random_effects",
+            "n_pairs": 24,
+            "n_effect_pairs": 24,
+            "median_abs_change": 0.3697192529457781,
+            "median_shift": 0.3697192529457781,
+            "normalized_shift": 0.724106847533377,
+            "inference_flip_rate": 0.7083333333333334
+          },
+          {
+            "option_a": "exposure_only",
+            "option_b": "referee_fixed_effects",
+            "n_pairs": 24,
+            "n_effect_pairs": 24,
+            "median_abs_change": 0.3697192529457781,
+            "median_shift": 0.3697192529457781,
+            "normalized_shift": 0.724106847533377,
+            "inference_flip_rate": 0.7083333333333334
+          },
+          {
+            "option_a": "player_and_league_adjusted",
+            "option_b": "player_referee_random_effects",
+            "n_pairs": 24,
+            "n_effect_pairs": 24,
+            "median_abs_change": 1.9009595195534423,
+            "median_shift": -1.9009595195534423,
+            "normalized_shift": -3.7230893279833572,
+            "inference_flip_rate": 0.041666666666666664
+          },
+          {
+            "option_a": "player_and_league_adjusted",
+            "option_b": "referee_fixed_effects",
+            "n_pairs": 24,
+            "n_effect_pairs": 24,
+            "median_abs_change": 1.9009595195534423,
+            "median_shift": -1.9009595195534423,
+            "normalized_shift": -3.7230893279833572,
+            "inference_flip_rate": 0.041666666666666664
+          },
+          {
+            "option_a": "player_referee_random_effects",
+            "option_b": "referee_fixed_effects",
+            "n_pairs": 24,
+            "n_effect_pairs": 24,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          }
+        ]
+      },
+      {
+        "decision_id": "sending_off_definition",
+        "scale": "standardized",
+        "n_pairs": 56,
+        "n_effect_pairs": 56,
+        "n_inference_pairs": 56,
+        "median_abs_effect_change": 0.18583336544018836,
+        "normalized_effect_change": 0.36396052232407655,
+        "normalized_ci_low": 0.34986978599715496,
+        "normalized_ci_high": 0.36396052232407655,
+        "effect_change_p90": 1.0569213012926477,
+        "effect_change_max": 1.197213554555597,
+        "median_abs_log10p_change": 0.1554590831680296,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.03571428571428571,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "straight_and_second_yellow": 0.3160361087296222,
+          "straight_reds_only": 0.5018694741698105
+        },
+        "option_pairs": [
+          {
+            "option_a": "straight_and_second_yellow",
+            "option_b": "straight_reds_only",
+            "n_pairs": 56,
+            "n_effect_pairs": 56,
+            "median_abs_change": 0.18583336544018836,
+            "median_shift": 0.18583336544018836,
+            "normalized_shift": 0.36396052232407655,
+            "inference_flip_rate": 0.03571428571428571
+          }
+        ]
+      },
+      {
+        "decision_id": "skin_tone_binary_rule",
+        "scale": "standardized",
+        "n_pairs": 168,
+        "n_effect_pairs": 168,
+        "n_inference_pairs": 168,
+        "median_abs_effect_change": 0.048643046829663084,
+        "normalized_effect_change": 0.09526894532433619,
+        "normalized_ci_low": 0.08117820899741461,
+        "normalized_ci_high": 0.12729192038888523,
+        "effect_change_p90": 0.1442534746713497,
+        "effect_change_max": 0.4040790749376897,
+        "median_abs_log10p_change": 0.36972214636746115,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.07142857142857142,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "mean_at_least_050": 0.3160361087296222,
+          "both_at_least_050": 0.3160361087296222,
+          "either_at_least_050": 0.27458760304535995,
+          "mean_at_least_075": 0.40422556456654507
+        },
+        "option_pairs": [
+          {
+            "option_a": "both_at_least_050",
+            "option_b": "either_at_least_050",
+            "n_pairs": 28,
+            "n_effect_pairs": 28,
+            "median_abs_change": 0.04144850568426223,
+            "median_shift": -0.04144850568426223,
+            "normalized_shift": -0.08117820899741461,
+            "inference_flip_rate": 0.07142857142857142
+          },
+          {
+            "option_a": "both_at_least_050",
+            "option_b": "mean_at_least_050",
+            "n_pairs": 28,
+            "n_effect_pairs": 28,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0
+          },
+          {
+            "option_a": "both_at_least_050",
+            "option_b": "mean_at_least_075",
+            "n_pairs": 28,
+            "n_effect_pairs": 28,
+            "median_abs_change": 0.08818945583692289,
+            "median_shift": 0.08818945583692289,
+            "normalized_shift": 0.17272183783494635,
+            "inference_flip_rate": 0.07142857142857142
+          },
+          {
+            "option_a": "either_at_least_050",
+            "option_b": "mean_at_least_050",
+            "n_pairs": 28,
+            "n_effect_pairs": 28,
+            "median_abs_change": 0.04144850568426223,
+            "median_shift": 0.04144850568426223,
+            "normalized_shift": 0.08117820899741461,
+            "inference_flip_rate": 0.07142857142857142
+          },
+          {
+            "option_a": "either_at_least_050",
+            "option_b": "mean_at_least_075",
+            "n_pairs": 28,
+            "n_effect_pairs": 28,
+            "median_abs_change": 0.12963796152118512,
+            "median_shift": 0.12963796152118512,
+            "normalized_shift": 0.25390004683236095,
+            "inference_flip_rate": 0.14285714285714285
+          },
+          {
+            "option_a": "mean_at_least_050",
+            "option_b": "mean_at_least_075",
+            "n_pairs": 28,
+            "n_effect_pairs": 28,
+            "median_abs_change": 0.08818945583692289,
+            "median_shift": 0.08818945583692289,
+            "normalized_shift": 0.17272183783494635,
+            "inference_flip_rate": 0.07142857142857142
+          }
+        ]
+      },
+      {
+        "decision_id": "standard_error_method",
+        "scale": "standardized",
+        "n_pairs": 96,
+        "n_effect_pairs": 96,
+        "n_inference_pairs": 96,
+        "median_abs_effect_change": 0.0,
+        "normalized_effect_change": 0.0,
+        "normalized_ci_low": 0.0,
+        "normalized_ci_high": 0.0,
+        "effect_change_p90": 0.0,
+        "effect_change_max": 0.0,
+        "median_abs_log10p_change": 0.25351436316398945,
+        "variance_share_first_order": null,
+        "variance_share_total": null,
+        "inference_flip_rate": 0.16666666666666666,
+        "sign_reversal_rate": 0.0,
+        "option_medians": {
+          "model_based": 0.27458760304535995,
+          "player_cluster_robust": 0.42872599595334626,
+          "two_way_cluster_robust": 0.42872599595334626
+        },
+        "option_pairs": [
+          {
+            "option_a": "model_based",
+            "option_b": "player_cluster_robust",
+            "n_pairs": 32,
+            "n_effect_pairs": 32,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.25
+          },
+          {
+            "option_a": "model_based",
+            "option_b": "two_way_cluster_robust",
+            "n_pairs": 32,
+            "n_effect_pairs": 32,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.1875
+          },
+          {
+            "option_a": "player_cluster_robust",
+            "option_b": "two_way_cluster_robust",
+            "n_pairs": 32,
+            "n_effect_pairs": 32,
+            "median_abs_change": 0.0,
+            "median_shift": 0.0,
+            "normalized_shift": 0.0,
+            "inference_flip_rate": 0.0625
+          }
+        ]
+      }
+    ],
+    "decisions": {
+      "sending_off_definition": {
+        "label": "Definition of all sendings-off",
+        "kind": "variable_choice",
+        "rationale": "Should the outcome count only straight red cards, or both straight reds and second-yellow sendings-off?  [found by: direct]",
+        "options": {
+          "straight_reds_only": {
+            "label": "Straight red cards only",
+            "description": "For each player-referee row, use `redCards` as the Poisson count and exclude `yellowReds`."
+          },
+          "straight_and_second_yellow": {
+            "label": "Straight reds plus second yellows",
+            "description": "For each player-referee row, use `redCards + yellowReds` as the Poisson count."
+          }
+        }
+      },
+      "skin_tone_binary_rule": {
+        "label": "Binary skin-tone classification",
+        "kind": "variable_choice",
+        "rationale": "How should `rater1` and `rater2` be combined and thresholded to define dark-skinned players?  [found by: direct]",
+        "options": {
+          "mean_at_least_050": {
+            "label": "Mean rating at least 0.50",
+            "description": "Compute (`rater1` + `rater2`) / 2 for each player and classify the player as dark-skinned when this mean is greater than or equal to 0.50; otherwise classify as light-skinned."
+          },
+          "mean_at_least_075": {
+            "label": "Mean rating at least 0.75",
+            "description": "Compute (`rater1` + `rater2`) / 2 for each player and classify the player as dark-skinned when this mean is greater than or equal to 0.75; otherwise classify as light-skinned."
+          },
+          "both_at_least_050": {
+            "label": "Both raters at least 0.50",
+            "description": "Classify a player as dark-skinned only when both `rater1` and `rater2` are greater than or equal to 0.50; otherwise classify as light-skinned."
+          },
+          "either_at_least_050": {
+            "label": "Either rater at least 0.50",
+            "description": "Classify a player as dark-skinned when either `rater1` or `rater2` is greater than or equal to 0.50; classify as light-skinned only when both are below 0.50."
+          }
+        }
+      },
+      "analysis_unit": {
+        "label": "Poisson analysis unit",
+        "kind": "preprocessing",
+        "rationale": "Should the Poisson count and exposure be modeled for each player-referee dyad or after aggregating over players?  [found by: direct]",
+        "options": {
+          "player_referee_dyad": {
+            "label": "Player-referee dyads",
+            "description": "Retain one observation per row, using the row-level sending-off count and `log(games)` as the offset; repeated observations for the same `playerShort` and `refNum` structure remain in the data."
+          },
+          "player_aggregate": {
+            "label": "Player-level aggregation",
+            "description": "Group rows by `playerShort`, sum the sending-off count and `games`, retain one skin-tone classification per player, and use `log(sum(games))` as the offset; do not retain referee-specific row variables in the outcome model."
+          }
+        }
+      },
+      "poisson_mean_structure": {
+        "label": "Poisson mean-model specification",
+        "kind": "model",
+        "rationale": "Which predictors and heterogeneity structure should enter the Poisson exposure model?  [found by: direct]",
+        "options": {
+          "exposure_only": {
+            "label": "Exposure-only model",
+            "description": "Fit a Poisson regression with the binary skin-tone indicator as the sole predictor and `log(games)` as an offset; include no `leagueCountry`, `position`, `height`, `weight`, or referee variables."
+          },
+          "player_and_league_adjusted": {
+            "label": "Player and league adjustment",
+            "description": "Fit a Poisson regression with the binary skin-tone indicator, categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight`, with `log(games)` as an offset; include no referee random or fixed effects."
+          },
+          "player_referee_random_effects": {
+            "label": "Player and referee random intercepts",
+            "description": "At the dyad level, fit a Poisson mixed model with the binary skin-tone indicator, categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight` as fixed effects, `log(games)` as an offset, and random intercepts for `playerShort` and `refNum`."
+          },
+          "referee_fixed_effects": {
+            "label": "Referee fixed effects",
+            "description": "At the dyad level, fit a Poisson regression with the binary skin-tone indicator, categorical `leagueCountry`, categorical `position`, numeric `height`, and numeric `weight`, a separate indicator for each `refNum` except the reference referee, and `log(games)` as an offset."
+          }
+        }
+      },
+      "standard_error_method": {
+        "label": "Inference and dependence adjustment",
+        "kind": "inference",
+        "rationale": "How should uncertainty in the Poisson rate-ratio estimate be calculated given repeated players and referees?  [found by: direct]",
+        "options": {
+          "model_based": {
+            "label": "Model-based standard errors",
+            "description": "Use the standard errors implied by the fitted Poisson regression or Poisson mixed model, without a sandwich correction; report the skin-tone rate ratio and its model-based confidence interval."
+          },
+          "player_cluster_robust": {
+            "label": "Player-clustered robust standard errors",
+            "description": "Use a sandwich variance estimator clustered by `playerShort`; for dyad-level data, allow arbitrary dependence among rows for the same player."
+          },
+          "two_way_cluster_robust": {
+            "label": "Player-and-referee two-way clustered errors",
+            "description": "For dyad-level data, use a two-way cluster-robust sandwich variance estimator with clustering dimensions `playerShort` and `refNum`, accounting for dependence shared by either players or referees."
+          }
+        }
+      }
+    },
+    "reported_results": 336,
+    "expected_results": 336,
+    "missing_universe_ids": [],
+    "unexpected_universe_ids": []
+  }
+}

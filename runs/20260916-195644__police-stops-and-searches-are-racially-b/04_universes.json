@@ -1,0 +1,3089 @@
+{
+  "universes": [
+    {
+      "id": "universe_000",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": true
+    },
+    {
+      "id": "universe_001",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_002",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_003",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_004",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_005",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_006",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_007",
+      "decisions": {
+        "bias_outcome": "search_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "not_applicable",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_008",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_009",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_010",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_011",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_012",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_013",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_014",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_015",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_016",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_017",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_018",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_019",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_020",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_021",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_022",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_023",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_024",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_025",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_026",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_027",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_028",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_029",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_030",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_031",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_032",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_033",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_034",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_035",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_036",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_037",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_038",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_039",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_040",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_041",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_042",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_043",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_044",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_045",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_046",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_047",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_048",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_049",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_050",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_051",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_052",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_053",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_054",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_055",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_056",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_057",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_058",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_059",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_060",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_061",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_062",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_063",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_064",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_065",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_066",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_067",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_068",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_069",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_070",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_071",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_072",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_073",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_074",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_075",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_076",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_077",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_078",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_079",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_080",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_081",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_082",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_083",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_084",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_085",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_086",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_087",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_088",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_089",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_090",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_091",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_092",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_093",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_094",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_095",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_096",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_097",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_098",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_099",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_100",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_101",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_102",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_103",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_104",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_105",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_106",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_107",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_108",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_109",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_110",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_111",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_112",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_113",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_114",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_115",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_116",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_117",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_118",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_119",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_120",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_121",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_122",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_123",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_124",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_125",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_126",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_127",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_128",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_129",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_130",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_131",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_132",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_133",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_134",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_135",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_136",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_137",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_138",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_139",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_140",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_141",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_142",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_143",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_144",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_145",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_146",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "all_known_races",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_147",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_148",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_149",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_150",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_151",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_152",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_153",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_154",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_155",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_156",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_157",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_158",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_159",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_160",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_161",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_162",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_163",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_164",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_165",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_166",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_167",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_168",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_169",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_170",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_171",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_172",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_173",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_174",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_175",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_176",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_177",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_178",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_179",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_180",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_181",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_182",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "no_time_adjustment"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_183",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_184",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_185",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_186",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_187",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_188",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_189",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_190",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_191",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_192",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_193",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_194",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_195",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_196",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_197",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_198",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_199",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_200",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_201",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_202",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_203",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_204",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_205",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_206",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_207",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_208",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_209",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_210",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_211",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_212",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "department_and_officer_controls",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_213",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_214",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "all_records",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "unadjusted_proportions_iid",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_215",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_216",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_217",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_218",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_219",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_220",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_221",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_222",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_223",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_224",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_225",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_226",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_227",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_228",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_229",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_230",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "drugs_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_231",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_232",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_233",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_234",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_235",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_236",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_237",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_238",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_239",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_240",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_241",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_242",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_243",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_244",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_245",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_246",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "include_unknown_as_category",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_247",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_248",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_249",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_250",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_251",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_252",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_county",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_253",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_254",
+      "decisions": {
+        "bias_outcome": "search_and_hit_rates",
+        "geographic_scope": "durham_police_department",
+        "hit_definition": "weapons_only",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "clock_time_controls"
+      },
+      "is_default": false
+    },
+    {
+      "id": "universe_255",
+      "decisions": {
+        "bias_outcome": "contraband_hit_rate",
+        "geographic_scope": "durham_county",
+        "hit_definition": "any_contraband",
+        "outcome_model_and_inference": "adjusted_logistic_officer_clustered",
+        "race_comparison_set": "black_vs_white",
+        "time_of_day_adjustment": "veil_of_darkness"
+      },
+      "is_default": false
+    }
+  ],
+  "n_total_grid": 972,
+  "n_dropped_constraints": 405,
+  "n_dropped_cap": 311,
+  "cap": 256,
+  "selection_strategy": "pair_balanced",
+  "matched_pairs_by_decision": {
+    "bias_outcome": 127,
+    "geographic_scope": 211,
+    "hit_definition": 208,
+    "outcome_model_and_inference": 150,
+    "time_of_day_adjustment": 211,
+    "race_comparison_set": 208
+  }
+}

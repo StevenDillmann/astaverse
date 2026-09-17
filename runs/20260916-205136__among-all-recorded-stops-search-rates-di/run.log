@@ -1,0 +1,15 @@
+[2026-09-16T20:51:37+00:00] study: profiled /Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv (326024 rows, 29 columns)
+[2026-09-16T21:15:38+00:00] run-all: starting decisions
+[2026-09-16T21:16:14+00:00] decisions: mode=direct models=openai/gpt-5.6-luna -> 6 execution decisions
+[2026-09-16T21:16:14+00:00] run-all: starting universes
+[2026-09-16T21:16:15+00:00] universes: 256 universes to execute (grid 1296, 0 dropped by constraints); 1040 DROPPED BY CAP 256 using pair_balanced (169-215 matched pairs/decision); x3 post-hoc verdict rules = 768 analysed
+[2026-09-16T21:16:15+00:00] run-all: starting task
+[2026-09-16T21:16:15+00:00] task: emitted Harbor task with 266 files at /Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/harbor_task
+[2026-09-16T21:16:15+00:00] run-all: starting execute
+[2026-09-16T21:16:15+00:00] execute: running: harbor run --yes -p /Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/harbor_task -a terminus-2 -o /Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/jobs --job-name 20260916-205136__among-all-recorded-stops-search-rates-di__terminus-2-openai_gpt-5.6-luna -m openai/gpt-5.6-luna --artifact /app/universes.jsonl --artifact /app/results.md --artifact /app/analysis.py
+[2026-09-16T21:26:52+00:00] run-all: starting verdicts
+[2026-09-16T21:26:52+00:00] verdicts: 480 results from 1 source(s) x 3 verdict rule(s); INCOMPLETE — 96 universes missing: universe_160, universe_161, universe_162, universe_163, universe_164
+[2026-09-16T21:26:52+00:00] run-all: starting conclusion
+[2026-09-16T21:27:07+00:00] conclusion: inconclusive + requires refinement
+[2026-09-16T21:27:07+00:00] run-all: starting refinement
+[2026-09-16T21:27:25+00:00] refinement: 4 successor hypotheses proposed

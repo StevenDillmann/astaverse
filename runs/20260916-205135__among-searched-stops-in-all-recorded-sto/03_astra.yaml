@@ -1,0 +1,209 @@
+id: nc-durham-stops_multiverse
+name: 'nc-durham-stops: multiverse analysis'
+description: Decision space extracted by mode 'direct'.
+inputs:
+- id: dataset
+  type: data
+  source: /Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv
+  description: Primary dataset under analysis
+outputs:
+- id: universe_stats
+  type: table
+  description: 'Per-universe statistics (estimate, estimate_standardized, std_error, std_error_standardized,
+    95% standardized confidence interval, p_value, n, direction). Carries no verdict by design: verdicts
+    are assigned downstream.'
+  inputs:
+  - dataset
+  decisions:
+  - contraband_hit_coding
+  - date_scope
+  - dependence_and_uncertainty
+  - race_analytic_sample
+  - race_comparison_model
+  - searched_stop_definition
+  recipe:
+    command: python /app/analysis.py
+decisions:
+  race_analytic_sample:
+    label: Race groups included
+    rationale: 'Which recorded driver races should define the Black-versus-White comparison?  [found by:
+      direct]'
+    default: black_white_only
+    options:
+      black_white_only:
+        label: Black and White subjects only
+        description: Retain rows where `subject_race` is exactly `black` or `white`; exclude `hispanic`,
+          `asian/pacific islander`, `other`, `unknown`, and missing values.
+      use_raw_race_mapping:
+        label: Use raw race fields to classify Black and White
+        description: Classify subjects using `raw_Race` (and, if needed, `raw_Ethnicity`) according to
+          the source codes; retain only source-coded Black and White subjects, excluding other or ambiguous
+          codes.
+      include_unknown_as_nonwhite:
+        label: Black versus all non-Black subjects
+        description: Retain Black subjects as the exposed group and combine White, Hispanic, Asian/Pacific
+          Islander, Other, Unknown, and missing `subject_race` values into the comparison group.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        black_white_only: []
+        use_raw_race_mapping: []
+        include_unknown_as_nonwhite: []
+  searched_stop_definition:
+    label: Definition of a searched stop
+    rationale: 'Which rows count as searched stops for the denominator?  [found by: direct]'
+    default: search_conducted
+    options:
+      search_conducted:
+        label: Recorded conducted search
+        description: Retain rows with `search_conducted == 1`; exclude all rows with `search_conducted
+          == 0` or missing.
+      person_or_vehicle_search:
+        label: Person or vehicle search indicator
+        description: Retain rows with `search_person == 1` or `search_vehicle == 1`; exclude rows where
+          both indicators are 0 or missing.
+      any_search_related_action:
+        label: Any search-related action
+        description: Retain rows with `search_conducted == 1`, `search_person == 1`, `search_vehicle ==
+          1`, or `frisk_performed == 1`; treat a row as searched if any of these indicators equals 1.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        search_conducted: []
+        person_or_vehicle_search: []
+        any_search_related_action: []
+  contraband_hit_coding:
+    label: Any-contraband outcome coding
+    rationale: 'How should `contraband_found`, `contraband_drugs`, and `contraband_weapons` define a hit
+      among selected searched stops?  [found by: direct]'
+    default: direct_contraband_complete_case
+    options:
+      direct_contraband_complete_case:
+        label: Direct contraband field, complete cases
+        description: Define a hit as `contraband_found == TRUE` and a non-hit as `contraband_found ==
+          FALSE`; exclude selected searched rows where `contraband_found` is missing.
+      direct_contraband_missing_nonhit:
+        label: Direct contraband field, missing as no hit
+        description: Define a hit as `contraband_found == TRUE`; define every other selected searched
+          row, including missing `contraband_found`, as a non-hit.
+      drug_or_weapon_union:
+        label: Union of drugs and weapons fields
+        description: Define a hit if `contraband_drugs == TRUE` or `contraband_weapons == TRUE`; define
+          a non-hit if both are FALSE; exclude rows where both component fields are missing.
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        direct_contraband_complete_case: []
+        direct_contraband_missing_nonhit: []
+        drug_or_weapon_union: []
+  date_scope:
+    label: Calendar scope of recorded stops
+    rationale: 'Which dates in the supplied rows should enter the analysis?  [found by: direct]'
+    default: all_supplied_rows
+    options:
+      all_supplied_rows:
+        label: All supplied rows
+        description: Use every row passing the race, searched-stop, and outcome rules, regardless of the
+          value of `date`; do not impose an additional date filter.
+      stated_2002_2015_window:
+        label: Stops dated 2002 through 2015
+        description: Retain only rows whose parsed `date` is between `2002-01-01` and `2015-12-31`, inclusive;
+          exclude missing, invalid, and out-of-window dates.
+      complete_date_only:
+        label: All rows with valid dates
+        description: "Retain all rows with a successfully parsed `date`, including dates outside 2002\u2013\
+          2015; exclude only missing or invalid dates."
+    x_astaverse:
+      kind: preprocessing
+      post_hoc: false
+      option_support:
+        all_supplied_rows: []
+        stated_2002_2015_window: []
+        complete_date_only: []
+  race_comparison_model:
+    label: Statistical comparison of hit rates
+    rationale: 'Should the Black-versus-White comparison use raw rates or adjust for observed stop and
+      driver characteristics?  [found by: direct]'
+    default: unadjusted_rate_comparison
+    options:
+      unadjusted_rate_comparison:
+        label: Unadjusted two-group rate comparison
+        description: For each race, calculate hits divided by selected searched stops and compare the
+          two proportions without adjustment for `subject_age`, `subject_sex`, `reason_for_stop`, `department_name`,
+          officer, date, or time.
+      race_only_logistic:
+        label: Race-only logistic model
+        description: Fit `hit ~ Black`, where `hit` is the coded any-contraband outcome and Black indicates
+          `subject_race == black` versus `white`; report the race coefficient as the comparison.
+      adjusted_logistic:
+        label: Observed-characteristics adjusted logistic model
+        description: Fit `hit ~ Black + subject_age + subject_sex + reason_for_stop + department_name
+          + calendar_year`, using complete cases for these predictors; report the adjusted Black coefficient,
+          with `calendar_year` derived from `date`.
+    x_astaverse:
+      kind: model
+      post_hoc: false
+      option_support:
+        unadjusted_rate_comparison: []
+        race_only_logistic: []
+        adjusted_logistic: []
+  dependence_and_uncertainty:
+    label: Dependence structure for uncertainty
+    rationale: 'How should repeated stops associated with the same officer or department affect standard
+      errors and the hypothesis test?  [found by: direct]'
+    default: independent_stops
+    options:
+      independent_stops:
+        label: Treat stops as independent
+        description: Compute uncertainty as if each searched stop were independent, with no clustering
+          adjustment for `officer_id_hash` or `department_name`.
+      cluster_officer:
+        label: Cluster by officer
+        description: Use cluster-robust uncertainty with `officer_id_hash` as the clustering unit, allowing
+          arbitrary dependence among stops handled by the same officer.
+      cluster_department:
+        label: Cluster by department
+        description: Use cluster-robust uncertainty with `department_name` as the clustering unit, allowing
+          arbitrary dependence among stops reported by the same department.
+    x_astaverse:
+      kind: inference
+      post_hoc: false
+      option_support:
+        independent_stops: []
+        cluster_officer: []
+        cluster_department: []
+  verdict_rule:
+    label: Verdict decision rule
+    rationale: How the reported statistics become a supported / not-supported verdict. Left implicit by
+      every plan, and consequential on its own.
+    default: alpha_05_two_sided
+    options:
+      alpha_05_two_sided:
+        label: p < 0.05, two-sided
+        description: Conventional two-sided test at the 5% level.
+      alpha_01_two_sided:
+        label: p < 0.01, two-sided
+        description: Stricter two-sided threshold at the 1% level.
+      alpha_05_directional:
+        label: p < 0.05 and direction matches
+        description: Significant at 5% AND the estimate points the way the hypothesis predicts; a significant
+          effect the other way counts as not supported.
+    x_astaverse:
+      kind: verdict_rule
+      post_hoc: true
+      option_support:
+        alpha_05_two_sided: []
+        alpha_01_two_sided: []
+        alpha_05_directional: []
+prior_insights:
+  hypothesis:
+    id: hypothesis
+    label: Hypothesis under test
+    claim: Among searched stops in all recorded stops, Black subjects have a higher rate of any contraband
+      hit than White subjects.
+x_astaverse:
+  astra_schema_shape: 0.0.13
+  note: ASTRA-shaped, emitted by astaverse without astra-tools. Run `astra validate` to check conformance.

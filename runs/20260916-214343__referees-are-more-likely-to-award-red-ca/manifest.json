@@ -1,0 +1,110 @@
+{
+  "run_id": "20260916-214343__referees-are-more-likely-to-award-red-ca",
+  "number": 42,
+  "created_at": "2026-09-16T21:43:43+00:00",
+  "hypothesis": "Referees are more likely to award red cards to dark-skinned players than to light-skinned players.",
+  "dataset": "data/datasets/silberzahn-red-cards",
+  "stages": {
+    "study": {
+      "completed_at": "2026-09-16T21:43:44+00:00",
+      "dataset": "/Users/stevend/Desktop/Asta/astaverse/data/datasets/silberzahn-red-cards/data.csv",
+      "n_rows": 146028,
+      "n_columns": 28
+    },
+    "decisions": {
+      "completed_at": "2026-09-16T21:44:32+00:00",
+      "mode": "direct",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "critique": false,
+      "n_decisions": 7,
+      "n_execution_decisions": 6
+    },
+    "universes": {
+      "completed_at": "2026-09-16T21:44:32+00:00",
+      "n_universes": 256,
+      "n_total_grid": 864,
+      "n_dropped_constraints": 0,
+      "n_dropped_cap": 608,
+      "n_analysed": 768,
+      "selection_strategy": "pair_balanced",
+      "matched_pairs_by_decision": {
+        "exposure_and_event_model": 194,
+        "fixed_covariate_adjustment": 222,
+        "sendoff_outcome_definition": 128,
+        "skin_tone_measurement_and_encoding": 238,
+        "uncertainty_accounting": 226,
+        "repeated_player_referee_structure": 144
+      }
+    },
+    "task": {
+      "completed_at": "2026-09-16T21:49:39+00:00",
+      "task_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-214343__referees-are-more-likely-to-award-red-ca/harbor_task",
+      "n_files": 266
+    },
+    "execute": {
+      "completed_at": "2026-09-16T22:03:23+00:00",
+      "agent": "terminus-2",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "n_jobs": 1
+    },
+    "verdicts": {
+      "completed_at": "2026-09-16T22:03:23+00:00",
+      "n_results": 768,
+      "rules": [
+        "alpha_05_two_sided",
+        "alpha_01_two_sided",
+        "alpha_05_directional"
+      ],
+      "complete": true,
+      "missing": []
+    },
+    "conclusion": {
+      "completed_at": "2026-09-16T22:03:37+00:00",
+      "model": "openai/gpt-5.6-luna",
+      "evidence_status": "partially_supported",
+      "requires_refinement": true
+    },
+    "refinement": {
+      "completed_at": "2026-09-16T22:03:54+00:00",
+      "needed": true,
+      "n_hypotheses": 3
+    }
+  },
+  "config": {
+    "plans": {
+      "k": 5,
+      "model": null,
+      "temperature": 0.9
+    },
+    "decisions": {
+      "mode": "direct",
+      "models": [],
+      "critique": false,
+      "max_decisions": 6
+    },
+    "universes": {
+      "cap": 256,
+      "include": [],
+      "exclude": []
+    },
+    "execute": {
+      "agent": "terminus-2",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "dry_run": false
+    },
+    "conclusion": {
+      "model": null
+    },
+    "refinement": {
+      "model": null
+    },
+    "through": "refinement"
+  },
+  "review_before_execute": true
+}

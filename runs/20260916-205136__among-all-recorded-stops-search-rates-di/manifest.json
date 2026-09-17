@@ -1,0 +1,207 @@
+{
+  "run_id": "20260916-205136__among-all-recorded-stops-search-rates-di",
+  "number": 40,
+  "created_at": "2026-09-16T20:51:36+00:00",
+  "hypothesis": "Among all recorded stops, search rates differ across the known race categories.",
+  "dataset": "data/datasets/nc-durham-stops",
+  "stages": {
+    "study": {
+      "completed_at": "2026-09-16T20:51:37+00:00",
+      "dataset": "/Users/stevend/Desktop/Asta/astaverse/data/datasets/nc-durham-stops/data.csv",
+      "n_rows": 326024,
+      "n_columns": 29
+    },
+    "decisions": {
+      "completed_at": "2026-09-16T21:16:14+00:00",
+      "mode": "direct",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "critique": false,
+      "n_decisions": 7,
+      "n_execution_decisions": 6
+    },
+    "universes": {
+      "completed_at": "2026-09-16T21:16:15+00:00",
+      "n_universes": 256,
+      "n_total_grid": 1296,
+      "n_dropped_constraints": 0,
+      "n_dropped_cap": 1040,
+      "n_analysed": 768,
+      "selection_strategy": "pair_balanced",
+      "matched_pairs_by_decision": {
+        "analysis_universe": 215,
+        "contrast_structure": 199,
+        "dependence_handling": 169,
+        "race_definition": 206,
+        "race_adjustment_model": 171,
+        "search_outcome": 180
+      }
+    },
+    "task": {
+      "completed_at": "2026-09-16T21:16:15+00:00",
+      "task_dir": "/Users/stevend/Desktop/Asta/astaverse/runs/20260916-205136__among-all-recorded-stops-search-rates-di/harbor_task",
+      "n_files": 266
+    },
+    "execute": {
+      "completed_at": "2026-09-16T21:26:52+00:00",
+      "agent": "terminus-2",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "n_jobs": 1
+    },
+    "verdicts": {
+      "completed_at": "2026-09-16T21:26:52+00:00",
+      "n_results": 480,
+      "rules": [
+        "alpha_05_two_sided",
+        "alpha_01_two_sided",
+        "alpha_05_directional"
+      ],
+      "complete": false,
+      "missing": [
+        "universe_160",
+        "universe_161",
+        "universe_162",
+        "universe_163",
+        "universe_164",
+        "universe_165",
+        "universe_166",
+        "universe_167",
+        "universe_168",
+        "universe_169",
+        "universe_170",
+        "universe_171",
+        "universe_172",
+        "universe_173",
+        "universe_174",
+        "universe_175",
+        "universe_176",
+        "universe_177",
+        "universe_178",
+        "universe_179",
+        "universe_180",
+        "universe_181",
+        "universe_182",
+        "universe_183",
+        "universe_184",
+        "universe_185",
+        "universe_186",
+        "universe_187",
+        "universe_188",
+        "universe_189",
+        "universe_190",
+        "universe_191",
+        "universe_192",
+        "universe_193",
+        "universe_194",
+        "universe_195",
+        "universe_196",
+        "universe_197",
+        "universe_198",
+        "universe_199",
+        "universe_200",
+        "universe_201",
+        "universe_202",
+        "universe_203",
+        "universe_204",
+        "universe_205",
+        "universe_206",
+        "universe_207",
+        "universe_208",
+        "universe_209",
+        "universe_210",
+        "universe_211",
+        "universe_212",
+        "universe_213",
+        "universe_214",
+        "universe_215",
+        "universe_216",
+        "universe_217",
+        "universe_218",
+        "universe_219",
+        "universe_220",
+        "universe_221",
+        "universe_222",
+        "universe_223",
+        "universe_224",
+        "universe_225",
+        "universe_226",
+        "universe_227",
+        "universe_228",
+        "universe_229",
+        "universe_230",
+        "universe_231",
+        "universe_232",
+        "universe_233",
+        "universe_234",
+        "universe_235",
+        "universe_236",
+        "universe_237",
+        "universe_238",
+        "universe_239",
+        "universe_240",
+        "universe_241",
+        "universe_242",
+        "universe_243",
+        "universe_244",
+        "universe_245",
+        "universe_246",
+        "universe_247",
+        "universe_248",
+        "universe_249",
+        "universe_250",
+        "universe_251",
+        "universe_252",
+        "universe_253",
+        "universe_254",
+        "universe_255"
+      ]
+    },
+    "conclusion": {
+      "completed_at": "2026-09-16T21:27:07+00:00",
+      "model": "openai/gpt-5.6-luna",
+      "evidence_status": "inconclusive",
+      "requires_refinement": true
+    },
+    "refinement": {
+      "completed_at": "2026-09-16T21:27:25+00:00",
+      "needed": true,
+      "n_hypotheses": 4
+    }
+  },
+  "config": {
+    "plans": {
+      "k": 5,
+      "model": null,
+      "temperature": 0.9
+    },
+    "decisions": {
+      "mode": "direct",
+      "models": [],
+      "critique": false,
+      "max_decisions": 6
+    },
+    "universes": {
+      "cap": 256,
+      "include": [],
+      "exclude": []
+    },
+    "execute": {
+      "agent": "terminus-2",
+      "models": [
+        "openai/gpt-5.6-luna"
+      ],
+      "dry_run": false
+    },
+    "conclusion": {
+      "model": null
+    },
+    "refinement": {
+      "model": null
+    },
+    "through": "refinement"
+  },
+  "review_before_execute": true
+}
